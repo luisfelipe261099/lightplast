@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Fábrica | LightPlast - Indústria de Embalagens no Paraná</title>
+    <meta name="description"
+        content="Conheça a estrutura fabril da LightPlast. Tecnologia de ponta, sustentabilidade e grande capacidade de produção de embalagens plásticas.">
+    <meta name="robots" content="index, follow">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@600;700;800&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        .sobre-hero {
+            background: linear-gradient(rgba(47, 95, 36, 0.8), rgba(47, 95, 36, 0.9)), url('assets/hero_bg.png') center/cover;
+            padding: 100px 0;
+            color: white;
+            text-align: center;
+        }
+
+        .sobre-hero h1 {
+            color: white;
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+        }
+
+        .sobre-content {
+            padding: 80px 0;
+        }
+
+        .text-block {
+            max-width: 800px;
+            margin: 0 auto 50px auto;
+            text-align: center;
+        }
+
+        .text-block p {
+            font-size: 1.15rem;
+            color: var(--text-dark);
+            margin-bottom: 20px;
+            line-height: 1.8;
+        }
+
+        .fabrica-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 40px;
+            margin-bottom: 60px;
+            align-items: center;
+        }
+
+        .fabrica-img {
+            width: 100%;
+            height: 400px;
+            border-radius: 20px;
+            object-fit: cover;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .fabrica-info h2 {
+            font-size: 2.2rem;
+            margin-bottom: 20px;
+            color: var(--primary-green-dark);
+        }
+
+        .fabrica-info p {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            color: #4b5563;
+        }
+
+        .certifications {
+            background-color: var(--bg-gray);
+            padding: 60px 0;
+            text-align: center;
+            border-radius: 20px;
+        }
+
+        .cert-icons {
+            display: flex;
+            justify-content: center;
+            gap: 50px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .cert-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            color: var(--primary-green);
+        }
+
+        .cert-item i {
+            font-size: 3rem;
+        }
+
+        .cert-item span {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        @media (max-width: 768px) {
+            .fabrica-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .fabrica-grid:nth-child(even) .fabrica-img {
+                order: -1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- HEADER -->
+    <header class="header">
+        <div class="container header-container">
+            <a href="index.html" class="logo" style="text-decoration: none;">
+                <span class="lp">lp</span>
+                <span class="lightplast">LIGHTPLAST</span>
+            </a>
+            <button class="mobile-menu-btn" onclick="document.querySelector('.nav').classList.toggle('nav-active')">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <nav class="nav">
+                <a href="index.html">Inicio</a>
+                <a href="catalogo.html">Catálogo Online</a>
+                <a href="sobre.html" class="active">A Fábrica</a>
+                <a href="blog.html">Blog</a>
+                <a href="orcamento.html">Orçamento</a>
+            </nav>
+            <a href="https://api.whatsapp.com/send?phone=5541988869272&text=Ola%20vim%20pelo%20site" target="_blank"
+                class="btn-whatsapp-header">
+                <i class="fa-brands fa-whatsapp"></i>
+            </a>
+        </div>
+    </header>
+
+    <section class="sobre-hero">
+        <div class="container">
+            <h1>Nossa Estrutura Fabril</h1>
+            <p style="font-size: 1.2rem; max-width: 700px; margin: 0 auto;">De Pinhais-PR para todo o Brasil. Conheça a
+                tecnologia e a seriedade por trás de cada embalagem LightPlast.</p>
+        </div>
+    </section>
+
+    <section class="sobre-content container">
+        <div class="text-block">
+            <h2 style="font-size: 2.5rem; margin-bottom: 30px; color: var(--primary-green);">Qualidade direto da Fonte
+            </h2>
+            <p>A LightPlast não é apenas uma distribuidora. Somos uma <strong>indústria especializada na extrusão,
+                    corte, solda e impressão</strong> de embalagens plásticas flexíveis. Dominar todo o ciclo de
+                fabricação significa que podemos garantir a procedência da matéria-prima, a precisão das medidas e,
+                principalmente, um custo agressivo para atacadistas e grandes consumidores.</p>
+        </div>
+
+        <div class="fabrica-grid">
+            <div class="fabrica-info">
+                <h2>Tecnologia de Extrusão e Impressão</h2>
+                <p>Nossas máquinas operam em três turnos para garantir prazos de entrega enxutos. Trabalhamos com
+                    polietileno de alta e baixa densidade (PEAD e PEBD), virgem ou reciclado, dependendo da necessidade
+                    técnica do seu negócio ou exigência de normas de saúde (como na linha hospitalar).</p>
+                <ul style="list-style: none; padding-top: 15px;">
+                    <li style="margin-bottom: 15px;"><i class="fa-solid fa-check"
+                            style="color: var(--primary-green); margin-right: 10px;"></i> <strong>+40 Toneladas
+                            processadas mensalmente</strong></li>
+                    <li style="margin-bottom: 15px;"><i class="fa-solid fa-check"
+                            style="color: var(--primary-green); margin-right: 10px;"></i> <strong>Laboratório próprio de
+                            controle de qualidade</strong></li>
+                    <li><i class="fa-solid fa-check" style="color: var(--primary-green); margin-right: 10px;"></i>
+                        <strong>Impressoras de tambor central (até 6 cores)</strong>
+                    </li>
+                </ul>
+            </div>
+            <img src="assets/plastic_films.png" alt="Máquinas de Extrusão LightPlast" class="fabrica-img">
+        </div>
+
+        <div class="fabrica-grid" style="margin-top: 80px;">
+            <img src="assets/trash_bags.png" alt="Sacos Prontos no Estoque" class="fabrica-img">
+            <div class="fabrica-info">
+                <h2>Compromisso com o Cliente B2B</h2>
+                <p>Entendemos as dores do comprador institucional: falta de estoque gera multas e paralisa operações.
+                    Por isso, a LightPlast atua como parceira estratégica de hospitais, hotéis, prefeituras e
+                    supermercados.</p>
+                <p>Nosso setor de logística estrategicamente localizado no Paraná nos permite escoar a produção
+                    rapidamente para as regiões Sul e Sudeste com frete otimizado.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="container" style="margin-bottom: 100px;">
+        <div class="certifications">
+            <h2>Nossos Pilares</h2>
+            <div class="cert-icons">
+                <div class="cert-item">
+                    <i class="fa-solid fa-leaf"></i>
+                    <span>Sustentabilidade &<br>Logística Reversa</span>
+                </div>
+                <div class="cert-item">
+                    <i class="fa-solid fa-shield-virus"></i>
+                    <span>Adequação ANVISA<br>(Linha Saúde)</span>
+                </div>
+                <div class="cert-item">
+                    <i class="fa-solid fa-truck-fast"></i>
+                    <span>Frota e Entrega<br>Acelerada</span>
+                </div>
+                <div class="cert-item">
+                    <i class="fa-solid fa-handshake-simple"></i>
+                    <span>10 Anos de<br>Mercado Plástico</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</body>
+
+</html>

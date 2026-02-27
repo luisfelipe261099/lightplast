@@ -168,6 +168,16 @@ a {
     text-decoration: none;
 }
 
+.mobile-menu-btn {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 1.8rem;
+    color: var(--primary-green);
+    cursor: pointer;
+    vertical-align: middle;
+}
+
 .btn-whatsapp-header i {
     font-size: 1.4rem;
 }
@@ -557,14 +567,35 @@ a {
 
 @media (max-width: 768px) {
     .header-container {
-        flex-direction: column;
-        gap: 15px;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .btn-whatsapp-header {
+        display: none;
+        /* Hide large WA button on mobile header to fit the logo and menu clearly */
+    }
+
+    .mobile-menu-btn {
+        display: block;
     }
 
     .nav {
+        display: none;
+        /* Hidden by default on mobile */
+        width: 100%;
+        flex-direction: column;
         gap: 15px;
-        flex-wrap: wrap;
-        justify-content: center;
+        padding: 20px 0 10px 0;
+        text-align: center;
+        border-top: 1px solid #e5e7eb;
+        margin-top: 15px;
+    }
+
+    .nav.nav-active {
+        display: flex;
+        /* Shown when the menu button is clicked */
     }
 
     .hero {
