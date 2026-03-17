@@ -1,7 +1,0 @@
-{
-  "name": "lightplast/crm",
-  "description": "LightPlast CRM System - PHP Backend with TiDB Cloud",
-  "require": {
-    "php": ">=8.0"
-  }
-}
