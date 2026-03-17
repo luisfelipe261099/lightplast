@@ -1,4 +1,8 @@
 <?php
+// Suppress errors before headers are sent
+error_reporting(E_ALL);
+ini_set('display_errors', 0);
+
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE');
@@ -38,8 +42,9 @@ class Database {
                 throw new Exception("Missing database credentials. Check environment variables.");
             }
             
-            // Connect to database
-            $this->conn = new mysqli($host, $user, $password, $database, (int)$port);
+            // Suppress mysqli warnings/errors and catch manually
+            mysqli_report(MYSQLI_REPORT_OFF);
+            $this->conn = @new mysqli($host, $user, $password, $database, (int)$port);
             
             if ($this->conn->connect_error) {
                 throw new Exception("Connection failed: " . $this->conn->connect_error);
