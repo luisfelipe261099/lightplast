@@ -1,13 +1,11 @@
 {
-    "buildCommand": "npm install",
+    "buildCommand": "echo 'No build needed - serving static files + serverless APIs'",
+    "outputDirectory": ".",
     "env": {
         "TIDB_HOST": "@tidb_host",
         "TIDB_PORT": "@tidb_port",
         "TIDB_USER": "@tidb_user",
         "TIDB_PASSWORD": "@tidb_password",
         "TIDB_DATABASE": "@tidb_database"
-    },
-    "rewrites": [
-        {"source": "/crm", "destination": "/crm.html"}
-    ]
+    }
 }
