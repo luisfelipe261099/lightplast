@@ -16,8 +16,8 @@ const pool = mysql.createPool({
   connectionLimit: 10,
   host: process.env.TIDB_HOST || 'gateway01.us-east-1.prod.aws.tidbcloud.com',
   port: process.env.TIDB_PORT || 4000,
-  user: process.env.TIDB_USER || 'wYESZBLpQwYM5hn.root',
-  password: process.env.TIDB_PASSWORD || 'GJlg4N2UHGauRmG7',
+  user: process.env.TIDB_USER || 'wYESZBLpqwYM6hn.root',
+  password: process.env.TIDB_PASSWORD || 'Ovo0zK03hoeXjv1q',
   database: process.env.TIDB_DATABASE || 'test',
   ssl: {
     minVersion: 'TLSv1.2',
@@ -352,15 +352,35 @@ app.get('/api/budgets.php/:id/pdf', async (req, res) => {
 });
 
 // Endpoint de teste/debug
-app.get('/api/debug', (req, res) => {
-  res.json({
-    status: 'online',
-    timestamp: new Date().toISOString(),
-    config: {
-      host: process.env.TIDB_HOST ? 'Configurado' : 'Padrao',
-      user: process.env.TIDB_USER ? 'Configurado' : 'Padrao'
-    }
-  });
+// Endpoint de diagnóstico avançado
+app.get('/api/debug', async (req, res) => {
+  try {
+    const startTime = Date.now();
+    const result = await query('SELECT 1 + 1 AS test');
+    const duration = Date.now() - startTime;
+    
+    res.json({
+      status: 'success',
+      message: 'Conexão com o banco de dados realizada com sucesso!',
+      duration: `${duration}ms`,
+      config: {
+        host: process.env.TIDB_HOST || 'FALLBACK',
+        user: (process.env.TIDB_USER || 'FALLBACK').split('.')[0] + '... (obscured)',
+        database: process.env.TIDB_DATABASE || 'test'
+      },
+      data: result[0]
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 'error',
+      message: 'Falha na conexão com o banco de dados',
+      error: error.message,
+      code: error.code,
+      errno: error.errno,
+      hint: 'Verifique se o Usuário e a Senha no Vercel estão exatamente iguais ao console do TiDB Cloud.',
+      doc: 'https://docs.pingcap.com/tidbcloud/select-cluster-tier#user-name-prefix'
+    });
+  }
 });
 
 export default app;
