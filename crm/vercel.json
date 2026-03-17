@@ -17,5 +17,8 @@
       "source": "/api/(.*)",
       "destination": "/api/index.ts"
     }
-  ]
+  ],
+  "static": {
+    "dashboard": "dashboard"
+  }
 }

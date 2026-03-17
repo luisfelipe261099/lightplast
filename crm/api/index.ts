@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
+import path from 'path';
 import PDFDocument from 'pdfkit';
 import { initializeDatabase, query, execute, closeDatabase } from './database';
 
@@ -13,6 +14,12 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
+
+// Serve dashboard (static files)
+app.use('/dashboard', express.static(path.join(__dirname, '../dashboard')));
+app.get('/', (req: Request, res: Response) => {
+  res.sendFile(path.join(__dirname, '../dashboard/index.html'));
+});
 
 // Error handler middleware
 app.use((err: any, req: Request, res: Response, next: any) => {
