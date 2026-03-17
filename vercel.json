@@ -1,5 +1,5 @@
 {
-    "buildCommand": "npm run build --prefix crm",
+    "buildCommand": "npm run build --prefix crm && cp crm/dist/api/* api/",
     "rewrites": [
         {"source": "/crm", "destination": "/crm.html"}
     ]
