@@ -1,8 +1,6 @@
 {
     "buildCommand": "echo 'PHP No Build'",
-    "framework": "php",
     "rewrites": [
-        {"source": "/crm", "destination": "/crm.html"},
-        {"source": "/api/:endpoint", "destination": "/api/index.php"}
+        {"source": "/crm", "destination": "/crm.html"}
     ]
 }
