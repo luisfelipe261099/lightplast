@@ -1,14 +1,9 @@
 {
-    "outputDirectory":  "crm/dist",
-    "buildCommand":  "npm ci --prefix crm --legacy-peer-deps && npm run build --prefix crm",
-    "rewrites":  [
-                     {
-                         "destination":  "/api/$1",
-                         "source":  "/crm/api/(.*)"
-                     },
-                     {
-                         "destination":  "/crm.html",
-                         "source":  "/crm"
-                     }
-                 ]
+    "buildCommand": "npm run build --prefix crm",
+    "framework": "other",
+    "rewrites": [
+        {"source": "/crm/api/(.*)", "destination": "/api"},
+        {"source": "/crm", "destination": "/crm.html"},
+        {"source": "/(.*)", "destination": "/index.html"}
+    ]
 }
