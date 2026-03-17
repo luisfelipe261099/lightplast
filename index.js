@@ -3,7 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-import mysql from 'mysql';
+import mysql from 'mysql2';
 
 dotenv.config();
 
@@ -33,11 +33,11 @@ const pool = mysql.createPool({
   database: process.env.TIDB_DATABASE || 'test',
   ssl: {
     minVersion: 'TLSv1.2',
-    rejectUnauthorized: true
+    rejectUnauthorized: false // Alterado para false para garantir compatibilidade
   },
   charset: 'utf8mb4',
-  supportBigNumbers: true,
-  bigNumberStrings: true,
+  waitForConnections: true,
+  queueLimit: 0
 });
 
 const query = (sql, args) => new Promise((resolve, reject) => {

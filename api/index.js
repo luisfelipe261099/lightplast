@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import mysql from 'mysql';
+import mysql from 'mysql2';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -21,11 +21,11 @@ const pool = mysql.createPool({
   database: process.env.TIDB_DATABASE || 'test',
   ssl: {
     minVersion: 'TLSv1.2',
-    rejectUnauthorized: true
+    rejectUnauthorized: false // Alterado para false para garantir compatibilidade em ambientes serverless
   },
   charset: 'utf8mb4',
-  supportBigNumbers: true,
-  bigNumberStrings: true,
+  waitForConnections: true,
+  queueLimit: 0
 });
 
 const query = (sql, args) => new Promise((resolve, reject) => {
@@ -348,8 +348,19 @@ app.get('/api/dashboard.php', async (req, res) => {
 
 app.get('/api/budgets.php/:id/pdf', async (req, res) => {
   const { id } = req.params;
-  res.setHeader('Content-Type', 'text/plain; charset=utf-8');
   res.status(200).send(`PDF temporario indisponivel no serverless. Orcamento ID: ${id}`);
+});
+
+// Endpoint de teste/debug
+app.get('/api/debug', (req, res) => {
+  res.json({
+    status: 'online',
+    timestamp: new Date().toISOString(),
+    config: {
+      host: process.env.TIDB_HOST ? 'Configurado' : 'Padrao',
+      user: process.env.TIDB_USER ? 'Configurado' : 'Padrao'
+    }
+  });
 });
 
 export default app;

@@ -776,8 +776,14 @@
                         : '<div class="empty-state"><p>Nenhum cliente cadastrado</p></div>';
                     document.getElementById('top-customers-container').innerHTML = customersHtml;
                 }
+ else {
+                    document.getElementById('recent-follow-ups-container').innerHTML = 
+                        `<div class="alert alert-error">Erro na API: ${data.error || 'Erro desconhecido'}</div>`;
+                }
             } catch (error) {
                 console.error('Error loading dashboard:', error);
+                document.getElementById('recent-follow-ups-container').innerHTML = 
+                    `<div class="alert alert-error">Falha ao conectar com o servidor. Verifique os logs.</div>`;
             }
         }
 
