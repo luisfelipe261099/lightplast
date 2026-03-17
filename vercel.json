@@ -1,14 +1,14 @@
 {
-  "buildCommand": "npm run build",
-  "outputDirectory": "crm/dist",
-  "rewrites": [
-    {
-      "source": "/crm/api/(.*)",
-      "destination": "/api/$1"
-    },
-    {
-      "source": "/crm",
-      "destination": "/crm.html"
-    }
-  ]
+    "outputDirectory":  "crm/dist",
+    "buildCommand":  "cd crm \u0026\u0026 npm install \u0026\u0026 npm run build",
+    "rewrites":  [
+                     {
+                         "destination":  "/api/$1",
+                         "source":  "/crm/api/(.*)"
+                     },
+                     {
+                         "destination":  "/crm.html",
+                         "source":  "/crm"
+                     }
+                 ]
 }
