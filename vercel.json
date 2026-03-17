@@ -1,5 +1,5 @@
 {
-  "buildCommand": "cd crm && npm run build",
+  "buildCommand": "npm --prefix crm run build",
   "outputDirectory": "crm/dist",
   "rewrites": [
     {
