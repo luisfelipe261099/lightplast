@@ -1,9 +1,6 @@
 {
     "buildCommand": "npm run build --prefix crm",
-    "framework": "other",
     "rewrites": [
-        {"source": "/crm/api/(.*)", "destination": "/api"},
-        {"source": "/crm", "destination": "/crm.html"},
-        {"source": "/(.*)", "destination": "/index.html"}
+        {"source": "/crm", "destination": "/crm.html"}
     ]
 }
