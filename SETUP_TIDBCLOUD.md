@@ -66,7 +66,7 @@ SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'test';
 ## 🔑 Credenciais TiDB Cloud
 
 ```
-Host: gateway01us-east1prod.aws.tidbcloud.com
+Host: gateway01.us-east-1.prod.aws.tidbcloud.com
 Port: 4000
 Username: wYESZBLpQwYM5hn.root
 Password: GJlg4N2UHGauRmG7

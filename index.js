@@ -26,11 +26,15 @@ app.get('/crm', (req, res) => {
 // Database connection
 const pool = mysql.createPool({
   connectionLimit: 10,
-  host: process.env.TIDB_HOST || 'gateway01us-east1prod.aws.tidbcloud.com',
+  host: process.env.TIDB_HOST || 'gateway01.us-east-1.prod.aws.tidbcloud.com',
   port: process.env.TIDB_PORT || 4000,
   user: process.env.TIDB_USER || 'wYESZBLpQwYM5hn.root',
   password: process.env.TIDB_PASSWORD || 'GJlg4N2UHGauRmG7',
   database: process.env.TIDB_DATABASE || 'test',
+  ssl: {
+    minVersion: 'TLSv1.2',
+    rejectUnauthorized: true
+  },
   charset: 'utf8mb4',
   supportBigNumbers: true,
   bigNumberStrings: true,
@@ -196,22 +200,71 @@ app.post('/api/follow-ups', async (req, res) => {
 app.get('/api/dashboard', async (req, res) => {
   try {
     const [totalCustomers] = await query('SELECT COUNT(*) as count FROM customers');
-    const [qualifiedLeads] = await query('SELECT COUNT(*) as count FROM leads WHERE status = "qualified"');
+    const [totalLeads] = await query('SELECT COUNT(*) as count FROM leads');
     const [pendingFollowUps] = await query('SELECT COUNT(*) as count FROM follow_ups WHERE completed = 0');
     const [totalRevenue] = await query('SELECT SUM(value) as total FROM orders WHERE status = "confirmed"');
+    const recentFollowUps = await query(
+      `SELECT f.scheduled_date, f.type AS follow_up_type, COALESCE(c.name, 'Sem contato') AS contact_name
+       FROM follow_ups f
+       LEFT JOIN customers c ON c.id = f.customer_id
+       ORDER BY f.scheduled_date ASC
+       LIMIT 5`
+    );
+    const topCustomers = await query(
+      `SELECT c.name, c.company, c.phone, COALESCE(SUM(o.value), 0) AS total_spent
+       FROM customers c
+       LEFT JOIN orders o ON o.customer_id = c.id
+       GROUP BY c.id
+       ORDER BY total_spent DESC
+       LIMIT 5`
+    );
     
     res.json({
       success: true,
       data: {
         totalCustomers: totalCustomers?.count || 0,
-        qualifiedLeads: qualifiedLeads?.count || 0,
+        qualifiedLeads: totalLeads?.count || 0,
         pendingFollowUps: pendingFollowUps?.count || 0,
         totalRevenue: totalRevenue?.total || 0
-      }
+      },
+      stats: {
+        total_customers: totalCustomers?.count || 0,
+        total_leads: totalLeads?.count || 0,
+        pending_follow_ups: pendingFollowUps?.count || 0,
+        total_revenue: totalRevenue?.total || 0
+      },
+      recent_follow_ups: recentFollowUps,
+      top_customers: topCustomers
     });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
+});
+
+// ==================== PHP COMPATIBILITY ====================
+app.get('/api/customers.php', (req, res) => {
+  req.url = '/api/customers';
+  return app._router.handle(req, res);
+});
+app.get('/api/leads.php', (req, res) => {
+  req.url = '/api/leads';
+  return app._router.handle(req, res);
+});
+app.get('/api/budgets.php', (req, res) => {
+  req.url = '/api/budgets';
+  return app._router.handle(req, res);
+});
+app.get('/api/orders.php', (req, res) => {
+  req.url = '/api/orders';
+  return app._router.handle(req, res);
+});
+app.get('/api/follow-ups.php', (req, res) => {
+  req.url = '/api/follow-ups';
+  return app._router.handle(req, res);
+});
+app.get('/api/dashboard.php', (req, res) => {
+  req.url = '/api/dashboard';
+  return app._router.handle(req, res);
 });
 
 // Start server

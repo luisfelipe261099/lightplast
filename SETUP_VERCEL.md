@@ -28,7 +28,7 @@
 
 | Nome | Valor |
 |------|-------|
-| `TIDB_HOST` | `gateway01us-east1prod.aws.tidbcloud.com` |
+| `TIDB_HOST` | `gateway01.us-east-1.prod.aws.tidbcloud.com` |
 | `TIDB_PORT` | `4000` |
 | `TIDB_USER` | `wYESZBLpQwYM5hn.root` |
 | `TIDB_PASSWORD` | `GJlg4N2UHGauRmG7` |

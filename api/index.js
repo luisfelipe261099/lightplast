@@ -14,11 +14,15 @@ app.use(express.json());
 // Database connection
 const pool = mysql.createPool({
   connectionLimit: 10,
-  host: process.env.TIDB_HOST || 'gateway01us-east1prod.aws.tidbcloud.com',
+  host: process.env.TIDB_HOST || 'gateway01.us-east-1.prod.aws.tidbcloud.com',
   port: process.env.TIDB_PORT || 4000,
   user: process.env.TIDB_USER || 'wYESZBLpQwYM5hn.root',
   password: process.env.TIDB_PASSWORD || 'GJlg4N2UHGauRmG7',
   database: process.env.TIDB_DATABASE || 'test',
+  ssl: {
+    minVersion: 'TLSv1.2',
+    rejectUnauthorized: true
+  },
   charset: 'utf8mb4',
   supportBigNumbers: true,
   bigNumberStrings: true,
