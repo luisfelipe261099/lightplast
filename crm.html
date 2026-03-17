@@ -299,9 +299,12 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
             z-index: 1000;
-            align-items: center;
+            padding: 20px;
+            overflow-y: auto;
+            align-items: flex-start; /* Permite scroll natural se o modal for longo */
             justify-content: center;
         }
 
@@ -311,29 +314,74 @@
 
         .modal-content {
             background: white;
-            border-radius: 10px;
-            padding: 40px;
+            border-radius: 12px;
+            padding: 30px;
             max-width: 500px;
-            width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
+            width: 100%;
+            margin: auto; /* Centraliza verticalmente se couber */
+            position: relative;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .modal-content.modal-lg {
+            max-width: 800px;
         }
 
         .modal-header {
             font-size: 1.5rem;
             font-weight: 700;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
+            color: var(--text-dark);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 15px;
         }
 
         .modal-close {
             position: absolute;
-            top: 15px;
-            right: 15px;
-            background: none;
+            top: 20px;
+            right: 20px;
+            background: #f3f4f6;
             border: none;
-            font-size: 1.5rem;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
             cursor: pointer;
             color: var(--text-light);
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            background: #e5e7eb;
+            color: var(--danger);
+        }
+
+        .budget-item-grid {
+            display: grid;
+            grid-template-columns: 2fr 80px 120px 40px;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+
+        .budget-item-grid input {
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .btn-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            border-radius: 6px;
         }
 
         /* RESPONSIVE */
@@ -567,7 +615,7 @@
     </div>
 
     <div class="modal" id="budgetModal">
-        <div class="modal-content">
+        <div class="modal-content modal-lg">
             <button class="modal-close" onclick="closeModal('budgetModal')">✕</button>
             <div class="modal-header">Novo Orçamento</div>
             <form onsubmit="saveBudget(event)">
@@ -586,17 +634,17 @@
                     <textarea id="budgetDesc" rows="2"></textarea>
                 </div>
 
-                <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin: 20px 0;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                        <h4 style="margin: 0;">Itens do Orçamento</h4>
-                        <button type="button" class="btn btn-primary" style="padding: 5px 10px; font-size: 0.9em;" onclick="addBudgetItem()">+ Item</button>
+                <div style="background: #f9fafb; padding: 20px; border-radius: 12px; border: 1px solid var(--border); margin: 25px 0;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h4 style="margin: 0; color: var(--text-dark);">Itens do Orçamento</h4>
+                        <button type="button" class="btn btn-primary btn-small" onclick="addBudgetItem()">+ Adicionar Item</button>
                     </div>
                     <div id="budgetItems">
-                        <div class="budget-item" style="display: grid; grid-template-columns: 2fr 1fr 1fr 100px; gap: 10px; margin-bottom: 10px;">
-                            <input type="text" placeholder="Descrição do produto/serviço" class="budget-item-desc" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                            <input type="number" placeholder="Qtd" class="budget-item-qty" value="1" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                            <input type="number" placeholder="Preço unit." step="0.01" class="budget-item-price" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                            <button type="button" class="btn btn-danger" style="padding: 5px 10px; width: 100%;" onclick="removeBudgetItem(this)">Remover</button>
+                        <div class="budget-item-grid">
+                            <input type="text" placeholder="Descrição do produto/serviço" class="budget-item-desc" required>
+                            <input type="number" placeholder="Qtd" class="budget-item-qty" value="1" min="1" required>
+                            <input type="number" placeholder="Preço unit." step="0.01" class="budget-item-price" required>
+                            <button type="button" class="btn btn-danger btn-icon" onclick="removeBudgetItem(this)" title="Remover">✕</button>
                         </div>
                     </div>
                 </div>
@@ -986,11 +1034,11 @@
             document.getElementById('budgetTaxPercent').value = '0';
             document.getElementById('budgetNotes').value = '';
             document.getElementById('budgetItems').innerHTML = `
-                <div class="budget-item" style="display: grid; grid-template-columns: 2fr 1fr 1fr 100px; gap: 10px; margin-bottom: 10px;">
-                    <input type="text" placeholder="Descrição do produto/serviço" class="budget-item-desc" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                    <input type="number" placeholder="Qtd" class="budget-item-qty" value="1" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                    <input type="number" placeholder="Preço unit." step="0.01" class="budget-item-price" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                    <button type="button" class="btn btn-danger" style="padding: 5px 10px; width: 100%;" onclick="removeBudgetItem(this)">Remover</button>
+                <div class="budget-item-grid">
+                    <input type="text" placeholder="Descrição do produto/serviço" class="budget-item-desc" required>
+                    <input type="number" placeholder="Qtd" class="budget-item-qty" value="1" min="1" required>
+                    <input type="number" placeholder="Preço unit." step="0.01" class="budget-item-price" required>
+                    <button type="button" class="btn btn-danger btn-icon" onclick="removeBudgetItem(this)" title="Remover">✕</button>
                 </div>
             `;
 
@@ -1038,13 +1086,12 @@
         function addBudgetItem() {
             const container = document.getElementById('budgetItems');
             const item = document.createElement('div');
-            item.className = 'budget-item';
-            item.style.cssText = 'display: grid; grid-template-columns: 2fr 1fr 1fr 100px; gap: 10px; margin-bottom: 10px;';
+            item.className = 'budget-item-grid';
             item.innerHTML = `
-                <input type="text" placeholder="Descrição do produto/serviço" class="budget-item-desc" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                <input type="number" placeholder="Qtd" class="budget-item-qty" value="1" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                <input type="number" placeholder="Preço unit." step="0.01" class="budget-item-price" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                <button type="button" class="btn btn-danger" style="padding: 5px 10px; width: 100%;" onclick="removeBudgetItem(this)">Remover</button>
+                <input type="text" placeholder="Descrição do produto/serviço" class="budget-item-desc" required>
+                <input type="number" placeholder="Qtd" class="budget-item-qty" value="1" min="1" required>
+                <input type="number" placeholder="Preço unit." step="0.01" class="budget-item-price" required>
+                <button type="button" class="btn btn-danger btn-icon" onclick="removeBudgetItem(this)" title="Remover">✕</button>
             `;
             container.appendChild(item);
         }
@@ -1113,7 +1160,7 @@
             e.preventDefault();
 
             const items = [];
-            document.querySelectorAll('.budget-item').forEach(item => {
+            document.querySelectorAll('.budget-item-grid').forEach(item => {
                 const desc = item.querySelector('.budget-item-desc').value;
                 const qty = parseFloat(item.querySelector('.budget-item-qty').value) || 0;
                 const price = parseFloat(item.querySelector('.budget-item-price').value) || 0;

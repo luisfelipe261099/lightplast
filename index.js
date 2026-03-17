@@ -27,13 +27,13 @@ app.get('/crm', (req, res) => {
 const pool = mysql.createPool({
   connectionLimit: 10,
   host: process.env.TIDB_HOST || 'gateway01.us-east-1.prod.aws.tidbcloud.com',
-  port: process.env.TIDB_PORT || 4000,
+  port: Number(process.env.TIDB_PORT) || 4000,
   user: process.env.TIDB_USER || 'wYESZBLpqwYM6hn.root',
-  password: process.env.TIDB_PASSWORD || 'Ovo0zK03hoeXjv1q',
+  password: process.env.TIDB_PASSWORD || '4u5Ukx0YsaVWTcs4',
   database: process.env.TIDB_DATABASE || 'test',
   ssl: {
     minVersion: 'TLSv1.2',
-    rejectUnauthorized: false // Alterado para false para garantir compatibilidade
+    rejectUnauthorized: false
   },
   charset: 'utf8mb4',
   waitForConnections: true,
