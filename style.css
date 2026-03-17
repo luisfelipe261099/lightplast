@@ -10,9 +10,9 @@
     --text-light: #6b7280;
     --bg-light: #ffffff;
     --bg-gray: #f9fafb;
-    --font-heading: 'Playfair Display', serif;
-    --font-body: 'Inter', sans-serif;
-    --font-alt: 'Montserrat', sans-serif;
+    --font-heading: Georgia, 'Times New Roman', serif;
+    --font-body: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --font-alt: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     --border-radius: 8px;
     --transition: 0.3s ease-in-out;
 }
@@ -182,6 +182,17 @@ a {
     font-size: 1.4rem;
 }
 
+.icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.btn-whatsapp-header .icon {
+    font-size: 1.2rem;
+}
+
 .btn-whatsapp-header .btn-text {
     display: flex;
     flex-direction: column;
@@ -203,8 +214,10 @@ a {
 .hero {
     position: relative;
     padding: 100px 0;
-    background: linear-gradient(to right, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.85) 45%, rgba(255, 255, 255, 0) 100%), url('assets/hero_bg.png') right center no-repeat;
-    background-size: cover;
+    background:
+        radial-gradient(circle at 80% 30%, rgba(72, 128, 57, 0.16), transparent 32%),
+        radial-gradient(circle at 10% 85%, rgba(72, 128, 57, 0.08), transparent 30%),
+        linear-gradient(120deg, #ffffff 0%, #f4f8f2 54%, #ebf4e7 100%);
     min-height: 500px;
     display: flex;
     align-items: center;
@@ -226,7 +239,6 @@ a {
     font-weight: 700;
     margin-bottom: 20px;
     border: 1px solid rgba(72, 128, 57, 0.3);
-    backdrop-filter: blur(4px);
 }
 
 .hero-content h1 {
@@ -245,8 +257,6 @@ a {
     /* Darker for better contrast */
     font-weight: 500;
     margin-bottom: 30px;
-    text-shadow: 0px 0px 8px rgba(255, 255, 255, 0.9);
-    /* White glow for legibility over busy background */
 }
 
 .hero-content .btn-primary {
@@ -278,74 +288,94 @@ a {
 }
 
 .cards-catalog {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 80px 40px;
-    padding-top: 20px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(220px, 1fr));
+    gap: 26px;
+    padding-top: 10px;
 }
 
 .card-catalog {
-    width: 350px;
+    width: 100%;
     position: relative;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    background: transparent;
-    overflow: visible;
-    margin-top: 30px;
+    align-items: stretch;
+    background: #ffffff;
+    border-radius: 26px;
+    overflow: hidden;
+    border: 1px solid #e8eee7;
+    box-shadow: 0 12px 30px rgba(31, 41, 55, 0.08);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.card-catalog:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 16px 36px rgba(31, 41, 55, 0.12);
+}
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation: none !important;
+        transition: none !important;
+        scroll-behavior: auto !important;
+    }
 }
 
 .card-cat-title {
-    background-color: #558b3e;
-    /* Softer green, more exact to catalog */
-    padding: 25px 30px;
-    border-radius: 40px;
-    /* Fully rounded pill shape */
-    width: 105%;
-    margin-bottom: -50px;
+    background: linear-gradient(145deg, #5f9644 0%, #417730 100%);
+    padding: 18px 20px;
+    border-radius: 26px 26px 18px 18px;
+    width: 100%;
+    margin-bottom: 0;
     z-index: 2;
     position: relative;
-    min-height: 120px;
+    min-height: 92px;
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
-    box-shadow: 0 10px 25px rgba(85, 139, 62, 0.25);
-    border: 3px solid rgba(255, 255, 255, 0.4);
-    /* Elegant rim */
 }
 
 .card-cat-title h3 {
     color: white;
-    font-size: 1.7rem;
-    line-height: 1.3;
+    font-size: 1.06rem;
+    line-height: 1.35;
     font-family: var(--font-alt);
     font-weight: 700;
-    letter-spacing: -0.5px;
+    letter-spacing: 0;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
 .card-cat-img {
     width: 100%;
+    aspect-ratio: 4 / 3;
     position: relative;
     z-index: 1;
     display: flex;
     align-items: center;
     justify-content: center;
+    overflow: hidden;
 }
 
 .card-cat-img img {
     width: 100%;
-    height: auto;
-    object-fit: contain;
+    height: 100%;
+    object-fit: cover;
     transition: transform 0.3s ease;
-    border-radius: 0 0 190px 190px;
-    /* Ensure circle shape on the bottom if images are square */
+    border-radius: 0;
 }
 
 .card-catalog:hover .card-cat-img img {
-    transform: scale(1.05);
+    transform: scale(1.07);
+}
+
+.produtos-cta {
+    margin-top: 44px;
+}
+
+.produtos-cta .btn-primary {
+    padding: 15px 30px;
+    font-size: 1.02rem;
+    border-radius: 999px;
 }
 
 /* 
@@ -355,8 +385,9 @@ a {
 */
 .porque-escolher {
     padding: 80px 0;
-    background: linear-gradient(to right, rgba(255, 255, 255, 0.97) 0%, rgba(255, 255, 255, 0.95) 100%), url('assets/hero_bg.png') center center no-repeat;
-    background-size: cover;
+    background:
+        radial-gradient(circle at 18% 22%, rgba(72, 128, 57, 0.08), transparent 32%),
+        linear-gradient(180deg, #fcfefd 0%, #f5f9f3 100%);
     border-top: 1px solid #e5e7eb;
     border-bottom: 1px solid #e5e7eb;
 }
@@ -412,12 +443,10 @@ a {
 .contato {
     padding: 80px 0;
     background-color: var(--bg-gray);
-    background-image: url('assets/custom_bags.png');
-    background-size: cover;
-    background-position: center;
-    background-blend-mode: overlay;
-    /* To make it very subtle */
-    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0.98) 100%);
+    background:
+        radial-gradient(circle at 12% 12%, rgba(72, 128, 57, 0.1), transparent 28%),
+        radial-gradient(circle at 88% 88%, rgba(72, 128, 57, 0.08), transparent 30%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(248, 251, 248, 0.98) 100%);
 }
 
 .contato-container {
@@ -466,6 +495,10 @@ a {
     font-size: 1.8rem;
 }
 
+.btn-whatsapp-large .icon-circle .icon {
+    font-size: 1.25rem;
+}
+
 .contato-details p {
     display: flex;
     align-items: center;
@@ -478,6 +511,12 @@ a {
 .contato-details p i {
     color: var(--primary-green);
     font-size: 1.2rem;
+}
+
+.contato-details p .icon {
+    color: var(--primary-green);
+    font-size: 1.1rem;
+    width: 20px;
 }
 
 .contato-form {
@@ -525,6 +564,14 @@ a {
     padding: 12px 40px;
 }
 
+.produtos,
+.porque-escolher,
+.contato,
+.footer {
+    content-visibility: auto;
+    contain-intrinsic-size: 700px;
+}
+
 /* 
 =========================
     MEDIA QUERIES
@@ -532,28 +579,25 @@ a {
 */
 @media (max-width: 992px) {
     .cards-catalog {
-        flex-direction: column;
-        align-items: center;
-        gap: 60px;
+        grid-template-columns: repeat(2, minmax(220px, 1fr));
+        gap: 22px;
     }
 
     .card-catalog {
-        width: 100%;
-        max-width: 340px;
+        max-width: none;
     }
 
     .card-cat-title {
         width: 100%;
-        margin-left: 0;
-        border-radius: 30px;
+        border-radius: 24px 24px 16px 16px;
         justify-content: center;
         text-align: center;
-        padding: 20px 20px;
-        min-height: 100px;
+        padding: 16px 18px;
+        min-height: 84px;
     }
 
     .card-cat-title h3 {
-        font-size: 1.5rem;
+        font-size: 0.98rem;
     }
 
     .contato-container {
@@ -599,8 +643,9 @@ a {
     }
 
     .hero {
-        background: linear-gradient(to right, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.9) 60%, rgba(255, 255, 255, 0.2) 100%), url('assets/hero_bg.png') right center no-repeat;
-        background-size: cover;
+        background:
+            radial-gradient(circle at 70% 20%, rgba(72, 128, 57, 0.14), transparent 28%),
+            linear-gradient(160deg, #ffffff 0%, #f2f7ef 100%);
     }
 
     .hero-content h1 {
@@ -617,6 +662,19 @@ a {
     .stats {
         flex-direction: column;
         gap: 30px;
+    }
+
+    .cards-catalog {
+        grid-template-columns: 1fr;
+    }
+
+    .produtos h2 {
+        font-size: 2.1rem;
+    }
+
+    .section-subtitle {
+        font-size: 1rem;
+        margin-bottom: 34px;
     }
 
     .form-group.row {

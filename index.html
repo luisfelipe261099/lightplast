@@ -52,13 +52,7 @@
     }
     </script>
 
-    <!-- Fonts and Styles -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@600;700;800&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,500&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Styles -->
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -71,10 +65,11 @@
                 <span class="lp">lp</span>
                 <span class="lightplast">LIGHTPLAST</span>
             </div>
-            <button class="mobile-menu-btn" onclick="document.querySelector('.nav').classList.toggle('nav-active')">
-                <i class="fa-solid fa-bars"></i>
+            <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Abrir menu de navegação"
+                aria-expanded="false" aria-controls="main-nav" type="button">
+                <span class="icon" aria-hidden="true">☰</span>
             </button>
-            <nav class="nav">
+            <nav class="nav" id="main-nav">
                 <a href="index.html" class="active">Inicio</a>
                 <a href="catalogo.html">Catálogo Online</a>
                 <a href="sobre.html">A Fábrica</a>
@@ -82,8 +77,8 @@
                 <a href="orcamento.html">Orçamento</a>
             </nav>
             <a href="https://api.whatsapp.com/send?phone=554135576013&text=Ola%20vim%20pelo%20site" target="_blank"
-                class="btn-whatsapp-header">
-                <i class="fa-brands fa-whatsapp"></i>
+                rel="noopener noreferrer" class="btn-whatsapp-header">
+                <span class="icon" aria-hidden="true">✆</span>
                 <div class="btn-text">
                     <span class="ddd">41</span>
                     <span class="number">3557-6013</span>
@@ -96,15 +91,16 @@
     <section id="inicio" class="hero">
         <div class="container hero-container">
             <div class="hero-content">
-                <div class="fabrica-badge"><i class="fa-solid fa-industry"></i> Indústria Nacional 100% Própria</div>
+                <div class="fabrica-badge"><span class="icon" aria-hidden="true">🏭</span> Indústria Nacional 100%
+                    Própria</div>
                 <h1>Embalagens Plásticas<br>Direto da <span class="highlight">Nossa Fábrica</span><br>Para o Seu Negócio
                 </h1>
                 <p>Nós somos a <strong>fábrica</strong>. Garanta sacos plásticos, sacolas<br>personalizadas e filmes
                     plásticos com preço de<br><strong>fabricante</strong>, qualidade inquestionável e pontualidade.</p>
                 <a href="https://api.whatsapp.com/send?phone=554135576013&text=Ola%20vim%20pelo%20site" target="_blank"
-                    class="btn-primary">
+                    rel="noopener noreferrer" class="btn-primary">
                     Solicitar Orçamento
-                    <i class="fa-brands fa-whatsapp"></i>
+                    <span class="icon" aria-hidden="true">✆</span>
                 </a>
             </div>
         </div>
@@ -123,7 +119,8 @@
                         <h3>Sacos de lixo coleta seletiva e Hampers</h3>
                     </div>
                     <div class="card-cat-img">
-                        <img src="assets/cat_coleta_seletiva.png"
+                        <img src="assets/cat_coleta_seletiva.jpg" loading="lazy" decoding="async" width="720"
+                            height="540"
                             alt="Sacos de Lixo Coleta Seletiva Fabricados pela LightPlast">
                     </div>
                 </div>
@@ -132,7 +129,8 @@
                         <h3>Embalagens Impressas</h3>
                     </div>
                     <div class="card-cat-img">
-                        <img src="assets/cat_embalagens.png" alt="Embalagens Plásticas Impressas Light Plast">
+                        <img src="assets/cat_embalagens.jpg" loading="lazy" decoding="async" width="720" height="540"
+                            alt="Embalagens Plásticas Impressas Light Plast">
                     </div>
                 </div>
                 <div class="card-catalog">
@@ -140,7 +138,8 @@
                         <h3>Sacolas plásticas,<br>personalizadas e brancas</h3>
                     </div>
                     <div class="card-cat-img">
-                        <img src="assets/cat_sacolas.png" alt="Sacolas Plásticas Personalizadas Fábrica LightPlast">
+                        <img src="assets/cat_sacolas.jpg" loading="lazy" decoding="async" width="720" height="540"
+                            alt="Sacolas Plásticas Personalizadas Fábrica LightPlast">
                     </div>
                 </div>
                 <div class="card-catalog">
@@ -148,7 +147,8 @@
                         <h3>Sacos de lixo Institucionais<br>e Hospitalares</h3>
                     </div>
                     <div class="card-cat-img">
-                        <img src="assets/cat_hospitalar.png" alt="Sacos de Lixo Hospitalar e Institucional LightPlast">
+                        <img src="assets/cat_hospitalar.jpg" loading="lazy" decoding="async" width="720"
+                            height="540" alt="Sacos de Lixo Hospitalar e Institucional LightPlast">
                     </div>
                 </div>
                 <div class="card-catalog">
@@ -156,7 +156,8 @@
                         <h3>Sacos de lixo Hamper<br>com fita </h3>
                     </div>
                     <div class="card-cat-img">
-                        <img src="assets/cat_hamper_fita.png" alt="Sacos Hamper com Fita Soldada Light Plast">
+                        <img src="assets/cat_hamper_fita.jpg" loading="lazy" decoding="async" width="720"
+                            height="540" alt="Sacos Hamper com Fita Soldada Light Plast">
                     </div>
                 </div>
                 <!-- NOVOS ITENS INDEX -->
@@ -165,7 +166,8 @@
                         <h3>Saco de Lixo<br>Compostável LightGreen</h3>
                     </div>
                     <div class="card-cat-img">
-                        <img src="assets/cat_lixo_compostavel.png" alt="Saco de Lixo Compostável">
+                        <img src="assets/cat_lixo_compostavel.jpg" loading="lazy" decoding="async" width="720"
+                            height="540" alt="Saco de Lixo Compostável">
                     </div>
                 </div>
                 <div class="card-catalog">
@@ -173,15 +175,15 @@
                         <h3>Filmes Técnicos,<br>Stretch e Picotados</h3>
                     </div>
                     <div class="card-cat-img">
-                        <img src="assets/cat_filmes_tecnicos.png" alt="Filmes Técnicos e Stretch">
+                        <img src="assets/cat_filmes_tecnicos.jpg" loading="lazy" decoding="async" width="720"
+                            height="540" alt="Filmes Técnicos e Stretch">
                     </div>
                 </div>
             </div>
 
-            <div style="margin-top: 60px;">
-                <a href="catalogo.html" class="btn-primary"
-                    style="padding: 18px 40px; font-size: 1.2rem; border-radius: 50px;">
-                    <i class="fa-solid fa-book-open"></i> Acessar Catálogo Virtual Completo
+            <div class="produtos-cta">
+                <a href="catalogo.html" class="btn-primary">
+                    <span class="icon" aria-hidden="true">📘</span> Acessar Catálogo Virtual Completo
                 </a>
             </div>
         </div>
@@ -198,11 +200,11 @@
 
             <div class="stats">
                 <div class="stat">
-                    <div class="stat-title"><i class="fa-solid fa-industry"></i> + 25 anos</div>
+                    <div class="stat-title"><span class="icon" aria-hidden="true">🏭</span> + 25 anos</div>
                     <p>de tradição e experiência<br>no setor plástico.</p>
                 </div>
                 <div class="stat">
-                    <div class="stat-title"><i class="fa-solid fa-boxes-stacked"></i> + 100 milhões</div>
+                    <div class="stat-title"><span class="icon" aria-hidden="true">▦</span> + 100 milhões</div>
                     <p>de sacos produzidos/ano<br>para grandes volumes.</p>
                 </div>
 
@@ -217,36 +219,38 @@
                 <h2>Entre em Contato e Solicite um Orçamento Rápido!</h2>
 
                 <a href="https://api.whatsapp.com/send?phone=554135576013&text=Ola%20vim%20pelo%20site" target="_blank"
-                    class="btn-whatsapp-large">
+                    rel="noopener noreferrer" class="btn-whatsapp-large">
                     <div class="icon-circle">
-                        <i class="fa-brands fa-whatsapp"></i>
+                        <span class="icon" aria-hidden="true">✆</span>
                     </div>
                     (41) 3557-6013
                 </a>
 
                 <div class="contato-details">
-                    <p><i class="fa-regular fa-envelope"></i> gerencia@lightplast.com.br</p>
-                    <p><i class="fa-solid fa-location-dot"></i> Rua Graça Aranha, 946 - Pinhais, PR</p>
+                    <p><span class="icon" aria-hidden="true">✉</span> gerencia@lightplast.com.br</p>
+                    <p><span class="icon" aria-hidden="true">📍</span> Rua Graça Aranha, 946 - Pinhais, PR</p>
                 </div>
             </div>
 
             <div class="contato-form">
                 <form>
                     <div class="form-group row">
-                        <label>Seu Nome</label>
-                        <input type="text" placeholder="Seu Nome">
+                        <label for="nome">Seu Nome</label>
+                        <input id="nome" name="nome" type="text" placeholder="Seu Nome" autocomplete="name">
                     </div>
                     <div class="form-group row">
-                        <label>Seu E-mail</label>
-                        <input type="email" placeholder="Seu E-mail">
+                        <label for="email">Seu E-mail</label>
+                        <input id="email" name="email" type="email" placeholder="Seu E-mail" autocomplete="email">
                     </div>
                     <div class="form-group row">
-                        <label>Seu Telefone</label>
-                        <input type="tel" placeholder="Seu Telefone">
+                        <label for="telefone">Seu Telefone</label>
+                        <input id="telefone" name="telefone" type="tel" placeholder="Seu Telefone"
+                            autocomplete="tel">
                     </div>
                     <div class="form-group row">
-                        <label>Sua Mensagem</label>
-                        <input type="text" placeholder="Sua Mensagem">
+                        <label for="mensagem">Sua Mensagem</label>
+                        <input id="mensagem" name="mensagem" type="text" placeholder="Sua Mensagem"
+                            autocomplete="off">
                     </div>
                     <div class="form-submit">
                         <button type="submit" class="btn-primary submit-btn">Enviar</button>
@@ -264,6 +268,18 @@
             <p>Rua Graça Aranha, 946 - Pinhais, Paraná.</p>
         </div>
     </footer>
+
+    <script>
+        const menuBtn = document.getElementById('mobile-menu-btn');
+        const nav = document.getElementById('main-nav');
+
+        if (menuBtn && nav) {
+            menuBtn.addEventListener('click', function () {
+                const active = nav.classList.toggle('nav-active');
+                menuBtn.setAttribute('aria-expanded', active ? 'true' : 'false');
+            });
+        }
+    </script>
 </body>
 
 </html>
