@@ -305,14 +305,17 @@ app.get('/api/dashboard', async (req, res) => {
     const [pendingFollowUps] = await query('SELECT COUNT(*) as count FROM follow_ups WHERE completed = 0');
     const [totalRevenue] = await query('SELECT SUM(value) as total FROM orders WHERE status = "confirmed"');
     const recentFollowUps = await query(
-      `SELECT f.scheduled_date, f.type AS follow_up_type, COALESCE(c.name, 'Sem contato') AS contact_name
+      `SELECT f.scheduled_date, f.type AS follow_up_type, f.description, f.completed,
+              COALESCE(c.name, 'Sem contato') AS contact_name
        FROM follow_ups f
        LEFT JOIN customers c ON c.id = f.customer_id
        ORDER BY f.scheduled_date ASC
        LIMIT 5`
     );
     const topCustomers = await query(
-      `SELECT c.name, c.company, c.phone, COALESCE(SUM(o.value), 0) AS total_spent
+      `SELECT c.name, c.company, c.phone, 
+              COUNT(o.id) AS total_orders,
+              COALESCE(SUM(o.value), 0) AS total_spent
        FROM customers c
        LEFT JOIN orders o ON o.customer_id = c.id
        GROUP BY c.id

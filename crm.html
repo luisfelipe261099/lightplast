@@ -668,23 +668,27 @@
                 const data = await res.json();
                 
                 if (data.success) {
-                    const stats = data.data.stats;
-                    document.getElementById('stat-customers').innerText = stats.total_customers;
-                    document.getElementById('stat-leads').innerText = stats.total_leads;
-                    document.getElementById('stat-follow-ups').innerText = stats.pending_follow_ups;
-                    document.getElementById('stat-revenue').innerText = `R$ ${stats.total_revenue.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+                    // Stats mapping
+                    const stats = data.stats || data.data; 
+                    document.getElementById('stat-customers').innerText = stats.total_customers || stats.totalCustomers || 0;
+                    document.getElementById('stat-leads').innerText = stats.total_leads || stats.qualifiedLeads || 0;
+                    document.getElementById('stat-follow-ups').innerText = stats.pending_follow_ups || stats.pendingFollowUps || 0;
+                    
+                    const revenue = stats.total_revenue || stats.totalRevenue || 0;
+                    document.getElementById('stat-revenue').innerText = `R$ ${revenue.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
 
-                    // Recent follow-ups
-                    const fuHtml = data.data.recent_follow_ups.length > 0 ? `
+                    // Recent follow-ups mapping (data.recent_follow_ups)
+                    const followUps = data.recent_follow_ups || data.data.recent_follow_ups || [];
+                    const fuHtml = followUps.length > 0 ? `
                         <table>
                             <thead>
                                 <tr><th>Cliente</th><th>Atividade</th><th>Data</th><th>Status</th></tr>
                             </thead>
                             <tbody>
-                                ${data.data.recent_follow_ups.map(f => `
+                                ${followUps.map(f => `
                                     <tr>
-                                        <td><span class="item-primary">${f.contact_name}</span></td>
-                                        <td>${f.description}</td>
+                                        <td><span class="item-primary">${f.contact_name || 'Sem contato'}</span></td>
+                                        <td>${f.description || f.follow_up_type || 'Follow-up'}</td>
                                         <td>${new Date(f.scheduled_date).toLocaleDateString('pt-BR')}</td>
                                         <td><span class="badge ${f.completed ? 'badge-success' : 'badge-warning'}">${f.completed ? 'Concluído' : 'Pendente'}</span></td>
                                     </tr>
@@ -694,18 +698,19 @@
                     ` : '<div class="loading-overlay">Nenhuma atividade pendente</div>';
                     document.getElementById('recent-follow-ups-container').innerHTML = fuHtml;
 
-                    // Top customers
-                    const tcHtml = data.data.top_customers.length > 0 ? `
+                    // Top customers mapping (data.top_customers)
+                    const customers = data.top_customers || data.data.top_customers || [];
+                    const tcHtml = customers.length > 0 ? `
                         <table>
                             <thead>
                                 <tr><th>Cliente</th><th>Pedidos</th><th>Total Gasto</th></tr>
                             </thead>
                             <tbody>
-                                ${data.data.top_customers.map(c => `
+                                ${customers.map(c => `
                                     <tr>
                                         <td><span class="item-primary">${c.name}</span></td>
-                                        <td>${c.total_orders}</td>
-                                        <td><b>R$ ${c.total_spent.toLocaleString('pt-BR')}</b></td>
+                                        <td>${c.total_orders || '-'}</td>
+                                        <td><b>R$ ${(c.total_spent || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</b></td>
                                     </tr>
                                 `).join('')}
                             </tbody>
@@ -713,7 +718,10 @@
                     ` : '<div class="loading-overlay">Sem dados consolidados</div>';
                     document.getElementById('top-customers-container').innerHTML = tcHtml;
                 }
-            } catch (error) { console.error(error); }
+            } catch (error) { 
+                console.error('Error loading dashboard:', error); 
+                document.querySelectorAll('.loading-overlay').forEach(el => el.innerHTML = '<span style="color:var(--danger)">Erro ao carregar dados</span>');
+            }
         }
 
         async function loadCustomers() {
