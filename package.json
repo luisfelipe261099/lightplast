@@ -1,0 +1,10 @@
+{
+  "name": "lightplast-site",
+  "version": "1.0.0",
+  "description": "LightPlast Website with Integrated CRM",
+  "scripts": {
+    "build": "npm run build --prefix crm",
+    "start": "npm start --prefix crm"
+  },
+  "dependencies": {}
+}
