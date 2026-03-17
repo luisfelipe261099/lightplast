@@ -1,0 +1,21 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "framework": "other",
+  "env": [
+    "TIDB_HOST",
+    "TIDB_PORT",
+    "TIDB_USER",
+    "TIDB_PASSWORD",
+    "TIDB_DATABASE",
+    "NODE_ENV",
+    "WHATSAPP_API_KEY",
+    "WHATSAPP_PHONE_ID"
+  ],
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/index.ts"
+    }
+  ]
+}
