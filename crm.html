@@ -724,7 +724,7 @@
         // LOAD DASHBOARD
         async function loadDashboard() {
             try {
-                const res = await fetch(`${API_URL}/dashboard`);
+                const res = await fetch(`${API_URL}/dashboard.php`);
                 const data = await res.json();
 
                 if (data.success) {
@@ -784,7 +784,7 @@
         // LOAD CUSTOMERS
         async function loadCustomers() {
             try {
-                const res = await fetch(`${API_URL}/customers`);
+                const res = await fetch(`${API_URL}/customers.php`);
                 const data = await res.json();
 
                 if (data.success) {
@@ -816,7 +816,7 @@
         // LOAD LEADS
         async function loadLeads() {
             try {
-                const res = await fetch(`${API_URL}/leads`);
+                const res = await fetch(`${API_URL}/leads.php`);
                 const data = await res.json();
 
                 if (data.success) {
@@ -848,7 +848,7 @@
         // LOAD FOLLOW-UPS
         async function loadFollowUps() {
             try {
-                const res = await fetch(`${API_URL}/follow-ups`);
+                const res = await fetch(`${API_URL}/follow-ups.php`);
                 const data = await res.json();
 
                 if (data.success) {
@@ -880,7 +880,7 @@
         // LOAD ORDERS
         async function loadOrders() {
             try {
-                const res = await fetch(`${API_URL}/orders`);
+                const res = await fetch(`${API_URL}/orders.php`);
                 const data = await res.json();
 
                 if (data.success) {
@@ -912,7 +912,7 @@
         // LOAD BUDGETS
         async function loadBudgets() {
             try {
-                const res = await fetch(`${API_URL}/budgets`);
+                const res = await fetch(`${API_URL}/budgets.php`);
                 const data = await res.json();
 
                 if (data.success) {
@@ -963,7 +963,7 @@
         async function openBudgetModal() {
             // Load customers first
             try {
-                const res = await fetch(`${API_URL}/customers`);
+                const res = await fetch(`${API_URL}/customers.php`);
                 const data = await res.json();
                 if (data.success) {
                     const select = document.getElementById('budgetCustomerId');
@@ -1004,7 +1004,7 @@
         async function openOrderModal() {
             // Load customers first
             try {
-                const res = await fetch(`${API_URL}/customers`);
+                const res = await fetch(`${API_URL}/customers.php`);
                 const data = await res.json();
                 if (data.success) {
                     const select = document.getElementById('orderCustomerId');
@@ -1057,7 +1057,7 @@
             };
 
             try {
-                const res = await fetch(`${API_URL}/customers`, {
+                const res = await fetch(`${API_URL}/customers.php`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(customer)
@@ -1086,7 +1086,7 @@
             };
 
             try {
-                const res = await fetch(`${API_URL}/leads`, {
+                const res = await fetch(`${API_URL}/leads.php`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(lead)
@@ -1137,7 +1137,7 @@
             };
 
             try {
-                const res = await fetch(`${API_URL}/budgets`, {
+                const res = await fetch(`${API_URL}/budgets.php`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(budget)
@@ -1156,7 +1156,7 @@
         }
 
         async function downloadBudgetPDF(budgetId) {
-            window.open(`${API_URL}/budgets/${budgetId}/pdf`, '_blank');
+            window.open(`${API_URL}/budgets.php/${budgetId}/pdf`, '_blank');
         }
 
         async function changeBudgetStatus(budgetId) {
@@ -1164,7 +1164,7 @@
             if (!newStatus) return;
 
             try {
-                const res = await fetch(`${API_URL}/budgets/${budgetId}`, {
+                const res = await fetch(`${API_URL}/budgets.php/${budgetId}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ status: newStatus })
@@ -1191,7 +1191,7 @@
             };
 
             try {
-                const res = await fetch(`${API_URL}/follow-ups`, {
+                const res = await fetch(`${API_URL}/follow-ups.php`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(followUp)
@@ -1220,7 +1220,7 @@
             };
 
             try {
-                const res = await fetch(`${API_URL}/orders`, {
+                const res = await fetch(`${API_URL}/orders.php`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(order)
@@ -1244,3 +1244,4 @@
 </body>
 
 </html>
+
