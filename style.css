@@ -7,7 +7,7 @@
     --primary-green: #488039;
     --primary-green-dark: #2f5f24;
     --text-dark: #1f2937;
-    --text-light: #6b7280;
+    --text-light: #4b5563;
     --bg-light: #ffffff;
     --bg-gray: #f9fafb;
     --font-heading: Georgia, 'Times New Roman', serif;
@@ -45,6 +45,13 @@ a {
     text-decoration: none;
     color: inherit;
     transition: var(--transition);
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible {
+    outline: 3px solid #1f6feb;
+    outline-offset: 2px;
 }
 
 .container {
@@ -202,8 +209,8 @@ a {
 }
 
 .btn-whatsapp-header .btn-text .ddd {
-    font-size: 0.6rem;
-    opacity: 0.8;
+    font-size: 0.75rem;
+    opacity: 1;
 }
 
 /* 
@@ -683,8 +690,9 @@ a {
     }
 
     .form-group.row label {
-        display: none;
-        /* Hide labels on mobile to make it space efficient, just placeholders */
+        display: block;
+        font-size: 0.92rem;
+        color: #374151;
     }
 
     .form-submit {
