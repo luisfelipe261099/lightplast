@@ -1,7 +1,6 @@
 {
   "buildCommand": "cd crm && npm run build",
   "outputDirectory": "crm/dist",
-  "framework": "other",
   "rewrites": [
     {
       "source": "/crm/api/(.*)",
