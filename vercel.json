@@ -1,6 +1,6 @@
 {
     "outputDirectory":  "crm/dist",
-    "buildCommand":  "npm --prefix crm install && npm --prefix crm run build",
+    "buildCommand":  "npm ci --prefix crm && npm run build --prefix crm",
     "rewrites":  [
                      {
                          "destination":  "/api/$1",
