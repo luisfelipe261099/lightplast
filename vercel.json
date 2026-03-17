@@ -1,15 +1,5 @@
 {
-    "runtime": "php:8.2",
-    "functions": {
-        "api/*.php": {
-            "runtime": "php:8.2"
-        }
-    },
-    "env": {
-        "TIDB_HOST": "@tidb_host",
-        "TIDB_PORT": "@tidb_port",
-        "TIDB_USER": "@tidb_user",
-        "TIDB_PASSWORD": "@tidb_password",
-        "TIDB_DATABASE": "@tidb_database"
-    }
+    "rewrites": [
+        {"source": "/crm", "destination": "/crm.html"}
+    ]
 }
