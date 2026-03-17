@@ -1,6 +1,6 @@
 {
     "outputDirectory":  "crm/dist",
-    "buildCommand":  "npm ci --prefix crm && npm run build --prefix crm",
+    "buildCommand":  "npm ci --prefix crm --legacy-peer-deps && npm run build --prefix crm",
     "rewrites":  [
                      {
                          "destination":  "/api/$1",
