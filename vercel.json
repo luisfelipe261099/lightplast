@@ -7,7 +7,7 @@
     "index.js": {
       "memory": 1024,
       "maxDuration": 30,
-      "includeFiles": "{index.html,crm-login.html,crm-pro.html,style.css,assets/**}"
+      "includeFiles": "{*.html,style.css,assets/**,sitemap.xml,robots.txt}"
     }
   },
   "rewrites": [

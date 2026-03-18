@@ -32,6 +32,38 @@ app.get('/crm-login', (req, res) => {
   res.sendFile(join(__dirname, 'crm-login.html'));
 });
 
+const staticPageRoutes = {
+  '/catalogo': 'catalogo.html',
+  '/sobre': 'sobre.html',
+  '/blog': 'blog.html',
+  '/categoria/sacos-de-lixo': 'categoria-sacos-de-lixo.html',
+  '/categoria/sacolas-personalizadas': 'categoria-sacolas-personalizadas.html',
+  '/categoria/filmes-tecnicos': 'categoria-filmes-tecnicos.html',
+  '/produto/saco-lixo-hospitalar': 'produto-saco-lixo-hospitalar.html',
+  '/produto/saco-hamper-fita': 'produto-saco-hamper-fita.html',
+  '/produto/saco-coleta-seletiva': 'produto-saco-coleta-seletiva.html',
+  '/produto/sacola-personalizada': 'produto-sacola-personalizada.html',
+  '/produto/filme-stretch': 'produto-filme-stretch.html',
+  '/produto/bobina-picotada': 'produto-bobina-picotada.html',
+  '/produto/saco-compostavel-lightgreen': 'produto-saco-compostavel-lightgreen.html',
+  '/produto/saco-hospitalar-20l': 'produto-saco-hospitalar-20l.html',
+  '/produto/saco-hospitalar-30l': 'produto-saco-hospitalar-30l.html',
+  '/produto/saco-hospitalar-50l': 'produto-saco-hospitalar-50l.html',
+  '/produto/saco-hospitalar-100l': 'produto-saco-hospitalar-100l.html',
+  '/produto/saco-infectante-100l': 'produto-saco-infectante-100l.html',
+  '/produto/saco-institucional-100l': 'produto-saco-institucional-100l.html',
+  '/blog/como-escolher-saco-hospitalar': 'blog-como-escolher-saco-hospitalar.html',
+  '/blog/coleta-seletiva-empresas': 'blog-coleta-seletiva-empresas.html',
+  '/blog/capacidade-saco-hospitalar-20-30-50-100l': 'blog-capacidade-saco-hospitalar-20-30-50-100l.html',
+  '/blog/diferenca-saco-infectante-e-institucional': 'blog-diferenca-saco-infectante-e-institucional.html',
+};
+
+Object.entries(staticPageRoutes).forEach(([route, fileName]) => {
+  app.get(route, (req, res) => {
+    res.sendFile(join(__dirname, fileName));
+  });
+});
+
 // Database connection pool
 let pool = null;
 
@@ -44,15 +76,11 @@ async function initDatabase() {
       user: process.env.TIDB_USER,
       password: process.env.TIDB_PASSWORD,
       database: process.env.TIDB_DATABASE,
-      ssl: {
-        minVersion: 'TLSv1.2',
-        rejectUnauthorized: true
-      },
       charset: 'utf8mb4',
       supportBigNumbers: true,
       bigNumberStrings: true,
       waitForConnections: true,
-      enableKeepAlive: true
+      enableKeepAlive: true,
     });
     console.log('✅ Banco de dados conectado');
   } catch (error) {
@@ -70,8 +98,7 @@ const query = async (sql, args) => {
   }
   const connection = await pool.getConnection();
   try {
-    const safeArgs = (args || []).map(arg => arg === undefined ? null : arg);
-    const [results] = await connection.execute(sql, safeArgs);
+    const [results] = await connection.execute(sql, args || []);
     return results;
   } finally {
     connection.release();
@@ -86,8 +113,6 @@ app.get('/api/health', (req, res) => {
     timestamp: new Date().toISOString()
   });
 });
-
-
 
 // ==================== CUSTOMERS ====================
 app.get('/api/customers', async (req, res) => {
@@ -273,27 +298,6 @@ app.put('/api/budgets/:id', async (req, res) => {
   }
 });
 
-app.delete('/api/budgets/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    await query('DELETE FROM budgets WHERE id=?', [id]);
-    res.json({ success: true });
-  } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
-
-app.get('/api/budgets/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const [budget] = await query('SELECT b.*, c.name as customer_name, c.email as customer_email, c.phone as customer_phone, c.company as customer_company FROM budgets b JOIN customers c ON b.customer_id = c.id WHERE b.id=?', [id]);
-    if (!budget) return res.status(404).json({ success: false, error: 'Orçamento não encontrado' });
-    res.json({ success: true, data: budget });
-  } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
-
 // ==================== ORDERS ====================
 app.get('/api/orders', async (req, res) => {
   try {
@@ -348,27 +352,6 @@ app.put('/api/orders/:id', async (req, res) => {
   }
 });
 
-app.delete('/api/orders/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    await query('DELETE FROM orders WHERE id=?', [id]);
-    res.json({ success: true });
-  } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
-
-app.get('/api/orders/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const [order] = await query('SELECT o.*, c.name as customer_name, c.email as customer_email, c.phone as customer_phone, c.company as customer_company FROM orders o JOIN customers c ON o.customer_id = c.id WHERE o.id=?', [id]);
-    if (!order) return res.status(404).json({ success: false, error: 'Pedido não encontrado' });
-    res.json({ success: true, data: order });
-  } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
-
 // ==================== FOLLOW-UPS ====================
 app.get('/api/follow-ups', async (req, res) => {
   try {
@@ -392,59 +375,34 @@ app.post('/api/follow-ups', async (req, res) => {
   }
 });
 
-app.put('/api/follow-ups/:id/complete', async (req, res) => {
-  try {
-    const { id } = req.params;
-    await query('UPDATE follow_ups SET completed = 1 WHERE id=?', [id]);
-    res.json({ success: true });
-  } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
-
-app.delete('/api/follow-ups/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    await query('DELETE FROM follow_ups WHERE id=?', [id]);
-    res.json({ success: true });
-  } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
-
 // ==================== DASHBOARD ====================
 app.get('/api/dashboard', async (req, res) => {
   try {
+    if (!pool) {
+      return res.json({
+        success: true,
+        data: {
+          totalCustomers: 0,
+          qualifiedLeads: 0,
+          pendingFollowUps: 0,
+          totalRevenue: 0
+        },
+        message: 'Banco de dados não conectado - dados fictícios'
+      });
+    }
+
     const [totalCustomers] = await query('SELECT COUNT(*) as count FROM customers');
     const [qualifiedLeads] = await query('SELECT COUNT(*) as count FROM leads WHERE status IN ("qualified", "contacted")');
     const [pendingFollowUps] = await query('SELECT COUNT(*) as count FROM follow_ups WHERE completed = 0');
     const [totalRevenue] = await query('SELECT SUM(value) as total FROM orders WHERE status IN ("confirmed", "completed")');
     
-    const [ordersCount] = await query('SELECT COUNT(*) as count FROM orders');
-    const [confirmedOrders] = await query('SELECT COUNT(*) as count FROM orders WHERE status IN ("confirmed", "completed")');
-
-    // Stats for charts
-    const revenueByMonth = await query(`
-      SELECT DATE_FORMAT(created_at, '%b') as label, SUM(value) as value 
-      FROM orders 
-      WHERE status IN ('confirmed', 'completed') AND created_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
-      GROUP BY label, DATE_FORMAT(created_at, '%Y-%m')
-      ORDER BY DATE_FORMAT(created_at, '%Y-%m') ASC
-    `);
-
-    const leadsByStatus = await query('SELECT status as label, COUNT(*) as value FROM leads GROUP BY status');
-
     res.json({
       success: true,
       data: {
         totalCustomers: totalCustomers?.count || 0,
         qualifiedLeads: qualifiedLeads?.count || 0,
         pendingFollowUps: pendingFollowUps?.count || 0,
-        totalRevenue: parseFloat(totalRevenue?.total) || 0,
-        totalOrders: ordersCount?.count || 0,
-        confirmedOrders: confirmedOrders?.count || 0,
-        revenueByMonth,
-        leadsByStatus
+        totalRevenue: parseFloat(totalRevenue?.total) || 0
       }
     });
   } catch (error) {

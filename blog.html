@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog LightPlast | Embalagens Plásticas, Dicas Técnicas e Compras B2B</title>
+    <meta name="description" content="Blog da LightPlast com guias técnicos, dicas de compra e conteúdos sobre embalagens plásticas para empresas, hospitais, indústrias e varejo.">
+    <meta name="keywords" content="blog embalagens plásticas, guia saco hospitalar, compra de sacos de lixo atacado, coleta seletiva empresas">
+    <link rel="canonical" href="https://lightplast.vercel.app/blog.html">
+    <meta property="og:title" content="Blog LightPlast | Conteúdo Técnico para Compradores B2B">
+    <meta property="og:description" content="Aprenda a escolher embalagens plásticas com mais eficiência e menos custo operacional.">
+    <meta property="og:url" content="https://lightplast.vercel.app/blog.html">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="https://lightplast.vercel.app/assets/cat_embalagens.jpg">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <header class="header">
+        <div class="container header-container">
+            <a href="index.html" class="logo" aria-label="Voltar para a página inicial">
+                <span class="lp">lp</span>
+                <span class="lightplast">LIGHTPLAST</span>
+            </a>
+            <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Abrir menu" aria-expanded="false" aria-controls="main-nav" type="button"><span class="icon" aria-hidden="true">☰</span></button>
+            <nav class="nav" id="main-nav">
+                <a href="index.html">Início</a>
+                <a href="catalogo.html">Catálogo</a>
+                <a href="sobre.html">Sobre</a>
+                <a href="blog.html" class="active">Blog</a>
+                <a href="/crm">Login</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero hero-internal hero-compact">
+            <div class="container hero-container">
+                <div class="hero-content">
+                    <div class="fabrica-badge"><span class="icon" aria-hidden="true">📝</span> Conteúdo Técnico e Comercial</div>
+                    <h1>Blog da <span class="highlight">LightPlast</span></h1>
+                    <p>Guias práticos para ajudar compradores, gestores e equipes operacionais a escolherem melhor suas embalagens plásticas.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="page-section">
+            <div class="container blog-grid">
+                <article class="blog-card">
+                    <img src="assets/cat_hospitalar.jpg" alt="Guia sobre sacos hospitalares" loading="lazy">
+                    <div class="blog-card-content">
+                        <h2>Como escolher saco de lixo hospitalar com segurança e economia</h2>
+                        <p>Entenda os critérios de capacidade, espessura e aplicação para evitar erros de compra e reduzir ruptura operacional.</p>
+                        <a href="blog-como-escolher-saco-hospitalar.html" class="btn-primary">Ler artigo</a>
+                    </div>
+                </article>
+                <article class="blog-card">
+                    <img src="assets/cat_coleta_seletiva.jpg" alt="Coleta seletiva em empresas" loading="lazy">
+                    <div class="blog-card-content">
+                        <h2>Coleta seletiva em empresas: padronização, cores e performance</h2>
+                        <p>Um guia objetivo para estruturar descarte interno com eficiência operacional e menos retrabalho no dia a dia.</p>
+                        <a href="blog-coleta-seletiva-empresas.html" class="btn-primary">Ler artigo</a>
+                    </div>
+                </article>
+                <article class="blog-card">
+                    <img src="assets/cat_hospitalar.jpg" alt="Capacidade de saco hospitalar por uso" loading="lazy">
+                    <div class="blog-card-content">
+                        <h2>Capacidade de saco hospitalar: quando usar 20L, 30L, 50L e 100L</h2>
+                        <p>Guia prático para definir capacidade por setor e reduzir desperdício na rotina de descarte.</p>
+                        <a href="blog-capacidade-saco-hospitalar-20-30-50-100l.html" class="btn-primary">Ler artigo</a>
+                    </div>
+                </article>
+                <article class="blog-card">
+                    <img src="assets/cat_hospitalar.jpg" alt="Diferenças entre saco infectante e institucional" loading="lazy">
+                    <div class="blog-card-content">
+                        <h2>Saco infectante x institucional: qual a diferença na prática?</h2>
+                        <p>Entenda os cenários corretos de uso para comprar com mais segurança e eficiência.</p>
+                        <a href="blog-diferenca-saco-infectante-e-institucional.html" class="btn-primary">Ler artigo</a>
+                    </div>
+                </article>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer" style="background: #1f2937; color: #9ca3af; padding: 40px 0; text-align: center; border-top: 1px solid #374151;">
+        <div class="container">
+            <p>&copy; 2026 <strong>LightPlast Embalagens</strong>. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script>
+        const menuBtn = document.getElementById('mobile-menu-btn');
+        const nav = document.getElementById('main-nav');
+        if (menuBtn && nav) {
+            menuBtn.addEventListener('click', function () {
+                const active = nav.classList.toggle('nav-active');
+                menuBtn.setAttribute('aria-expanded', active ? 'true' : 'false');
+            });
+        }
+    </script>
+</body>
+
+</html>

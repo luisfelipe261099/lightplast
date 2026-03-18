@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sobre a LightPlast | Fábrica de Embalagens Plásticas em Pinhais - PR</title>
+    <meta name="description" content="Conheça a LightPlast: indústria nacional com parque fabril próprio, foco em qualidade, escala e atendimento técnico para empresas.">
+    <meta name="keywords" content="sobre lightplast, fábrica embalagens pinhais, indústria plásticos paraná, fabricante sacos de lixo">
+    <link rel="canonical" href="https://lightplast.vercel.app/sobre.html">
+    <meta property="og:title" content="Sobre a LightPlast | Indústria de Embalagens Plásticas">
+    <meta property="og:description" content="Tradição, estrutura produtiva e atendimento consultivo para atender operações de pequeno, médio e grande porte.">
+    <meta property="og:url" content="https://lightplast.vercel.app/sobre.html">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="https://lightplast.vercel.app/assets/hero_bg.png">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <header class="header">
+        <div class="container header-container">
+            <a href="index.html" class="logo" aria-label="Voltar para a página inicial">
+                <span class="lp">lp</span>
+                <span class="lightplast">LIGHTPLAST</span>
+            </a>
+            <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Abrir menu" aria-expanded="false" aria-controls="main-nav" type="button"><span class="icon" aria-hidden="true">☰</span></button>
+            <nav class="nav" id="main-nav">
+                <a href="index.html">Início</a>
+                <a href="catalogo.html">Catálogo</a>
+                <a href="sobre.html" class="active">Sobre</a>
+                <a href="blog.html">Blog</a>
+                <a href="/crm">Login</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero hero-internal hero-compact">
+            <div class="container hero-container">
+                <div class="hero-content">
+                    <div class="fabrica-badge"><span class="icon" aria-hidden="true">🏭</span> Parque Fabril 100% Próprio</div>
+                    <h1>Sobre a <span class="highlight">LightPlast</span></h1>
+                    <p>Há mais de duas décadas, produzimos soluções em embalagens plásticas com foco em eficiência, qualidade e compromisso com o cliente.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="page-section">
+            <div class="container page-grid-2">
+                <article>
+                    <h2>Nossa trajetória</h2>
+                    <p>A LightPlast nasceu com objetivo claro: oferecer ao mercado empresarial produtos com padrão consistente de qualidade, preço competitivo e suporte técnico no pré e pós-venda. Com evolução de maquinário e processo, ampliamos nossa linha para atender diferentes segmentos.</p>
+                    <h2>Como trabalhamos</h2>
+                    <ul class="list-clean">
+                        <li>Controle de produção da matéria-prima à expedição</li>
+                        <li>Desenvolvimento de projetos personalizados</li>
+                        <li>Planejamento de fornecimento recorrente</li>
+                        <li>Suporte comercial para compra estratégica</li>
+                    </ul>
+                </article>
+                <aside class="info-panel">
+                    <h3>Atendimento B2B</h3>
+                    <p>Atendemos empresas de diversos portes e segmentos com proposta alinhada ao consumo real da operação.</p>
+                    <a class="btn-primary" href="https://api.whatsapp.com/send?phone=554135576013&text=Quero%20falar%20com%20a%20LightPlast%20sobre%20fornecimento" target="_blank" rel="noopener noreferrer">Falar com Comercial</a>
+                </aside>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer" style="background: #1f2937; color: #9ca3af; padding: 40px 0; text-align: center; border-top: 1px solid #374151;">
+        <div class="container">
+            <p>&copy; 2026 <strong>LightPlast Embalagens</strong>. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script>
+        const menuBtn = document.getElementById('mobile-menu-btn');
+        const nav = document.getElementById('main-nav');
+        if (menuBtn && nav) {
+            menuBtn.addEventListener('click', function () {
+                const active = nav.classList.toggle('nav-active');
+                menuBtn.setAttribute('aria-expanded', active ? 'true' : 'false');
+            });
+        }
+    </script>
+</body>
+
+</html>
