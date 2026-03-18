@@ -70,7 +70,8 @@ const query = async (sql, args) => {
   }
   const connection = await pool.getConnection();
   try {
-    const [results] = await connection.execute(sql, args || []);
+    const safeArgs = (args || []).map(arg => arg === undefined ? null : arg);
+    const [results] = await connection.execute(sql, safeArgs);
     return results;
   } finally {
     connection.release();
