@@ -14,10 +14,10 @@
         }
 
         :root {
-            --primary: #6366f1;
-            --primary-dark: #4f46e5;
-            --primary-light: #818cf8;
-            --secondary: #ec4899;
+            --primary: #488039;
+            --primary-dark: #2f5f24;
+            --primary-light: #5f9644;
+            --secondary: #7aa85d;
             --text-dark: #0f172a;
             --text-light: #64748b;
             --bg-dark: #0f172a;
@@ -32,7 +32,7 @@
 
         body {
             font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, var(--bg-light) 0%, #e0e7ff 100%);
+            background: linear-gradient(135deg, var(--bg-light) 0%, #eaf4e6 100%);
             color: var(--text-dark);
             min-height: 100vh;
         }
@@ -143,7 +143,7 @@
 
         .stat-card:hover {
             transform: translateY(-8px);
-            box-shadow: 0 15px 40px rgba(99, 102, 241, 0.2);
+            box-shadow: 0 15px 40px rgba(72, 128, 57, 0.2);
         }
 
         .stat-label {
@@ -259,7 +259,7 @@
         .search-bar input:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            box-shadow: 0 0 0 3px rgba(72, 128, 57, 0.12);
         }
 
         /* ===== LIST CONTAINER ===== */
@@ -276,7 +276,7 @@
             grid-template-columns: 2fr 1.5fr 1fr 1fr 1fr;
             gap: 20px;
             padding: 20px 25px;
-            background: linear-gradient(135deg, var(--bg-light) 0%, #f1f5ff 100%);
+            background: linear-gradient(135deg, var(--bg-light) 0%, #f2f7ef 100%);
             font-weight: 700;
             color: var(--text-dark);
             border-bottom: 1px solid var(--border);
@@ -339,7 +339,7 @@
         }
 
         .badge-primary {
-            background: rgba(99, 102, 241, 0.1);
+            background: rgba(72, 128, 57, 0.12);
             color: var(--primary);
         }
 
@@ -360,12 +360,12 @@
         .btn-primary {
             background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
             color: white;
-            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+            box-shadow: 0 4px 15px rgba(72, 128, 57, 0.3);
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+            box-shadow: 0 8px 25px rgba(72, 128, 57, 0.4);
         }
 
         .btn-primary:active {
@@ -433,7 +433,7 @@
         .form-group select:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            box-shadow: 0 0 0 3px rgba(72, 128, 57, 0.12);
         }
 
         .form-row {
@@ -1139,12 +1139,12 @@
                         datasets: [{
                             label: 'Receita (R$)',
                             data: [12000, 15000, 14000, 18000, 22000, 25000],
-                            borderColor: '#6366f1',
-                            backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                            borderColor: '#488039',
+                            backgroundColor: 'rgba(72, 128, 57, 0.12)',
                             tension: 0.4,
                             fill: true,
                             pointRadius: 5,
-                            pointBackgroundColor: '#6366f1',
+                            pointBackgroundColor: '#488039',
                             pointBorderColor: 'white',
                             pointBorderWidth: 2,
                             borderWidth: 3
@@ -1169,7 +1169,7 @@
                         labels: ['Novos', 'Contatados', 'Qualificados', 'Perdidos'],
                         datasets: [{
                             data: [8, 15, 24, 5],
-                            backgroundColor: ['#ec4899', '#f59e0b', '#10b981', '#6b7280']
+                            backgroundColor: ['#488039', '#f59e0b', '#10b981', '#6b7280']
                         }]
                     },
                     options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
@@ -1186,7 +1186,7 @@
                         datasets: [{
                             label: 'Clientes Adquiridos',
                             data: [12, 18, 8, 14, 10],
-                            backgroundColor: '#6366f1',
+                            backgroundColor: '#488039',
                             borderRadius: 8
                         }]
                     },
@@ -1641,8 +1641,8 @@
                         <p style="margin: 8px 0 0 0; font-size: 0.9rem;">Faturamento total de R$ ${revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} com ${orders} pedidos confirmados neste período.</p>
                     </div>
 
-                    <div style="padding: 15px; background: rgba(59, 130, 246, 0.05); border-radius: 8px; border-left: 4px solid #3b82f6;">
-                        <strong style="color: #3b82f6;">💡 Ticket Médio</strong>
+                    <div style="padding: 15px; background: rgba(72, 128, 57, 0.06); border-radius: 8px; border-left: 4px solid #488039;">
+                        <strong style="color: #488039;">💡 Ticket Médio</strong>
                         <p style="margin: 8px 0 0 0; font-size: 0.9rem;">Preço médio por pedido é R$ ${parseFloat(average).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}. Oportunidade para upsell em clientes menores.</p>
                     </div>
 
@@ -1651,13 +1651,13 @@
                         <p style="margin: 8px 0 0 0; font-size: 0.9rem;">Foco em manter relacionamento com top 10% de clientes. Eles geram 80% da receita (Princípio de Pareto).</p>
                     </div>
 
-                    <div style="padding: 15px; background: rgba(236, 72, 153, 0.05); border-radius: 8px; border-left: 4px solid #ec4899;">
-                        <strong style="color: #ec4899;">📊 Oportunidade</strong>
+                    <div style="padding: 15px; background: rgba(95, 150, 68, 0.08); border-radius: 8px; border-left: 4px solid #5f9644;">
+                        <strong style="color: #2f5f24;">📊 Oportunidade</strong>
                         <p style="margin: 8px 0 0 0; font-size: 0.9rem;">${orders} pedidos este mês. Meta: aumentar para 10+ pedidos/mês para crescimento de 100% anual.</p>
                     </div>
 
-                    <div style="padding: 15px; background: rgba(99, 102, 241, 0.05); border-radius: 8px; border-left: 4px solid #6366f1;">
-                        <strong style="color: #6366f1;">💰 Projeção</strong>
+                    <div style="padding: 15px; background: rgba(72, 128, 57, 0.08); border-radius: 8px; border-left: 4px solid #488039;">
+                        <strong style="color: #488039;">💰 Projeção</strong>
                         <p style="margin: 8px 0 0 0; font-size: 0.9rem;">Se manter taxa de crescimento: próximas 3 meses devem gerar R$ ${(revenue * 1.5).toLocaleString('pt-BR', { minimumFractionDigits: 0 })} em faturamento.</p>
                     </div>
 
@@ -1681,8 +1681,8 @@
                         datasets: [{
                             label: 'Faturamento (R$)',
                             data: [12000, 15000, 14000, 18000, 22000, 25000, 28000, 26000, 30000, 32000, 35000, 38000],
-                            backgroundColor: '#6366f1',
-                            borderColor: '#4f46e5',
+                            backgroundColor: '#488039',
+                            borderColor: '#2f5f24',
                             borderWidth: 2,
                             borderRadius: 8,
                             tension: 0.4
@@ -1709,7 +1709,7 @@
                             {
                                 label: 'Mês Atual',
                                 data: [8000, 9000, 10000, 11000],
-                                backgroundColor: '#6366f1',
+                                backgroundColor: '#488039',
                                 borderRadius: 6
                             },
                             {
@@ -1739,12 +1739,12 @@
                         datasets: [{
                             label: 'Faturamento Acumulado (R$)',
                             data: [12000, 27000, 41000, 59000, 81000, 106000, 134000, 165000],
-                            borderColor: '#ec4899',
-                            backgroundColor: 'rgba(236, 72, 153, 0.1)',
+                            borderColor: '#2f5f24',
+                            backgroundColor: 'rgba(72, 128, 57, 0.12)',
                             tension: 0.4,
                             fill: true,
                             pointRadius: 5,
-                            pointBackgroundColor: '#ec4899',
+                            pointBackgroundColor: '#2f5f24',
                             pointBorderColor: 'white',
                             pointBorderWidth: 2,
                             borderWidth: 3
