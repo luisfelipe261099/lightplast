@@ -69,7 +69,7 @@ let pool = null;
 
 async function initDatabase() {
   try {
-    pool = await mysql.createPool({
+    const poolConfig = {
       connectionLimit: 10,
       host: process.env.TIDB_HOST,
       port: process.env.TIDB_PORT || 4000,
@@ -81,9 +81,26 @@ async function initDatabase() {
       bigNumberStrings: true,
       waitForConnections: true,
       enableKeepAlive: true,
-    });
+    };
+
+    // TiDB Cloud requires TLS in most hosted environments (including serverless).
+    if (process.env.TIDB_SSL !== 'false') {
+      poolConfig.ssl = {
+        minVersion: 'TLSv1.2',
+        rejectUnauthorized: true,
+      };
+    }
+
+    pool = await mysql.createPool(poolConfig);
+
+    // Validate credentials and network at startup.
+    const conn = await pool.getConnection();
+    await conn.ping();
+    conn.release();
+
     console.log('✅ Banco de dados conectado');
   } catch (error) {
+    pool = null;
     console.error('❌ Erro ao conectar banco de dados:', error.message);
   }
 }
