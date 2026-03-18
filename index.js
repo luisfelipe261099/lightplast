@@ -86,42 +86,7 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-app.get('/api/dashboard', async (req, res) => {
-  try {
-    if (!pool) {
-      return res.json({ 
-        success: true, 
-        data: {
-          totalCustomers: 0,
-          totalLeads: 0,
-          totalBudgets: 0,
-          totalOrders: 0,
-          monthlyRevenue: 0
-        },
-        message: 'Banco de dados não conectado - dados fictícios'
-      });
-    }
 
-    const customers = await query('SELECT COUNT(*) as count FROM customers');
-    const leads = await query('SELECT COUNT(*) as count FROM leads');
-    const budgets = await query('SELECT COUNT(*) as count FROM budgets');
-    const orders = await query('SELECT COUNT(*) as count FROM orders');
-    
-    res.json({
-      success: true,
-      data: {
-        totalCustomers: customers[0].count || 0,
-        totalLeads: leads[0].count || 0,
-        totalBudgets: budgets[0].count || 0,
-        totalOrders: orders[0].count || 0,
-        monthlyRevenue: 0
-      }
-    });
-  } catch (error) {
-    console.error('Error:', error.message);
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
 
 // ==================== CUSTOMERS ====================
 app.get('/api/customers', async (req, res) => {
