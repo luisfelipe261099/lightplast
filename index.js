@@ -3,7 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-import mysql from 'mysql';
+import mysql from 'mysql2/promise';
 
 dotenv.config();
 
@@ -23,30 +23,92 @@ app.get('/crm', (req, res) => {
   res.sendFile(join(__dirname, 'crm-pro.html'));
 });
 
-// Database connection
-const pool = mysql.createPool({
-  connectionLimit: 10,
-  host: process.env.TIDB_HOST,
-  port: process.env.TIDB_PORT || 4000,
-  user: process.env.TIDB_USER,
-  password: process.env.TIDB_PASSWORD,
-  database: process.env.TIDB_DATABASE,
-  charset: 'utf8mb4',
-  supportBigNumbers: true,
-  bigNumberStrings: true,
-});
+// Database connection pool
+let pool = null;
 
-// Validar se variáveis de ambiente existem
-if (!process.env.TIDB_HOST || !process.env.TIDB_USER || !process.env.TIDB_PASSWORD || !process.env.TIDB_DATABASE) {
-  console.warn('⚠️  Aviso: Variáveis de ambiente de banco de dados não configuradas');
-  console.warn('Certifique-se de que TIDB_HOST, TIDB_USER, TIDB_PASSWORD e TIDB_DATABASE estão definidas');
+async function initDatabase() {
+  try {
+    pool = await mysql.createPool({
+      connectionLimit: 10,
+      host: process.env.TIDB_HOST,
+      port: process.env.TIDB_PORT || 4000,
+      user: process.env.TIDB_USER,
+      password: process.env.TIDB_PASSWORD,
+      database: process.env.TIDB_DATABASE,
+      charset: 'utf8mb4',
+      supportBigNumbers: true,
+      bigNumberStrings: true,
+      waitForConnections: true,
+      enableKeepAlive: true,
+      keepAliveInitialDelayMs: 0,
+    });
+    console.log('✅ Banco de dados conectado');
+  } catch (error) {
+    console.error('❌ Erro ao conectar banco de dados:', error.message);
+  }
 }
 
-const query = (sql, args) => new Promise((resolve, reject) => {
-  pool.query(sql, args, (err, results) => {
-    if (err) return reject(err);
-    resolve(results);
+// Inicializar banco de dados
+initDatabase();
+
+// Função para executar queries
+const query = async (sql, args) => {
+  if (!pool) {
+    throw new Error('Pool de banco de dados não inicializado');
+  }
+  const connection = await pool.getConnection();
+  try {
+    const [results] = await connection.execute(sql, args || []);
+    return results;
+  } finally {
+    connection.release();
+  }
+};
+
+// ==================== HEALTH CHECK ====================
+app.get('/api/health', (req, res) => {
+  res.json({ 
+    status: 'OK', 
+    database: pool ? 'connected' : 'disconnected',
+    timestamp: new Date().toISOString()
   });
+});
+
+app.get('/api/dashboard', async (req, res) => {
+  try {
+    if (!pool) {
+      return res.json({ 
+        success: true, 
+        data: {
+          totalCustomers: 0,
+          totalLeads: 0,
+          totalBudgets: 0,
+          totalOrders: 0,
+          monthlyRevenue: 0
+        },
+        message: 'Banco de dados não conectado - dados fictícios'
+      });
+    }
+
+    const customers = await query('SELECT COUNT(*) as count FROM customers');
+    const leads = await query('SELECT COUNT(*) as count FROM leads');
+    const budgets = await query('SELECT COUNT(*) as count FROM budgets');
+    const orders = await query('SELECT COUNT(*) as count FROM orders');
+    
+    res.json({
+      success: true,
+      data: {
+        totalCustomers: customers[0].count || 0,
+        totalLeads: leads[0].count || 0,
+        totalBudgets: budgets[0].count || 0,
+        totalOrders: orders[0].count || 0,
+        monthlyRevenue: 0
+      }
+    });
+  } catch (error) {
+    console.error('Error:', error.message);
+    res.status(500).json({ success: false, error: error.message });
+  }
 });
 
 // ==================== CUSTOMERS ====================
