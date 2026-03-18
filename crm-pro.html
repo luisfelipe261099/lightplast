@@ -13,6 +13,8 @@
         })();
     </script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -1548,10 +1550,10 @@
                                 <div>R$ ${b.total_value ? parseFloat(b.total_value).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '0,00'}</div>
                                 <div><span class="badge badge-warning">${b.status}</span></div>
                                 <div>
-                                    <button class="btn btn-small btn-primary">
+                                    <button class="btn btn-small btn-primary" onclick="generatePDF('budget', ${b.id})" title="Gerar PDF">
                                         <i class="fas fa-file-pdf"></i>
                                     </button>
-                                    <button class="btn btn-small btn-danger" onclick="deleteBudget(${b.id})">
+                                    <button class="btn btn-small btn-danger" onclick="deleteBudget(${b.id})" title="Excluir">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
@@ -1590,10 +1592,13 @@
                                 <div>R$ ${o.value ? parseFloat(o.value).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '0,00'}</div>
                                 <div><span class="badge badge-success">${o.status}</span></div>
                                 <div>
-                                    <button class="btn btn-small btn-primary" onclick="editOrder(${o.id})">
+                                    <button class="btn btn-small btn-primary" onclick="generatePDF('order', ${o.id})" title="Gerar PDF">
+                                        <i class="fas fa-file-pdf"></i>
+                                    </button>
+                                    <button class="btn btn-small btn-primary" onclick="editOrder(${o.id})" title="Editar">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button class="btn btn-small btn-danger" onclick="deleteOrder(${o.id})">
+                                    <button class="btn btn-small btn-danger" onclick="deleteOrder(${o.id})" title="Excluir">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
@@ -2215,6 +2220,129 @@
                 }
             } catch(e) {
                 showAlert('Erro ao excluir', 'error');
+            }
+        }
+
+        // ===== PDF GENERATOR =====
+        async function generatePDF(type, id) {
+            const endpoint = type === 'budget' ? 'budgets' : 'orders';
+            const titleLabel = type === 'budget' ? 'ORÇAMENTO' : 'PEDIDO';
+
+            try {
+                const res = await fetch(`${API_URL}/${endpoint}/${id}`);
+                const result = await res.json();
+                if (!result.success) throw new Error(result.error);
+                const data = result.data;
+
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                // Colors
+                const lpGreen = [72, 128, 57]; // #488039
+                const darkText = [15, 23, 42];
+                const lightText = [100, 116, 139];
+
+                // Header Background
+                doc.setFillColor(...lpGreen);
+                doc.rect(0, 0, 210, 40, 'F');
+
+                // Logo Text
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(22);
+                doc.setFont("helvetica", "bold");
+                doc.text("LIGHTPLAST", 15, 20);
+                
+                doc.setFontSize(10);
+                doc.setFont("helvetica", "normal");
+                doc.text("Indústria de Embalagens Plásticas", 15, 28);
+
+                // Document Info (Right side)
+                doc.setFontSize(14);
+                doc.setFont("helvetica", "bold");
+                doc.text(`${titleLabel} #${data.id}`, 195, 20, { align: "right" });
+                
+                doc.setFontSize(10);
+                doc.setFont("helvetica", "normal");
+                const date = new Date(data.created_at).toLocaleDateString('pt-BR');
+                doc.text(`Data: ${date}`, 195, 28, { align: "right" });
+
+                // Company Details (below header)
+                doc.setTextColor(...darkText);
+                doc.setFontSize(11);
+                doc.setFont("helvetica", "bold");
+                doc.text("DE:", 15, 55);
+                doc.setFont("helvetica", "normal");
+                doc.text("LIGHTPLAST EMBALAGENS", 15, 62);
+                doc.setFontSize(9);
+                doc.setTextColor(...lightText);
+                doc.text("Rua Graça Aranha, 946 - Pinhais, PR", 15, 68);
+                doc.text("Tel: (41) 3557-6013", 15, 73);
+                doc.text("E-mail: gerencia@lightplast.com.br", 15, 78);
+
+                // Customer Details
+                doc.setTextColor(...darkText);
+                doc.setFontSize(11);
+                doc.setFont("helvetica", "bold");
+                doc.text("PARA:", 120, 55);
+                doc.setFont("helvetica", "normal");
+                doc.text(data.customer_name || 'Cliente', 120, 62);
+                doc.setFontSize(9);
+                doc.setTextColor(...lightText);
+                if (data.customer_company) doc.text(data.customer_company, 120, 68);
+                if (data.customer_phone) doc.text(`Tel: ${data.customer_phone}`, 120, 73);
+                if (data.customer_email) doc.text(`Email: ${data.customer_email}`, 120, 78);
+
+                // Horizontal Line
+                doc.setDrawColor(226, 232, 240);
+                doc.line(15, 90, 195, 90);
+
+                // Table
+                doc.autoTable({
+                    startY: 100,
+                    head: [['DESCRIÇÃO', 'QTD', 'VALOR UNIT.', 'TOTAL']],
+                    body: [
+                        [data.title || data.description || 'Produto/Serviço', '1', 
+                         `R$ ${parseFloat(data.total_value || data.value).toLocaleString('pt-BR', {minimumFractionDigits: 2})}`,
+                         `R$ ${parseFloat(data.total_value || data.value).toLocaleString('pt-BR', {minimumFractionDigits: 2})}`]
+                    ],
+                    headStyles: { fillColor: lpGreen, fontSize: 10 },
+                    bodyStyles: { textColor: darkText, fontSize: 10 },
+                    alternateRowStyles: { fillColor: [248, 250, 252] },
+                    margin: { left: 15, right: 15 }
+                });
+
+                // Summary
+                const finalY = doc.lastAutoTable.finalY + 20;
+                doc.setFontSize(11);
+                doc.setFont("helvetica", "bold");
+                doc.setTextColor(...darkText);
+                doc.text("SUBTOTAL:", 140, finalY);
+                doc.text("TOTAL GERAL:", 140, finalY + 10);
+                
+                doc.setFont("helvetica", "normal");
+                const valStr = `R$ ${parseFloat(data.total_value || data.value).toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+                doc.text(valStr, 195, finalY, { align: "right" });
+                
+                doc.setFont("helvetica", "bold");
+                doc.setTextColor(...lpGreen);
+                doc.text(valStr, 195, finalY + 10, { align: "right" });
+
+                // Footer
+                const pageCount = doc.internal.getNumberOfPages();
+                for (let i = 1; i <= pageCount; i++) {
+                    doc.setPage(i);
+                    doc.setFontSize(9);
+                    doc.setTextColor(...lightText);
+                    doc.text("Este documento é uma representação eletrônica de orçamentos e pedidos da LightPlast.", 105, 285, { align: "center" });
+                    doc.text("Página " + i + " de " + pageCount, 105, 290, { align: "center" });
+                }
+
+                doc.save(`${titleLabel}_${data.id}_LightPlast.pdf`);
+                showAlert(`${titleLabel} gerado com sucesso!`, 'success');
+
+            } catch (err) {
+                console.error(err);
+                showAlert('Erro ao gerar PDF', 'error');
             }
         }
 

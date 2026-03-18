@@ -283,6 +283,17 @@ app.delete('/api/budgets/:id', async (req, res) => {
   }
 });
 
+app.get('/api/budgets/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [budget] = await query('SELECT b.*, c.name as customer_name, c.email as customer_email, c.phone as customer_phone, c.company as customer_company FROM budgets b JOIN customers c ON b.customer_id = c.id WHERE b.id=?', [id]);
+    if (!budget) return res.status(404).json({ success: false, error: 'Orçamento não encontrado' });
+    res.json({ success: true, data: budget });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // ==================== ORDERS ====================
 app.get('/api/orders', async (req, res) => {
   try {
@@ -342,6 +353,17 @@ app.delete('/api/orders/:id', async (req, res) => {
     const { id } = req.params;
     await query('DELETE FROM orders WHERE id=?', [id]);
     res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+app.get('/api/orders/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [order] = await query('SELECT o.*, c.name as customer_name, c.email as customer_email, c.phone as customer_phone, c.company as customer_company FROM orders o JOIN customers c ON o.customer_id = c.id WHERE o.id=?', [id]);
+    if (!order) return res.status(404).json({ success: false, error: 'Pedido não encontrado' });
+    res.json({ success: true, data: order });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
