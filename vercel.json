@@ -3,11 +3,6 @@
   "buildCommand": "npm install",
   "outputDirectory": ".",
   "env": {
-    "TIDB_HOST": "@tidb_host",
-    "TIDB_PORT": "@tidb_port",
-    "TIDB_USER": "@tidb_user",
-    "TIDB_PASSWORD": "@tidb_password",
-    "TIDB_DATABASE": "@tidb_database",
     "NODE_ENV": "production"
   },
   "functions": {
