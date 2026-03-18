@@ -119,6 +119,24 @@
             align-items: center;
         }
 
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: rgba(255, 255, 255, 0.95);
+            padding: 9px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.88rem;
+            transition: all 0.25s;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: white;
+            color: white;
+        }
+
         /* ===== DASHBOARD GRID ===== */
         .dashboard-grid {
             display: grid;
@@ -678,6 +696,11 @@
                 <button class="tab-btn" data-tab="orders"><i class="fas fa-shopping-cart"></i> Pedidos</button>
                 <button class="tab-btn" data-tab="reports"><i class="fas fa-money-bill-wave"></i> Relatórios</button>
             </nav>
+            <div class="header-actions">
+                <button id="logoutBtn" class="logout-btn" title="Sair do CRM">
+                    <i class="fas fa-sign-out-alt"></i> Sair
+                </button>
+            </div>
         </div>
     </header>
 
@@ -1107,6 +1130,13 @@
     <script>
         const API_URL = '/api';
         let charts = {};
+
+        function logoutFakeSession() {
+            sessionStorage.removeItem('crmFakeAuth');
+            window.location.href = '/crm';
+        }
+
+        document.getElementById('logoutBtn')?.addEventListener('click', logoutFakeSession);
 
         // ===== TAB NAVIGATION =====
         document.querySelectorAll('.tab-btn').forEach(btn => {
