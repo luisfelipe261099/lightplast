@@ -13,8 +13,6 @@
         })();
     </script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -688,15 +686,14 @@
         <div class="header-content">
             <div class="logo">
                 <i class="fas fa-rocket"></i>
-                <span>LightPlast Login</span>
+                <span>LightPlast Dashboard</span>
             </div>
             <nav class="nav-tabs">
-                <button class="tab-btn" data-tab="dashboard"><i class="fas fa-chart-line"></i> Dashboard</button>
+                <button class="tab-btn active" data-tab="dashboard"><i class="fas fa-chart-line"></i> Dashboard</button>
                 <button class="tab-btn" data-tab="customers"><i class="fas fa-users"></i> Clientes</button>
                 <button class="tab-btn" data-tab="leads"><i class="fas fa-bullseye"></i> Leads</button>
                 <button class="tab-btn" data-tab="budgets"><i class="fas fa-file-invoice"></i> Orçamentos</button>
                 <button class="tab-btn" data-tab="orders"><i class="fas fa-shopping-cart"></i> Pedidos</button>
-                <button class="tab-btn" data-tab="agenda" id="agenda-tab-btn"><i class="fas fa-bell"></i> Agenda <span id="agenda-badge" style="background:#ef4444;color:white;border-radius:50%;padding:1px 6px;font-size:0.72rem;margin-left:4px;display:none;">0</span></button>
                 <button class="tab-btn" data-tab="reports"><i class="fas fa-money-bill-wave"></i> Relatórios</button>
             </nav>
             <div class="header-actions">
@@ -763,16 +760,13 @@
                 </div>
             </div>
 
-            <!-- Alertas Follow-ups Dashboard -->
+            <!-- Recent Activity -->
             <div class="mt-30">
-                <h2 class="section-title mt-30"><i class="fas fa-bell"></i> Lembretes &amp; Alertas</h2>
-                <div id="dashboard-alerts-container">
-                    <div class="empty-state"><p>Carregando alertas...</p></div>
-                </div>
-                <div style="margin-top:12px;">
-                    <button class="btn btn-primary" onclick="switchTab('agenda')">
-                        <i class="fas fa-calendar-plus"></i> Ver Agenda Completa
-                    </button>
+                <h2 class="section-title mt-30"><i class="fas fa-history"></i> Atividades Recentes</h2>
+                <div class="list-container" id="recent-activity-container">
+                    <div class="empty-state">
+                        <p>Carregando atividades...</p>
+                    </div>
                 </div>
             </div>
         </section>
@@ -871,32 +865,6 @@
             </div>
         </section>
 
-        <!-- ===== AGENDA / FOLLOW-UPS ===== -->
-        <section id="agenda" class="section">
-            <div class="section-header">
-                <h1 class="section-title"><i class="fas fa-bell"></i> Agenda &amp; Follow-ups</h1>
-                <button class="btn btn-primary" onclick="openFollowUpModal()">
-                    <i class="fas fa-plus"></i> Novo Lembrete
-                </button>
-            </div>
-
-            <!-- Filtros de Urgência -->
-            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:18px;">
-                <button class="btn btn-secondary" onclick="loadFollowUps('all')" id="filter-all" style="border:2px solid var(--primary);">Todos</button>
-                <button class="btn btn-secondary" onclick="loadFollowUps('overdue')" id="filter-overdue">🔴 Atrasados</button>
-                <button class="btn btn-secondary" onclick="loadFollowUps('today')" id="filter-today">🟡 Hoje</button>
-                <button class="btn btn-secondary" onclick="loadFollowUps('upcoming')" id="filter-upcoming">🟢 Próximos</button>
-                <button class="btn btn-secondary" onclick="loadFollowUps('done')" id="filter-done">✅ Concluídos</button>
-            </div>
-
-            <div class="list-container" id="followups-container">
-                <div class="empty-state">
-                    <div class="empty-state-icon"><i class="fas fa-bell"></i></div>
-                    <p>Carregando agenda...</p>
-                </div>
-            </div>
-        </section>
-
         <!-- ===== RELATÓRIOS FINANCEIROS ===== -->
         <section id="reports" class="section">
             <h1 class="section-title"><i class="fas fa-money-bill-wave"></i> Relatórios Financeiros</h1>
@@ -978,46 +946,6 @@
     </div>
 
     <!-- ===== MODALS ===== -->
-
-    <!-- Follow-up Modal -->
-    <div class="modal" id="followUpModal">
-        <div class="modal-content">
-            <button class="modal-close" onclick="closeModal('followUpModal')">✕</button>
-            <div class="modal-header"><i class="fas fa-bell"></i> Novo Lembrete / Follow-up</div>
-            <form onsubmit="saveFollowUp(event)">
-                <div class="form-group">
-                    <label>Cliente *</label>
-                    <select id="followUpCustomerId" required>
-                        <option value="">Selecionar cliente...</option>
-                    </select>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Tipo de Atividade</label>
-                        <select id="followUpType">
-                            <option value="call">📞 Ligação</option>
-                            <option value="meeting">🤝 Reunião / Visita</option>
-                            <option value="email">✉️ E-mail</option>
-                            <option value="order_followup">📦 Retorno de Pedido</option>
-                            <option value="visit">🏢 Visita ao Cliente</option>
-                            <option value="proposal">📋 Apresentar Proposta</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Data Agendada *</label>
-                        <input type="datetime-local" id="followUpDate" required>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Descrição / Motivo</label>
-                    <textarea id="followUpDescription" rows="3" placeholder="Ex: Cliente pediu retorno em 30 dias para novo pedido..."></textarea>
-                </div>
-                <button type="submit" class="btn btn-primary" style="width: 100%;">
-                    <i class="fas fa-save"></i> Salvar Lembrete
-                </button>
-            </form>
-        </div>
-    </div>
 
     <!-- Customer Modal -->
     <div class="modal" id="customerModal">
@@ -1211,11 +1139,6 @@
         document.getElementById('logoutBtn')?.addEventListener('click', logoutFakeSession);
 
         // ===== TAB NAVIGATION =====
-        function switchTab(tabName) {
-            const btn = document.querySelector(`[data-tab="${tabName}"]`);
-            if (btn) btn.click();
-        }
-
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 // Remove active from all
@@ -1239,8 +1162,6 @@
                     loadBudgets();
                 } else if (tab === 'orders') {
                     loadOrders();
-                } else if (tab === 'agenda') {
-                    loadFollowUps('all');
                 } else if (tab === 'reports') {
                     loadFinancialReports();
                     initFinancialCharts();
@@ -1248,88 +1169,27 @@
             });
         });
 
-        // Activate dashboard on load
-        document.querySelector('[data-tab="dashboard"]').classList.add('active');
-        document.getElementById('dashboard').classList.add('active');
-
         // ===== LOAD DASHBOARD =====
-        let lastDashboardData = null;
-
         async function loadDashboard() {
             try {
                 const res = await fetch(`${API_URL}/dashboard`);
                 const data = await res.json();
 
                 if (data.success) {
-                    lastDashboardData = data.data;
                     document.getElementById('stat-customers').textContent = data.data.totalCustomers;
                     document.getElementById('stat-leads').textContent = data.data.qualifiedLeads;
                     document.getElementById('stat-revenue').textContent = 'R$ ' + 
                         (data.data.totalRevenue || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-                    document.getElementById('stat-orders').textContent = data.data.totalOrders || '0';
-                    
-                    initCharts(data.data);
+                    document.getElementById('stat-orders').textContent = '0'; // Você pode contar pedidos depois
                 }
             } catch (error) {
                 console.error('Erro carregando dashboard:', error);
-            }
-
-            // Load dashboard alerts from follow-ups
-            loadDashboardAlerts();
-        }
-
-        async function loadDashboardAlerts() {
-            try {
-                const res = await fetch(`${API_URL}/follow-ups`);
-                const data = await res.json();
-                const container = document.getElementById('dashboard-alerts-container');
-
-                if (!data.success || !data.data.length) {
-                    container.innerHTML = '<div class="empty-state"><div class="empty-state-icon"><i class="fas fa-check-circle"></i></div><p>Nenhum lembrete pendente. Tudo em dia! ✅</p></div>';
-                    return;
-                }
-
-                const now = new Date();
-                const today = now.toDateString();
-                const pending = data.data.filter(f => !f.completed).slice(0, 6);
-                
-                // Update badge
-                const overdue = pending.filter(f => new Date(f.scheduled_date) < now).length;
-                const badge = document.getElementById('agenda-badge');
-                if (overdue > 0) { badge.textContent = overdue; badge.style.display = 'inline'; }
-
-                if (!pending.length) {
-                    container.innerHTML = '<div class="empty-state"><p>Sem lembretes pendentes ✅</p></div>';
-                    return;
-                }
-
-                const typeIcons = { call:'📞', meeting:'🤝', email:'✉️', order_followup:'📦', visit:'🏢', proposal:'📋' };
-
-                container.innerHTML = '<div class="list-container" style="padding:0;border:none;">' +
-                    '<div class="list-header"><div>Tipo</div><div>Cliente</div><div>Descrição</div><div>Data</div><div>Status</div></div>' +
-                    pending.map(f => {
-                        const dt = new Date(f.scheduled_date);
-                        const isOverdue = dt < now;
-                        const isToday = dt.toDateString() === today;
-                        const badge = isOverdue ? '<span class="badge" style="background:#fef2f2;color:#dc2626;border:1px solid #fca5a5;">⚠️ Atrasado</span>' :
-                                      isToday   ? '<span class="badge" style="background:#fffbeb;color:#d97706;border:1px solid #fcd34d;">🟡 Hoje</span>' :
-                                                  '<span class="badge" style="background:#f0fdf4;color:#16a34a;border:1px solid #86efac;">🟢 Futuro</span>';
-                        return `<div class="list-item" style="${isOverdue ? 'border-left:4px solid #ef4444;' : isToday ? 'border-left:4px solid #f59e0b;' : ''}">` +
-                            `<div style="font-size:1.4rem;">${typeIcons[f.type] || '📌'}</div>` +
-                            `<div style="font-weight:600;">Cliente #${f.customer_id}</div>` +
-                            `<div style="color:#64748b;">${f.description || '-'}</div>` +
-                            `<div>${dt.toLocaleDateString('pt-BR')} ${dt.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'})}</div>` +
-                            `<div>${badge}</div>` +
-                        '</div>';
-                    }).join('') +
-                '</div>';
-            } catch(e) {
-                console.error('Erro alertas dashboard:', e);
+                showAlert('Erro ao carregar dashboard', 'error');
             }
         }
 
         // ===== CHARTS INITIALIZATION =====
-        function initCharts(dashboardData = lastDashboardData) {
+        function initCharts() {
             // Revenue Chart
             const revenueCtx = document.getElementById('revenueChart');
             if (revenueCtx && !charts.revenue) {
@@ -1339,7 +1199,7 @@
                         labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
                         datasets: [{
                             label: 'Receita (R$)',
-                            data: [0, 0, 0, 0, 0, 0],
+                            data: [12000, 15000, 14000, 18000, 22000, 25000],
                             borderColor: '#488039',
                             backgroundColor: 'rgba(72, 128, 57, 0.12)',
                             tension: 0.4,
@@ -1361,42 +1221,20 @@
                 });
             }
 
-            // Update Revenue Chart Data
-            if (dashboardData && dashboardData.revenueByMonth && charts.revenue) {
-                charts.revenue.data.labels = dashboardData.revenueByMonth.map(r => r.label);
-                charts.revenue.data.datasets[0].data = dashboardData.revenueByMonth.map(r => r.value);
-                charts.revenue.update();
-            }
-
             // Leads Status Chart
             const leadsCtx = document.getElementById('leadsChart');
             if (leadsCtx && !charts.leads) {
                 charts.leads = new Chart(leadsCtx, {
                     type: 'doughnut',
                     data: {
-                        labels: ['Aguardando'],
+                        labels: ['Novos', 'Contatados', 'Qualificados', 'Perdidos'],
                         datasets: [{
-                            data: [1],
-                            backgroundColor: ['#cbd5e1', '#488039', '#f59e0b', '#10b981', '#6b7280', '#ef4444', '#3b82f6', '#8b5cf6']
+                            data: [8, 15, 24, 5],
+                            backgroundColor: ['#488039', '#f59e0b', '#10b981', '#6b7280']
                         }]
                     },
                     options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
                 });
-            }
-
-            // Update Leads Chart Data
-            if (dashboardData && dashboardData.leadsByStatus && charts.leads) {
-                const colors = {
-                    'new': '#488039',
-                    'contacted': '#f59e0b',
-                    'qualified': '#10b981',
-                    'lost': '#6b7280',
-                    'won': '#3b82f6'
-                };
-                charts.leads.data.labels = dashboardData.leadsByStatus.map(s => s.label);
-                charts.leads.data.datasets[0].data = dashboardData.leadsByStatus.map(s => s.value);
-                charts.leads.data.datasets[0].backgroundColor = dashboardData.leadsByStatus.map(s => colors[s.label] || '#94a3b8');
-                charts.leads.update();
             }
 
             // Performance Chart
@@ -1505,14 +1343,11 @@
                             <div class="list-item">
                                 <div class="item-name">${l.name}</div>
                                 <div>${l.phone || '-'}</div>
-                                <div>R$ ${l.value ? parseFloat(l.value).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '0,00'}</div>
+                                <div>R$ ${l.value ? l.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '0'}</div>
                                 <div><span class="badge badge-primary">${l.status}</span></div>
                                 <div>
                                     <button class="btn btn-small btn-primary" onclick="editLead(${l.id})">
                                         <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button class="btn btn-small btn-danger" onclick="deleteLead(${l.id})">
-                                        <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
                             </div>
@@ -1546,15 +1381,12 @@
                         ${data.data.map(b => `
                             <div class="list-item">
                                 <div>${b.id}</div>
-                                <div>${b.customer_name || b.customer_id}</div>
-                                <div>R$ ${b.total_value ? parseFloat(b.total_value).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '0,00'}</div>
+                                <div>${b.customer_id}</div>
+                                <div>R$ ${b.total_value ? b.total_value.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '0'}</div>
                                 <div><span class="badge badge-warning">${b.status}</span></div>
-                                <div style="display:flex; gap:8px;">
-                                    <button class="btn btn-icon btn-primary" style="background:#488039; width:36px; height:36px; border-radius:50%; justify-content:center; padding:0; box-shadow:0 4px 6px rgba(0,0,0,0.1);" onclick="generatePDF('budget', ${b.id})" title="Gerar PDF">
+                                <div>
+                                    <button class="btn btn-small btn-primary">
                                         <i class="fas fa-file-pdf"></i>
-                                    </button>
-                                    <button class="btn btn-icon btn-danger" style="background:#ef4444; width:36px; height:36px; border-radius:50%; justify-content:center; padding:0; box-shadow:0 4px 6px rgba(0,0,0,0.1);" onclick="deleteBudget(${b.id})" title="Excluir">
-                                        <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
                             </div>
@@ -1588,18 +1420,12 @@
                         ${data.data.map(o => `
                             <div class="list-item">
                                 <div>${o.id}</div>
-                                <div>${o.customer_name || o.customer_id}</div>
-                                <div>R$ ${o.value ? parseFloat(o.value).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '0,00'}</div>
+                                <div>${o.customer_id}</div>
+                                <div>R$ ${o.value ? o.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '0'}</div>
                                 <div><span class="badge badge-success">${o.status}</span></div>
-                                <div style="display:flex; gap:8px;">
-                                    <button class="btn btn-icon btn-primary" style="background:#488039; width:36px; height:36px; border-radius:50%; justify-content:center; padding:0; box-shadow:0 4px 6px rgba(0,0,0,0.1);" onclick="generatePDF('order', ${o.id})" title="Gerar PDF">
-                                        <i class="fas fa-file-pdf"></i>
-                                    </button>
-                                    <button class="btn btn-icon btn-primary" style="background:#3b82f6; width:36px; height:36px; border-radius:50%; justify-content:center; padding:0; box-shadow:0 4px 6px rgba(0,0,0,0.1);" onclick="editOrder(${o.id})" title="Editar">
+                                <div>
+                                    <button class="btn btn-small btn-primary">
                                         <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button class="btn btn-icon btn-danger" style="background:#ef4444; width:36px; height:36px; border-radius:50%; justify-content:center; padding:0; box-shadow:0 4px 6px rgba(0,0,0,0.1);" onclick="deleteOrder(${o.id})" title="Excluir">
-                                        <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
                             </div>
@@ -1805,52 +1631,6 @@
             alert('Funcionalidade de edição em desenvolvimento');
         }
 
-        async function deleteLead(id) {
-            if (!confirm('Tem certeza que deseja excluir este lead?')) return;
-            try {
-                const res = await fetch(`${API_URL}/leads/${id}`, { method: 'DELETE' });
-                const data = await res.json();
-                if (data.success) {
-                    showAlert('Lead excluído com sucesso!', 'success');
-                    loadLeads();
-                }
-            } catch (error) {
-                showAlert('Erro ao excluir lead', 'error');
-            }
-        }
-
-        async function deleteBudget(id) {
-            if (!confirm('Tem certeza que deseja excluir este orçamento?')) return;
-            try {
-                const res = await fetch(`${API_URL}/budgets/${id}`, { method: 'DELETE' });
-                const data = await res.json();
-                if (data.success) {
-                    showAlert('Orçamento excluído com sucesso!', 'success');
-                    loadBudgets();
-                }
-            } catch (error) {
-                showAlert('Erro ao excluir orçamento', 'error');
-            }
-        }
-
-        async function deleteOrder(id) {
-            if (!confirm('Tem certeza que deseja excluir este pedido?')) return;
-            try {
-                const res = await fetch(`${API_URL}/orders/${id}`, { method: 'DELETE' });
-                const data = await res.json();
-                if (data.success) {
-                    showAlert('Pedido excluído com sucesso!', 'success');
-                    loadOrders();
-                }
-            } catch (error) {
-                showAlert('Erro ao excluir pedido', 'error');
-            }
-        }
-
-        function editOrder(id) {
-            alert('Funcionalidade de edição em desenvolvimento');
-        }
-
         // ===== FINANCIAL REPORTS =====
         async function loadFinancialReports() {
             try {
@@ -1859,21 +1639,19 @@
 
                 if (data.success) {
                     const totalRevenue = data.data.totalRevenue || 0;
-                    const confirmedOrders = data.data.confirmedOrders || 0;
-                    const totalOrders = data.data.totalOrders || 0;
-                    const averageTicket = confirmedOrders > 0 ? (totalRevenue / confirmedOrders).toFixed(2) : 0;
-                    const conversionRate = totalOrders > 0 ? ((confirmedOrders / totalOrders) * 100).toFixed(1) : 0;
+                    const totalOrders = 5; // Dados simulados
+                    const averageTicket = totalOrders > 0 ? (totalRevenue / totalOrders).toFixed(2) : 0;
 
                     document.getElementById('report-revenue').textContent = 'R$ ' + totalRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-                    document.getElementById('report-orders').textContent = confirmedOrders;
+                    document.getElementById('report-orders').textContent = totalOrders;
                     document.getElementById('report-average').textContent = 'R$ ' + parseFloat(averageTicket).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-                    document.getElementById('report-conversion').textContent = conversionRate + '%';
+                    document.getElementById('report-conversion').textContent = (totalOrders > 0 ? (totalOrders * 20) : 0) + '%';
 
                     // Top clients
                     loadTopRevenueClients();
                     
                     // Insights
-                    generateFinancialInsights(totalRevenue, confirmedOrders, averageTicket);
+                    generateFinancialInsights(totalRevenue, totalOrders, averageTicket);
                 }
             } catch (error) {
                 console.error('Erro carregando relatórios:', error);
@@ -2064,302 +1842,6 @@
                         }
                     }
                 });
-            }
-        }
-
-        // ===== AGENDA / FOLLOW-UPS =====
-        let allFollowUps = [];
-
-        async function loadFollowUps(filter = 'all') {
-            const container = document.getElementById('followups-container');
-            container.innerHTML = '<div class="empty-state"><p>Carregando...</p></div>';
-
-            // Update active filter button
-            ['all','overdue','today','upcoming','done'].forEach(f => {
-                const btn = document.getElementById('filter-' + f);
-                if (btn) btn.style.border = f === filter ? '2px solid var(--primary)' : '';
-            });
-
-            try {
-                const res = await fetch(`${API_URL}/follow-ups`);
-                const data = await res.json();
-                if (!data.success) throw new Error(data.error);
-                allFollowUps = data.data;
-
-                const now = new Date();
-                const todayStr = now.toDateString();
-                let filtered = allFollowUps;
-
-                if (filter === 'overdue') filtered = allFollowUps.filter(f => !f.completed && new Date(f.scheduled_date) < now);
-                else if (filter === 'today') filtered = allFollowUps.filter(f => !f.completed && new Date(f.scheduled_date).toDateString() === todayStr);
-                else if (filter === 'upcoming') filtered = allFollowUps.filter(f => !f.completed && new Date(f.scheduled_date) >= now && new Date(f.scheduled_date).toDateString() !== todayStr);
-                else if (filter === 'done') filtered = allFollowUps.filter(f => f.completed);
-                else filtered = allFollowUps; // all
-
-                if (!filtered.length) {
-                    container.innerHTML = '<div class="empty-state"><div class="empty-state-icon"><i class="fas fa-bell-slash"></i></div><p>Nenhum lembrete nesta categoria.</p></div>';
-                    return;
-                }
-
-                const typeLabels = { call:'📞 Ligação', meeting:'🤝 Reunião/Visita', email:'✉️ E-mail', order_followup:'📦 Retorno Pedido', visit:'🏢 Visita', proposal:'📋 Proposta' };
-
-                container.innerHTML = `
-                    <div class="list-header">
-                        <div>Tipo</div>
-                        <div>Cliente</div>
-                        <div>Descrição</div>
-                        <div>Data / Hora</div>
-                        <div>Status</div>
-                        <div>Ações</div>
-                    </div>
-                    ${filtered.map(f => {
-                        const dt = new Date(f.scheduled_date);
-                        const isOverdue = !f.completed && dt < now;
-                        const isToday = !f.completed && dt.toDateString() === todayStr;
-                        const statusBadge = f.completed
-                            ? '<span class="badge" style="background:#f0fdf4;color:#16a34a;border:1px solid #86efac;">✅ Concluído</span>'
-                            : isOverdue ? '<span class="badge" style="background:#fef2f2;color:#dc2626;border:1px solid #fca5a5;">⚠️ Atrasado</span>'
-                            : isToday ? '<span class="badge" style="background:#fffbeb;color:#d97706;border:1px solid #fcd34d;">🟡 Hoje</span>'
-                            : '<span class="badge" style="background:#f0fdf4;color:#16a34a;border:1px solid #86efac;">🟢 Agendado</span>';
-                        const rowStyle = isOverdue ? 'border-left:4px solid #ef4444;' : isToday ? 'border-left:4px solid #f59e0b;' : '';
-                        return `
-                            <div class="list-item" style="${rowStyle}">
-                                <div>${typeLabels[f.type] || f.type}</div>
-                                <div style="font-weight:600;">Cliente #${f.customer_id}</div>
-                                <div style="color:#64748b;">${f.description || '-'}</div>
-                                <div>${dt.toLocaleDateString('pt-BR')} ${dt.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'})}</div>
-                                <div>${statusBadge}</div>
-                                <div style="display:flex;gap:6px;">
-                                    ${!f.completed ? `<button class="btn btn-small btn-primary" onclick="completeFollowUp(${f.id})" title="Marcar como concluído"><i class="fas fa-check"></i></button>` : ''}
-                                    <button class="btn btn-small btn-danger" onclick="deleteFollowUp(${f.id})" title="Excluir"><i class="fas fa-trash"></i></button>
-                                </div>
-                            </div>`;
-                    }).join('')}
-                `;
-            } catch (e) {
-                container.innerHTML = '<div class="empty-state"><p>Erro ao carregar agenda.</p></div>';
-                console.error(e);
-            }
-        }
-
-        async function openFollowUpModal() {
-            // Set default date to now + 1 day
-            const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
-            document.getElementById('followUpDate').value = tomorrow.toISOString().slice(0,16);
-
-            // Populate customers
-            try {
-                const res = await fetch(`${API_URL}/customers`);
-                const data = await res.json();
-                const sel = document.getElementById('followUpCustomerId');
-                sel.innerHTML = '<option value="">Selecionar cliente...</option>';
-                if (data.success) {
-                    data.data.forEach(c => {
-                        sel.innerHTML += `<option value="${c.id}">${c.name}${c.company ? ' - ' + c.company : ''}</option>`;
-                    });
-                }
-            } catch(e) {}
-
-            document.getElementById('followUpDescription').value = '';
-            document.getElementById('followUpType').value = 'call';
-            document.getElementById('followUpModal').style.display = 'flex';
-        }
-
-        async function saveFollowUp(event) {
-            event.preventDefault();
-            const customer_id = document.getElementById('followUpCustomerId').value;
-            const type = document.getElementById('followUpType').value;
-            const description = document.getElementById('followUpDescription').value;
-            const scheduled_date = document.getElementById('followUpDate').value;
-
-            if (!customer_id) { showAlert('Selecione um cliente!', 'error'); return; }
-
-            try {
-                const res = await fetch(`${API_URL}/follow-ups`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ customer_id, type, description, scheduled_date })
-                });
-                const data = await res.json();
-                if (data.success) {
-                    showAlert('Lembrete salvo com sucesso! ✅', 'success');
-                    closeModal('followUpModal');
-                    loadFollowUps('all');
-                    loadDashboardAlerts();
-                } else {
-                    showAlert('Erro ao salvar: ' + (data.error || ''), 'error');
-                }
-            } catch(e) {
-                showAlert('Erro ao salvar lembrete', 'error');
-            }
-        }
-
-        async function completeFollowUp(id) {
-            try {
-                const res = await fetch(`${API_URL}/follow-ups/${id}/complete`, { method: 'PUT' });
-                const data = await res.json();
-                if (data.success) {
-                    showAlert('Lembrete marcado como concluído! ✅', 'success');
-                    loadFollowUps('all');
-                    loadDashboardAlerts();
-                }
-            } catch(e) {
-                showAlert('Erro ao atualizar lembrete', 'error');
-            }
-        }
-
-        async function deleteFollowUp(id) {
-            if (!confirm('Excluir este lembrete?')) return;
-            try {
-                const res = await fetch(`${API_URL}/follow-ups/${id}`, { method: 'DELETE' });
-                const data = await res.json();
-                if (data.success) {
-                    showAlert('Lembrete excluído!', 'success');
-                    loadFollowUps('all');
-                    loadDashboardAlerts();
-                }
-            } catch(e) {
-                showAlert('Erro ao excluir', 'error');
-            }
-        }
-
-        // ===== PDF GENERATOR =====
-        async function generatePDF(type, id) {
-            const endpoint = type === 'budget' ? 'budgets' : 'orders';
-            const titleLabel = type === 'budget' ? 'ORCAMENTO' : 'PEDIDO';
-            const displayLabel = type === 'budget' ? 'ORÇAMENTO' : 'PEDIDO';
-
-            try {
-                const res = await fetch(`${API_URL}/${endpoint}/${id}`);
-                const result = await res.json();
-                if (!result.success) throw new Error(result.error);
-                const data = result.data;
-
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-                
-                // Colors
-                const lpGreen = [72, 128, 57]; // #488039
-                const darkText = [15, 23, 42];
-                const lightText = [100, 116, 139];
-
-                // Header Background
-                doc.setFillColor(...lpGreen);
-                doc.rect(0, 0, 210, 40, 'F');
-
-                // Logo Text
-                doc.setTextColor(255, 255, 255);
-                doc.setFontSize(22);
-                doc.setFont("helvetica", "bold");
-                doc.text("LIGHTPLAST", 15, 20);
-                
-                doc.setFontSize(10);
-                doc.setFont("helvetica", "normal");
-                doc.text("Indústria de Embalagens Plásticas", 15, 28);
-
-                // Document Info (Right side)
-                doc.setFontSize(14);
-                doc.setFont("helvetica", "bold");
-                doc.text(`${displayLabel} #${data.id}`, 195, 20, { align: "right" });
-                
-                doc.setFontSize(10);
-                doc.setFont("helvetica", "normal");
-                const date = new Date(data.created_at).toLocaleDateString('pt-BR');
-                doc.text(`Data: ${date}`, 195, 28, { align: "right" });
-
-                // Company Details (below header)
-                doc.setTextColor(...darkText);
-                doc.setFontSize(11);
-                doc.setFont("helvetica", "bold");
-                doc.text("DE:", 15, 55);
-                doc.setFont("helvetica", "normal");
-                doc.text("LIGHTPLAST EMBALAGENS", 15, 62);
-                doc.setFontSize(9);
-                doc.setTextColor(...lightText);
-                doc.text("Rua Graça Aranha, 946 - Pinhais, PR", 15, 68);
-                doc.text("Tel: (41) 3557-6013", 15, 73);
-                doc.text("E-mail: gerencia@lightplast.com.br", 15, 78);
-
-                // Customer Details
-                doc.setTextColor(...darkText);
-                doc.setFontSize(11);
-                doc.setFont("helvetica", "bold");
-                doc.text("PARA:", 120, 55);
-                doc.setFont("helvetica", "normal");
-                doc.text(data.customer_name || 'Cliente', 120, 62);
-                doc.setFontSize(9);
-                doc.setTextColor(...lightText);
-                if (data.customer_company) doc.text(data.customer_company, 120, 68);
-                if (data.customer_phone) doc.text(`Tel: ${data.customer_phone}`, 120, 73);
-                if (data.customer_email) doc.text(`Email: ${data.customer_email}`, 120, 78);
-
-                // Horizontal Line
-                doc.setDrawColor(226, 232, 240);
-                doc.line(15, 90, 195, 90);
-
-                // Table
-                doc.autoTable({
-                    startY: 100,
-                    head: [['DESCRIÇÃO', 'QTD', 'VALOR UNIT.', 'TOTAL']],
-                    body: [
-                        [data.title || data.description || 'Produto/Serviço', '1', 
-                         `R$ ${parseFloat(data.total_value || data.value).toLocaleString('pt-BR', {minimumFractionDigits: 2})}`,
-                         `R$ ${parseFloat(data.total_value || data.value).toLocaleString('pt-BR', {minimumFractionDigits: 2})}`]
-                    ],
-                    headStyles: { fillColor: lpGreen, fontSize: 10 },
-                    bodyStyles: { textColor: darkText, fontSize: 10 },
-                    alternateRowStyles: { fillColor: [248, 250, 252] },
-                    margin: { left: 15, right: 15 }
-                });
-
-                // Summary
-                const finalY = doc.lastAutoTable.finalY + 20;
-                doc.setFontSize(11);
-                doc.setFont("helvetica", "bold");
-                doc.setTextColor(...darkText);
-                doc.text("SUBTOTAL:", 140, finalY);
-                doc.text("TOTAL GERAL:", 140, finalY + 10);
-                
-                doc.setFont("helvetica", "normal");
-                const valStr = `R$ ${parseFloat(data.total_value || data.value).toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
-                doc.text(valStr, 195, finalY, { align: "right" });
-                
-                doc.setFont("helvetica", "bold");
-                doc.setTextColor(...lpGreen);
-                doc.text(valStr, 195, finalY + 10, { align: "right" });
-
-                // Footer
-                const pageCount = doc.internal.getNumberOfPages();
-                for (let i = 1; i <= pageCount; i++) {
-                    doc.setPage(i);
-                    doc.setFontSize(9);
-                    doc.setTextColor(...lightText);
-                    doc.text("Este documento é uma representação eletrônica de orçamentos e pedidos da LightPlast.", 105, 285, { align: "center" });
-                    doc.text("Página " + i + " de " + pageCount, 105, 290, { align: "center" });
-                }
-
-                // Gerar Blob
-                const pdfBlob = doc.output('blob');
-                const url = URL.createObjectURL(pdfBlob);
-                
-                // Criar link de download manual para forçar nome e extensão
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = `${titleLabel}_${data.id}_LightPlast.pdf`;
-                document.body.appendChild(link);
-                link.click();
-                
-                // Limpar
-                setTimeout(() => {
-                    document.body.removeChild(link);
-                    URL.revokeObjectURL(url);
-                }, 100);
-                
-                showAlert(`${displayLabel} gerado com sucesso!`, 'success');
-
-            } catch (err) {
-                console.error(err);
-                showAlert('Erro ao gerar PDF', 'error');
             }
         }
 
