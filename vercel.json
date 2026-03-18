@@ -3,18 +3,17 @@
   "env": {
     "NODE_ENV": "production"
   },
+  "functions": {
+    "index.js": {
+      "memory": 1024,
+      "maxDuration": 30,
+      "includeFiles": "{index.html,crm-pro.html,style.css,assets/**}"
+    }
+  },
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "/api/index.js"
-    },
-    {
-      "source": "/crm",
-      "destination": "/crm-pro.html"
-    },
-    {
-      "source": "/",
-      "destination": "/index.html"
+      "source": "/(.*)",
+      "destination": "/index.js"
     }
   ]
 }
