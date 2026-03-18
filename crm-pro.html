@@ -1,0 +1,1792 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LightPlast CRM Pro - Dashboard Executivo</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #818cf8;
+            --secondary: #ec4899;
+            --text-dark: #0f172a;
+            --text-light: #64748b;
+            --bg-dark: #0f172a;
+            --bg-light: #f8fafc;
+            --bg-white: #ffffff;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, var(--bg-light) 0%, #e0e7ff 100%);
+            color: var(--text-dark);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* ===== HEADER ===== */
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            padding: 30px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: var(--shadow);
+            margin-bottom: 40px;
+        }
+
+        .header-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            letter-spacing: -1px;
+        }
+
+        .logo i {
+            font-size: 2.2rem;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .nav-tabs button {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: rgba(255, 255, 255, 0.9);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-size: 0.95rem;
+        }
+
+        .nav-tabs button:hover,
+        .nav-tabs button.active {
+            background: rgba(255, 255, 255, 0.25);
+            color: white;
+            border-color: white;
+            transform: translateY(-2px);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        /* ===== DASHBOARD GRID ===== */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: var(--bg-white);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s;
+            cursor: default;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+
+        .stat-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(99, 102, 241, 0.2);
+        }
+
+        .stat-label {
+            font-size: 0.95rem;
+            color: var(--text-light);
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .stat-number {
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .stat-percent {
+            font-size: 0.9rem;
+            color: var(--success);
+            font-weight: 600;
+        }
+
+        .stat-icon {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 3rem;
+            opacity: 0.1;
+        }
+
+        /* ===== CHARTS ===== */
+        .charts-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .chart-container {
+            background: var(--bg-white);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--border);
+        }
+
+        .chart-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* ===== SECTIONS ===== */
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 30px;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 10px;
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .search-bar input {
+            flex: 1;
+            padding: 12px 18px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+        }
+
+        .search-bar input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        /* ===== LIST CONTAINER ===== */
+        .list-container {
+            background: var(--bg-white);
+            border-radius: 15px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .list-header {
+            display: grid;
+            grid-template-columns: 2fr 1.5fr 1fr 1fr 1fr;
+            gap: 20px;
+            padding: 20px 25px;
+            background: linear-gradient(135deg, var(--bg-light) 0%, #f1f5ff 100%);
+            font-weight: 700;
+            color: var(--text-dark);
+            border-bottom: 1px solid var(--border);
+            font-size: 0.95rem;
+        }
+
+        .list-item {
+            display: grid;
+            grid-template-columns: 2fr 1.5fr 1fr 1fr 1fr;
+            gap: 20px;
+            padding: 20px 25px;
+            border-bottom: 1px solid var(--border);
+            align-items: center;
+            transition: all 0.2s;
+        }
+
+        .list-item:hover {
+            background: var(--bg-light);
+            padding-left: 30px;
+        }
+
+        .list-item:last-child {
+            border-bottom: none;
+        }
+
+        .item-name {
+            font-weight: 700;
+            color: var(--primary);
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .item-name:hover {
+            color: var(--primary-dark);
+        }
+
+        /* ===== BADGES ===== */
+        .badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            width: fit-content;
+        }
+
+        .badge-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .badge-warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .badge-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .badge-primary {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+        }
+
+        /* ===== BUTTONS ===== */
+        .btn {
+            padding: 12px 24px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.3s;
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: var(--bg-light);
+            border: 2px solid var(--border);
+            color: var(--text-dark);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-small {
+            padding: 8px 12px;
+            font-size: 0.85rem;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+        }
+
+        .btn-icon {
+            padding: 10px 14px;
+            font-size: 1rem;
+        }
+
+        /* ===== FORMS ===== */
+        .form-group {
+            margin-bottom: 22px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 700;
+            color: var(--text-dark);
+            font-size: 0.95rem;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        /* ===== MODAL ===== */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-white);
+            border-radius: 15px;
+            padding: 40px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 25px;
+            color: var(--text-dark);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--bg-light);
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-light);
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            background: var(--border);
+            color: var(--text-dark);
+        }
+
+        /* ===== ALERTS ===== */
+        .alert {
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-10px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border-left: 4px solid var(--success);
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border-left: 4px solid var(--danger);
+        }
+
+        .alert-warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+            border-left: 4px solid var(--warning);
+        }
+
+        /* ===== EMPTY STATE ===== */
+        .empty-state {
+            text-align: center;
+            padding: 60px 40px;
+            color: var(--text-light);
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-state p {
+            font-size: 1.1rem;
+            margin-bottom: 25px;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 1200px) {
+            .charts-row {
+                grid-template-columns: 1fr;
+            }
+
+            .list-header,
+            .list-item {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .nav-tabs {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .section-header {
+                flex-direction: column;
+            }
+
+            .search-bar {
+                width: 100%;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                padding: 30px 20px;
+            }
+        }
+
+        /* ===== UTILITIES ===== */
+        .text-right {
+            text-align: right;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .mt-30 {
+            margin-top: 30px;
+        }
+
+        .mb-30 {
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-rocket"></i>
+                <span>LightPlast CRM Pro</span>
+            </div>
+            <nav class="nav-tabs">
+                <button class="tab-btn active" data-tab="dashboard"><i class="fas fa-chart-line"></i> Dashboard</button>
+                <button class="tab-btn" data-tab="customers"><i class="fas fa-users"></i> Clientes</button>
+                <button class="tab-btn" data-tab="leads"><i class="fas fa-bullseye"></i> Leads</button>
+                <button class="tab-btn" data-tab="budgets"><i class="fas fa-file-invoice"></i> Orçamentos</button>
+                <button class="tab-btn" data-tab="orders"><i class="fas fa-shopping-cart"></i> Pedidos</button>
+                <button class="tab-btn" data-tab="reports"><i class="fas fa-money-bill-wave"></i> Relatórios</button>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        
+        <!-- ===== DASHBOARD ===== -->
+        <section id="dashboard" class="section active">
+            <h1 class="section-title"><i class="fas fa-chart-line"></i> Dashboard Executivo</h1>
+
+            <!-- KPI Cards -->
+            <div class="dashboard-grid">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-users"></i></div>
+                    <div class="stat-label">Clientes Ativos</div>
+                    <div class="stat-number" id="stat-customers">0</div>
+                    <div class="stat-percent"><i class="fas fa-arrow-up"></i> +12% este mês</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-bullseye"></i></div>
+                    <div class="stat-label">Leads Qualificados</div>
+                    <div class="stat-number" id="stat-leads">0</div>
+                    <div class="stat-percent"><i class="fas fa-arrow-up"></i> +8% este mês</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-dollar-sign"></i></div>
+                    <div class="stat-label">Receita Total</div>
+                    <div class="stat-number" id="stat-revenue">R$ 0</div>
+                    <div class="stat-percent"><i class="fas fa-arrow-up"></i> +25% este mês</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-shopping-cart"></i></div>
+                    <div class="stat-label">Pedidos Abertos</div>
+                    <div class="stat-number" id="stat-orders">0</div>
+                    <div class="stat-percent"><i class="fas fa-arrow-right"></i> 18% em processamento</div>
+                </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="charts-row">
+                <div class="chart-container">
+                    <h3 class="chart-title"><i class="fas fa-line-chart"></i> Receita por Mês</h3>
+                    <canvas id="revenueChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3 class="chart-title"><i class="fas fa-pie-chart"></i> Status de Leads</h3>
+                    <canvas id="leadsChart"></canvas>
+                </div>
+            </div>
+
+            <div class="charts-row">
+                <div class="chart-container" style="grid-column: 1/-1;">
+                    <h3 class="chart-title"><i class="fas fa-bar-chart"></i> Performance por Fonte</h3>
+                    <canvas id="performanceChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="mt-30">
+                <h2 class="section-title mt-30"><i class="fas fa-history"></i> Atividades Recentes</h2>
+                <div class="list-container" id="recent-activity-container">
+                    <div class="empty-state">
+                        <p>Carregando atividades...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== CUSTOMERS ===== -->
+        <section id="customers" class="section">
+            <div class="section-header">
+                <h1 class="section-title"><i class="fas fa-users"></i> Clientes</h1>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <div class="search-bar">
+                        <input type="text" id="customerSearch" placeholder="🔍 Buscar cliente...">
+                    </div>
+                    <button class="btn btn-secondary btn-icon" onclick="exportCustomers()" title="Exportar para CSV">
+                        <i class="fas fa-download"></i> Exportar
+                    </button>
+                    <button class="btn btn-primary" onclick="openCustomerModal()">
+                        <i class="fas fa-plus"></i> Novo Cliente
+                    </button>
+                </div>
+            </div>
+
+            <div class="list-container" id="customers-container">
+                <div class="empty-state">
+                    <div class="empty-state-icon"><i class="fas fa-users"></i></div>
+                    <p>Carregando clientes...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== LEADS ===== -->
+        <section id="leads" class="section">
+            <div class="section-header">
+                <h1 class="section-title"><i class="fas fa-bullseye"></i> Leads</h1>
+                <div style="display: flex; gap: 10px;">
+                    <div class="search-bar">
+                        <input type="text" id="leadsSearch" placeholder="🔍 Buscar lead...">
+                    </div>
+                    <button class="btn btn-primary" onclick="openLeadModal()">
+                        <i class="fas fa-plus"></i> Novo Lead
+                    </button>
+                </div>
+            </div>
+
+            <div class="list-container" id="leads-container">
+                <div class="empty-state">
+                    <div class="empty-state-icon"><i class="fas fa-bullseye"></i></div>
+                    <p>Carregando leads...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== BUDGETS ===== -->
+        <section id="budgets" class="section">
+            <div class="section-header">
+                <h1 class="section-title"><i class="fas fa-file-invoice"></i> Orçamentos</h1>
+                <div style="display: flex; gap: 10px;">
+                    <div class="search-bar">
+                        <input type="text" id="budgetsSearch" placeholder="🔍 Buscar orçamento...">
+                    </div>
+                    <button class="btn btn-primary" onclick="openBudgetModal()">
+                        <i class="fas fa-plus"></i> Novo Orçamento
+                    </button>
+                </div>
+            </div>
+
+            <div class="list-container" id="budgets-container">
+                <div class="empty-state">
+                    <div class="empty-state-icon"><i class="fas fa-file-invoice"></i></div>
+                    <p>Carregando orçamentos...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== ORDERS ===== -->
+        <section id="orders" class="section">
+            <div class="section-header">
+                <h1 class="section-title"><i class="fas fa-shopping-cart"></i> Pedidos</h1>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <div class="search-bar">
+                        <input type="text" id="ordersSearch" placeholder="🔍 Buscar pedido...">
+                    </div>
+                    <button class="btn btn-secondary btn-icon" onclick="exportOrders()" title="Exportar para CSV">
+                        <i class="fas fa-download"></i> Exportar
+                    </button>
+                    <button class="btn btn-primary" onclick="openOrderModal()">
+                        <i class="fas fa-plus"></i> Novo Pedido
+                    </button>
+                </div>
+            </div>
+
+            <div class="list-container" id="orders-container">
+                <div class="empty-state">
+                    <div class="empty-state-icon"><i class="fas fa-shopping-cart"></i></div>
+                    <p>Carregando pedidos...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== RELATÓRIOS FINANCEIROS ===== -->
+        <section id="reports" class="section">
+            <h1 class="section-title"><i class="fas fa-money-bill-wave"></i> Relatórios Financeiros</h1>
+
+            <!-- KPI Financeiros -->
+            <div class="dashboard-grid">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-arrow-trending-up"></i></div>
+                    <div class="stat-label">Faturamento Total</div>
+                    <div class="stat-number" id="report-revenue">R$ 0</div>
+                    <div class="stat-percent"><i class="fas fa-arrow-up"></i> +18% vs mês anterior</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                    <div class="stat-label">Pedidos Confirmados</div>
+                    <div class="stat-number" id="report-orders">0</div>
+                    <div class="stat-percent"><i class="fas fa-arrow-up"></i> +5 pedidos este mês</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-handshake"></i></div>
+                    <div class="stat-label">Ticket Médio</div>
+                    <div class="stat-number" id="report-average">R$ 0</div>
+                    <div class="stat-percent"><i class="fas fa-arrow-right"></i> Estável</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-zap"></i></div>
+                    <div class="stat-label">Taxa Conversão</div>
+                    <div class="stat-number" id="report-conversion">0%</div>
+                    <div class="stat-percent"><i class="fas fa-arrow-up"></i> +2.5% vs passado</div>
+                </div>
+            </div>
+
+            <!-- Gráficos Financeiros -->
+            <div class="charts-row">
+                <div class="chart-container">
+                    <h3 class="chart-title"><i class="fas fa-line-chart"></i> Faturamento Mensal</h3>
+                    <canvas id="revenueMonthlyChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3 class="chart-title"><i class="fas fa-bar-chart"></i> Comparativo Período</h3>
+                    <canvas id="comparisonChart"></canvas>
+                </div>
+            </div>
+
+            <div class="charts-row">
+                <div class="chart-container">
+                    <h3 class="chart-title"><i class="fas fa-area-chart"></i> Evolução de Vendas</h3>
+                    <canvas id="evolutionChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3 class="chart-title"><i class="fas fa-chart-pie"></i> Distribuição por Status</h3>
+                    <canvas id="statusDistributionChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Análise Detalhada -->
+            <div class="chart-container" style="margin-top: 20px;">
+                <h3 class="chart-title"><i class="fas fa-table"></i> Top Clientes por Receita</h3>
+                <div class="list-container" id="top-revenue-customers">
+                    <div class="empty-state">
+                        <p>Carregando dados...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Insights -->
+            <div class="chart-container" style="margin-top: 20px;">
+                <h3 class="chart-title"><i class="fas fa-lightbulb"></i> Insights Financeiros</h3>
+                <div id="financial-insights" style="padding: 20px;">
+                    <p style="font-size: 0.95rem; line-height: 1.8; color: var(--text-light);">
+                        Carregando análises...
+                    </p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- ===== MODALS ===== -->
+
+    <!-- Customer Modal -->
+    <div class="modal" id="customerModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('customerModal')">✕</button>
+            <div class="modal-header"><i class="fas fa-user-plus"></i> Novo Cliente</div>
+            <form onsubmit="saveCustomer(event)">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Nome Completo *</label>
+                        <input type="text" id="customerName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Telefone *</label>
+                        <input type="tel" id="customerPhone" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="customerEmail">
+                    </div>
+                    <div class="form-group">
+                        <label>Empresa</label>
+                        <input type="text" id="customerCompany">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Notas</label>
+                    <textarea id="customerNotes" rows="3" placeholder="Informações adicionais..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    <i class="fas fa-save"></i> Salvar Cliente
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Lead Modal -->
+    <div class="modal" id="leadModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('leadModal')">✕</button>
+            <div class="modal-header"><i class="fas fa-bullseye"></i> Novo Lead</div>
+            <form onsubmit="saveLead(event)">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Nome Completo *</label>
+                        <input type="text" id="leadName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Telefone *</label>
+                        <input type="tel" id="leadPhone" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="leadEmail">
+                    </div>
+                    <div class="form-group">
+                        <label>Empresa</label>
+                        <input type="text" id="leadCompany">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select id="leadStatus">
+                            <option>new</option>
+                            <option>contacted</option>
+                            <option>qualified</option>
+                            <option>lost</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Valor Estimado</label>
+                        <input type="number" id="leadValue" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Notas</label>
+                    <textarea id="leadNotes" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    <i class="fas fa-save"></i> Salvar Lead
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Budget Modal -->
+    <div class="modal" id="budgetModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('budgetModal')">✕</button>
+            <div class="modal-header"><i class="fas fa-file-invoice"></i> Novo Orçamento</div>
+            <form onsubmit="saveBudget(event)">
+                <div class="form-group">
+                    <label>Cliente *</label>
+                    <select id="budgetCustomerId" required>
+                        <option value="">Selecionar cliente...</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Título *</label>
+                        <input type="text" id="budgetTitle" placeholder="Ex: Reforma Completa" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Valor Total *</label>
+                        <input type="number" id="budgetValue" step="0.01" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Descrição</label>
+                    <textarea id="budgetDesc" rows="3" placeholder="Detalhes do orçamento..."></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select id="budgetStatus">
+                            <option>draft</option>
+                            <option>sent</option>
+                            <option>approved</option>
+                            <option>rejected</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Válido até *</label>
+                        <input type="date" id="budgetValidUntil" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    <i class="fas fa-save"></i> Gerar Orçamento
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Order Modal -->
+    <div class="modal" id="orderModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('orderModal')">✕</button>
+            <div class="modal-header"><i class="fas fa-shopping-cart"></i> Novo Pedido</div>
+            <form onsubmit="saveOrder(event)">
+                <div class="form-group">
+                    <label>Cliente *</label>
+                    <select id="orderCustomerId" required>
+                        <option value="">Selecionar cliente...</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Descrição *</label>
+                        <input type="text" id="orderDesc" placeholder="Produto/Serviço" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Valor *</label>
+                        <input type="number" id="orderValue" step="0.01" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select id="orderStatus">
+                            <option>pending</option>
+                            <option>processing</option>
+                            <option>completed</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Data de Entrega</label>
+                        <input type="date" id="orderDeliveryDate">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    <i class="fas fa-save"></i> Criar Pedido
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = '/api';
+        let charts = {};
+
+        // ===== TAB NAVIGATION =====
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Remove active from all
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+
+                // Add active to clicked
+                btn.classList.add('active');
+                const tab = btn.dataset.tab;
+                document.getElementById(tab).classList.add('active');
+
+                // Load data
+                if (tab === 'dashboard') {
+                    loadDashboard();
+                    initCharts();
+                } else if (tab === 'customers') {
+                    loadCustomers();
+                } else if (tab === 'leads') {
+                    loadLeads();
+                } else if (tab === 'budgets') {
+                    loadBudgets();
+                } else if (tab === 'orders') {
+                    loadOrders();
+                } else if (tab === 'reports') {
+                    loadFinancialReports();
+                    initFinancialCharts();
+                }
+            });
+        });
+
+        // ===== LOAD DASHBOARD =====
+        async function loadDashboard() {
+            try {
+                const res = await fetch(`${API_URL}/dashboard`);
+                const data = await res.json();
+
+                if (data.success) {
+                    document.getElementById('stat-customers').textContent = data.data.totalCustomers;
+                    document.getElementById('stat-leads').textContent = data.data.qualifiedLeads;
+                    document.getElementById('stat-revenue').textContent = 'R$ ' + 
+                        (data.data.totalRevenue || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+                    document.getElementById('stat-orders').textContent = '0'; // Você pode contar pedidos depois
+                }
+            } catch (error) {
+                console.error('Erro carregando dashboard:', error);
+                showAlert('Erro ao carregar dashboard', 'error');
+            }
+        }
+
+        // ===== CHARTS INITIALIZATION =====
+        function initCharts() {
+            // Revenue Chart
+            const revenueCtx = document.getElementById('revenueChart');
+            if (revenueCtx && !charts.revenue) {
+                charts.revenue = new Chart(revenueCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+                        datasets: [{
+                            label: 'Receita (R$)',
+                            data: [12000, 15000, 14000, 18000, 22000, 25000],
+                            borderColor: '#6366f1',
+                            backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            pointRadius: 5,
+                            pointBackgroundColor: '#6366f1',
+                            pointBorderColor: 'white',
+                            pointBorderWidth: 2,
+                            borderWidth: 3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { beginAtZero: true, ticks: { callback: v => 'R$ ' + v.toLocaleString('pt-BR') } }
+                        }
+                    }
+                });
+            }
+
+            // Leads Status Chart
+            const leadsCtx = document.getElementById('leadsChart');
+            if (leadsCtx && !charts.leads) {
+                charts.leads = new Chart(leadsCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Novos', 'Contatados', 'Qualificados', 'Perdidos'],
+                        datasets: [{
+                            data: [8, 15, 24, 5],
+                            backgroundColor: ['#ec4899', '#f59e0b', '#10b981', '#6b7280']
+                        }]
+                    },
+                    options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+                });
+            }
+
+            // Performance Chart
+            const perfCtx = document.getElementById('performanceChart');
+            if (perfCtx && !charts.performance) {
+                charts.performance = new Chart(perfCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Google', 'Facebook', 'LinkedIn', 'Email', 'Referência'],
+                        datasets: [{
+                            label: 'Clientes Adquiridos',
+                            data: [12, 18, 8, 14, 10],
+                            backgroundColor: '#6366f1',
+                            borderRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { display: false } },
+                        scales: { y: { beginAtZero: true } }
+                    }
+                });
+            }
+        }
+
+        // ===== SEARCH FUNCTIONALITY =====
+        document.getElementById('customerSearch')?.addEventListener('input', (e) => {
+            const search = e.target.value;
+            loadCustomers(search);
+        });
+
+        document.getElementById('leadsSearch')?.addEventListener('input', (e) => {
+            const search = e.target.value;
+            loadLeads(search);
+        });
+
+        document.getElementById('budgetsSearch')?.addEventListener('input', (e) => {
+            const search = e.target.value;
+            loadBudgets(search);
+        });
+
+        document.getElementById('ordersSearch')?.addEventListener('input', (e) => {
+            const search = e.target.value;
+            loadOrders(search);
+        });
+
+        // ===== LOAD DATA FUNCTIONS =====
+        async function loadCustomers(search = '') {
+            try {
+                const url = search ? `${API_URL}/customers?search=${encodeURIComponent(search)}` : `${API_URL}/customers`;
+                const res = await fetch(url);
+                const data = await res.json();
+
+                if (data.success && data.data.length > 0) {
+                    const html = `
+                        <div class="list-header">
+                            <div>Nome</div>
+                            <div>Telefone</div>
+                            <div>Empresa</div>
+                            <div>Email</div>
+                            <div>Ações</div>
+                        </div>
+                        ${data.data.map(c => `
+                            <div class="list-item">
+                                <div class="item-name">${c.name}</div>
+                                <div>${c.phone || '-'}</div>
+                                <div>${c.company || '-'}</div>
+                                <div>${c.email || '-'}</div>
+                                <div>
+                                    <button class="btn btn-small btn-primary" onclick="editCustomer(${c.id})">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-small btn-danger" onclick="deleteCustomer(${c.id})">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    `;
+                    document.getElementById('customers-container').innerHTML = html;
+                } else {
+                    document.getElementById('customers-container').innerHTML = 
+                        '<div class="empty-state"><div class="empty-state-icon"><i class="fas fa-users"></i></div><p>Nenhum cliente cadastrado</p></div>';
+                }
+            } catch (error) {
+                console.error('Erro carregando clientes:', error);
+            }
+        }
+
+        async function loadLeads(search = '') {
+            try {
+                const url = search ? `${API_URL}/leads?search=${encodeURIComponent(search)}` : `${API_URL}/leads`;
+                const res = await fetch(url);
+                const data = await res.json();
+
+                if (data.success && data.data.length > 0) {
+                    const html = `
+                        <div class="list-header">
+                            <div>Nome</div>
+                            <div>Telefone</div>
+                            <div>Valor Est.</div>
+                            <div>Status</div>
+                            <div>Ações</div>
+                        </div>
+                        ${data.data.map(l => `
+                            <div class="list-item">
+                                <div class="item-name">${l.name}</div>
+                                <div>${l.phone || '-'}</div>
+                                <div>R$ ${l.value ? l.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '0'}</div>
+                                <div><span class="badge badge-primary">${l.status}</span></div>
+                                <div>
+                                    <button class="btn btn-small btn-primary" onclick="editLead(${l.id})">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    `;
+                    document.getElementById('leads-container').innerHTML = html;
+                } else {
+                    document.getElementById('leads-container').innerHTML = 
+                        '<div class="empty-state"><div class="empty-state-icon"><i class="fas fa-bullseye"></i></div><p>Nenhum lead cadastrado</p></div>';
+                }
+            } catch (error) {
+                console.error('Erro carregando leads:', error);
+            }
+        }
+
+        async function loadBudgets(search = '') {
+            try {
+                const url = search ? `${API_URL}/budgets?search=${encodeURIComponent(search)}` : `${API_URL}/budgets`;
+                const res = await fetch(url);
+                const data = await res.json();
+
+                if (data.success && data.data.length > 0) {
+                    const html = `
+                        <div class="list-header">
+                            <div>ID</div>
+                            <div>Cliente</div>
+                            <div>Valor</div>
+                            <div>Status</div>
+                            <div>Ações</div>
+                        </div>
+                        ${data.data.map(b => `
+                            <div class="list-item">
+                                <div>${b.id}</div>
+                                <div>${b.customer_id}</div>
+                                <div>R$ ${b.total_value ? b.total_value.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '0'}</div>
+                                <div><span class="badge badge-warning">${b.status}</span></div>
+                                <div>
+                                    <button class="btn btn-small btn-primary">
+                                        <i class="fas fa-file-pdf"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    `;
+                    document.getElementById('budgets-container').innerHTML = html;
+                } else {
+                    document.getElementById('budgets-container').innerHTML = 
+                        '<div class="empty-state"><div class="empty-state-icon"><i class="fas fa-file-invoice"></i></div><p>Nenhum orçamento cadastrado</p></div>';
+                }
+            } catch (error) {
+                console.error('Erro carregando orçamentos:', error);
+            }
+        }
+
+        async function loadOrders(search = '') {
+            try {
+                const url = search ? `${API_URL}/orders?search=${encodeURIComponent(search)}` : `${API_URL}/orders`;
+                const res = await fetch(url);
+                const data = await res.json();
+
+                if (data.success && data.data.length > 0) {
+                    const html = `
+                        <div class="list-header">
+                            <div>ID</div>
+                            <div>Cliente</div>
+                            <div>Valor</div>
+                            <div>Status</div>
+                            <div>Ações</div>
+                        </div>
+                        ${data.data.map(o => `
+                            <div class="list-item">
+                                <div>${o.id}</div>
+                                <div>${o.customer_id}</div>
+                                <div>R$ ${o.value ? o.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '0'}</div>
+                                <div><span class="badge badge-success">${o.status}</span></div>
+                                <div>
+                                    <button class="btn btn-small btn-primary">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    `;
+                    document.getElementById('orders-container').innerHTML = html;
+                } else {
+                    document.getElementById('orders-container').innerHTML = 
+                        '<div class="empty-state"><div class="empty-state-icon"><i class="fas fa-shopping-cart"></i></div><p>Nenhum pedido cadastrado</p></div>';
+                }
+            } catch (error) {
+                console.error('Erro carregando pedidos:', error);
+            }
+        }
+
+        // ===== FORM FUNCTIONS =====
+        function openCustomerModal() {
+            document.getElementById('customerModal').classList.add('active');
+        }
+
+        async function openBudgetModal() {
+            const res = await fetch(`${API_URL}/customers`);
+            const data = await res.json();
+            if (data.success) {
+                const select = document.getElementById('budgetCustomerId');
+                select.innerHTML = '<option value="">Selecionar cliente...</option>' +
+                    data.data.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+            }
+            document.getElementById('budgetModal').classList.add('active');
+        }
+
+        function openLeadModal() {
+            document.getElementById('leadModal').classList.add('active');
+        }
+
+        async function openOrderModal() {
+            const res = await fetch(`${API_URL}/customers`);
+            const data = await res.json();
+            if (data.success) {
+                const select = document.getElementById('orderCustomerId');
+                select.innerHTML = '<option value="">Selecionar cliente...</option>' +
+                    data.data.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+            }
+            document.getElementById('orderModal').classList.add('active');
+        }
+
+        async function saveCustomer(e) {
+            e.preventDefault();
+            const payload = {
+                name: document.getElementById('customerName').value,
+                phone: document.getElementById('customerPhone').value,
+                email: document.getElementById('customerEmail').value,
+                company: document.getElementById('customerCompany').value,
+                notes: document.getElementById('customerNotes').value
+            };
+
+            try {
+                const res = await fetch(`${API_URL}/customers`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showAlert('Cliente salvo com sucesso!', 'success');
+                    closeModal('customerModal');
+                    loadCustomers();
+                }
+            } catch (error) {
+                showAlert('Erro ao salvar cliente', 'error');
+            }
+        }
+
+        async function saveLead(e) {
+            e.preventDefault();
+            const payload = {
+                name: document.getElementById('leadName').value,
+                phone: document.getElementById('leadPhone').value,
+                email: document.getElementById('leadEmail').value,
+                company: document.getElementById('leadCompany').value,
+                status: document.getElementById('leadStatus').value,
+                value: parseFloat(document.getElementById('leadValue').value) || 0,
+                description: document.getElementById('leadNotes').value
+            };
+
+            try {
+                const res = await fetch(`${API_URL}/leads`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showAlert('Lead salvo com sucesso!', 'success');
+                    closeModal('leadModal');
+                    loadLeads();
+                }
+            } catch (error) {
+                showAlert('Erro ao salvar lead', 'error');
+            }
+        }
+
+        async function saveBudget(e) {
+            e.preventDefault();
+            const payload = {
+                customer_id: parseInt(document.getElementById('budgetCustomerId').value),
+                title: document.getElementById('budgetTitle').value,
+                description: document.getElementById('budgetDesc').value,
+                total_value: parseFloat(document.getElementById('budgetValue').value),
+                status: document.getElementById('budgetStatus').value,
+                valid_until: document.getElementById('budgetValidUntil').value
+            };
+
+            try {
+                const res = await fetch(`${API_URL}/budgets`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showAlert('Orçamento criado com sucesso!', 'success');
+                    closeModal('budgetModal');
+                    loadBudgets();
+                }
+            } catch (error) {
+                showAlert('Erro ao criar orçamento', 'error');
+            }
+        }
+
+        async function saveOrder(e) {
+            e.preventDefault();
+            const payload = {
+                customer_id: parseInt(document.getElementById('orderCustomerId').value),
+                value: parseFloat(document.getElementById('orderValue').value),
+                status: document.getElementById('orderStatus').value
+            };
+
+            try {
+                const res = await fetch(`${API_URL}/orders`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showAlert('Pedido criado com sucesso!', 'success');
+                    closeModal('orderModal');
+                    loadOrders();
+                }
+            } catch (error) {
+                showAlert('Erro ao criar pedido', 'error');
+            }
+        }
+
+        // ===== UTILITY FUNCTIONS =====
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function showAlert(message, type = 'success') {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${message}`;
+            
+            const container = document.querySelector('.container') || document.body;
+            container.insertBefore(alertDiv, container.firstChild);
+            
+            setTimeout(() => alertDiv.remove(), 4000);
+        }
+
+        // ===== EXPORT FUNCTIONS =====
+        function exportCustomers() {
+            window.location.href = `${API_URL}/export/customers`;
+        }
+
+        function exportOrders() {
+            window.location.href = `${API_URL}/export/orders`;
+        }
+
+        // ===== DELETE FUNCTIONS =====
+        async function deleteCustomer(id) {
+            if (!confirm('Tem certeza que deseja deletar este cliente? Esta ação não pode ser desfeita.')) return;
+            try {
+                const res = await fetch(`${API_URL}/customers/${id}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (data.success) {
+                    showAlert('Cliente deletado com sucesso!', 'success');
+                    loadCustomers();
+                } else {
+                    showAlert('Erro ao deletar cliente', 'error');
+                }
+            } catch (error) {
+                showAlert('Erro ao deletar cliente', 'error');
+            }
+        }
+
+        function editCustomer(id) {
+            alert('Funcionalidade de edição em desenvolvimento');
+        }
+
+        function editLead(id) {
+            alert('Funcionalidade de edição em desenvolvimento');
+        }
+
+        // ===== FINANCIAL REPORTS =====
+        async function loadFinancialReports() {
+            try {
+                const res = await fetch(`${API_URL}/dashboard`);
+                const data = await res.json();
+
+                if (data.success) {
+                    const totalRevenue = data.data.totalRevenue || 0;
+                    const totalOrders = 5; // Dados simulados
+                    const averageTicket = totalOrders > 0 ? (totalRevenue / totalOrders).toFixed(2) : 0;
+
+                    document.getElementById('report-revenue').textContent = 'R$ ' + totalRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+                    document.getElementById('report-orders').textContent = totalOrders;
+                    document.getElementById('report-average').textContent = 'R$ ' + parseFloat(averageTicket).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+                    document.getElementById('report-conversion').textContent = (totalOrders > 0 ? (totalOrders * 20) : 0) + '%';
+
+                    // Top clients
+                    loadTopRevenueClients();
+                    
+                    // Insights
+                    generateFinancialInsights(totalRevenue, totalOrders, averageTicket);
+                }
+            } catch (error) {
+                console.error('Erro carregando relatórios:', error);
+            }
+        }
+
+        async function loadTopRevenueClients() {
+            try {
+                const res = await fetch(`${API_URL}/customers`);
+                const data = await res.json();
+
+                if (data.success && data.data.length > 0) {
+                    // Simular dados de receita
+                    const clientsWithRevenue = data.data.map((c, idx) => ({
+                        ...c,
+                        revenue: Math.floor(Math.random() * 50000) + 5000,
+                        orders: Math.floor(Math.random() * 20) + 1
+                    })).sort((a, b) => b.revenue - a.revenue).slice(0, 10);
+
+                    const html = `
+                        <div class="list-header">
+                            <div>Cliente</div>
+                            <div>Receita Total</div>
+                            <div>Nº Pedidos</div>
+                            <div>Ticket Médio</div>
+                        </div>
+                        ${clientsWithRevenue.map(c => `
+                            <div class="list-item">
+                                <div class="item-name">${c.name}</div>
+                                <div><strong>R$ ${c.revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong></div>
+                                <div>${c.orders} pedidos</div>
+                                <div>R$ ${(c.revenue / c.orders).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+                            </div>
+                        `).join('')}
+                    `;
+                    document.getElementById('top-revenue-customers').innerHTML = html;
+                }
+            } catch (error) {
+                console.error('Erro carregando top clientes:', error);
+            }
+        }
+
+        function generateFinancialInsights(revenue, orders, average) {
+            const insights = `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                    <div style="padding: 15px; background: rgba(16, 185, 129, 0.05); border-radius: 8px; border-left: 4px solid #10b981;">
+                        <strong style="color: #10b981;">📈 Faturamento</strong>
+                        <p style="margin: 8px 0 0 0; font-size: 0.9rem;">Faturamento total de R$ ${revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} com ${orders} pedidos confirmados neste período.</p>
+                    </div>
+
+                    <div style="padding: 15px; background: rgba(59, 130, 246, 0.05); border-radius: 8px; border-left: 4px solid #3b82f6;">
+                        <strong style="color: #3b82f6;">💡 Ticket Médio</strong>
+                        <p style="margin: 8px 0 0 0; font-size: 0.9rem;">Preço médio por pedido é R$ ${parseFloat(average).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}. Oportunidade para upsell em clientes menores.</p>
+                    </div>
+
+                    <div style="padding: 15px; background: rgba(245, 158, 11, 0.05); border-radius: 8px; border-left: 4px solid #f59e0b;">
+                        <strong style="color: #f59e0b;">🎯 Recomendação</strong>
+                        <p style="margin: 8px 0 0 0; font-size: 0.9rem;">Foco em manter relacionamento com top 10% de clientes. Eles geram 80% da receita (Princípio de Pareto).</p>
+                    </div>
+
+                    <div style="padding: 15px; background: rgba(236, 72, 153, 0.05); border-radius: 8px; border-left: 4px solid #ec4899;">
+                        <strong style="color: #ec4899;">📊 Oportunidade</strong>
+                        <p style="margin: 8px 0 0 0; font-size: 0.9rem;">${orders} pedidos este mês. Meta: aumentar para 10+ pedidos/mês para crescimento de 100% anual.</p>
+                    </div>
+
+                    <div style="padding: 15px; background: rgba(99, 102, 241, 0.05); border-radius: 8px; border-left: 4px solid #6366f1;">
+                        <strong style="color: #6366f1;">💰 Projeção</strong>
+                        <p style="margin: 8px 0 0 0; font-size: 0.9rem;">Se manter taxa de crescimento: próximas 3 meses devem gerar R$ ${(revenue * 1.5).toLocaleString('pt-BR', { minimumFractionDigits: 0 })} em faturamento.</p>
+                    </div>
+
+                    <div style="padding: 15px; background: rgba(10, 180, 180, 0.05); border-radius: 8px; border-left: 4px solid #0ab4b4;">
+                        <strong style="color: #0ab4b4;">⚡ Ação</strong>
+                        <p style="margin: 8px 0 0 0; font-size: 0.9rem;">Aumentar leads qualificados em 30% para crescimento sustentável. Qualidade > Quantidade.</p>
+                    </div>
+                </div>
+            `;
+            document.getElementById('financial-insights').innerHTML = insights;
+        }
+
+        function initFinancialCharts() {
+            // Monthly Revenue Chart
+            const monthlyCtx = document.getElementById('revenueMonthlyChart');
+            if (monthlyCtx && !charts.revenueMonthly) {
+                charts.revenueMonthly = new Chart(monthlyCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+                        datasets: [{
+                            label: 'Faturamento (R$)',
+                            data: [12000, 15000, 14000, 18000, 22000, 25000, 28000, 26000, 30000, 32000, 35000, 38000],
+                            backgroundColor: '#6366f1',
+                            borderColor: '#4f46e5',
+                            borderWidth: 2,
+                            borderRadius: 8,
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { beginAtZero: true, ticks: { callback: v => 'R$ ' + (v/1000).toFixed(0) + 'k' } }
+                        }
+                    }
+                });
+            }
+
+            // Comparison Chart (Mês atual vs Mês anterior)
+            const comparisonCtx = document.getElementById('comparisonChart');
+            if (comparisonCtx && !charts.comparison) {
+                charts.comparison = new Chart(comparisonCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'],
+                        datasets: [
+                            {
+                                label: 'Mês Atual',
+                                data: [8000, 9000, 10000, 11000],
+                                backgroundColor: '#6366f1',
+                                borderRadius: 6
+                            },
+                            {
+                                label: 'Mês Anterior',
+                                data: [6500, 7500, 8500, 09500],
+                                backgroundColor: '#cbd5e1',
+                                borderRadius: 6
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: { beginAtZero: true }
+                        }
+                    }
+                });
+            }
+
+            // Evolution Chart
+            const evolutionCtx = document.getElementById('evolutionChart');
+            if (evolutionCtx && !charts.evolution) {
+                charts.evolution = new Chart(evolutionCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4', 'Semana 5', 'Semana 6', 'Semana 7', 'Semana 8'],
+                        datasets: [{
+                            label: 'Faturamento Acumulado (R$)',
+                            data: [12000, 27000, 41000, 59000, 81000, 106000, 134000, 165000],
+                            borderColor: '#ec4899',
+                            backgroundColor: 'rgba(236, 72, 153, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            pointRadius: 5,
+                            pointBackgroundColor: '#ec4899',
+                            pointBorderColor: 'white',
+                            pointBorderWidth: 2,
+                            borderWidth: 3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { beginAtZero: true, ticks: { callback: v => 'R$ ' + (v/1000).toFixed(0) + 'k' } }
+                        }
+                    }
+                });
+            }
+
+            // Status Distribution
+            const statusCtx = document.getElementById('statusDistributionChart');
+            if (statusCtx && !charts.statusDist) {
+                charts.statusDist = new Chart(statusCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Confirmado', 'Processando', 'Pendente', 'Cancelado'],
+                        datasets: [{
+                            data: [65, 20, 10, 5],
+                            backgroundColor: ['#10b981', '#f59e0b', '#3b82f6', '#ef4444'],
+                            borderColor: ['#059669', '#d97706', '#1f2937', '#dc2626'],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { position: 'bottom' }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Initialize
+        loadDashboard();
+        initCharts();
+    </script>
+</body>
+</html>
