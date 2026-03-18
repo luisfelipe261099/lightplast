@@ -398,13 +398,31 @@ app.get('/api/dashboard', async (req, res) => {
     const [pendingFollowUps] = await query('SELECT COUNT(*) as count FROM follow_ups WHERE completed = 0');
     const [totalRevenue] = await query('SELECT SUM(value) as total FROM orders WHERE status IN ("confirmed", "completed")');
     
+    const [ordersCount] = await query('SELECT COUNT(*) as count FROM orders');
+    const [confirmedOrders] = await query('SELECT COUNT(*) as count FROM orders WHERE status IN ("confirmed", "completed")');
+
+    // Stats for charts
+    const revenueByMonth = await query(`
+      SELECT DATE_FORMAT(created_at, '%b') as label, SUM(value) as value 
+      FROM orders 
+      WHERE status IN ('confirmed', 'completed') AND created_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
+      GROUP BY label, DATE_FORMAT(created_at, '%Y-%m')
+      ORDER BY DATE_FORMAT(created_at, '%Y-%m') ASC
+    `);
+
+    const leadsByStatus = await query('SELECT status as label, COUNT(*) as value FROM leads GROUP BY status');
+
     res.json({
       success: true,
       data: {
         totalCustomers: totalCustomers?.count || 0,
         qualifiedLeads: qualifiedLeads?.count || 0,
         pendingFollowUps: pendingFollowUps?.count || 0,
-        totalRevenue: parseFloat(totalRevenue?.total) || 0
+        totalRevenue: parseFloat(totalRevenue?.total) || 0,
+        totalOrders: ordersCount?.count || 0,
+        confirmedOrders: confirmedOrders?.count || 0,
+        revenueByMonth,
+        leadsByStatus
       }
     });
   } catch (error) {

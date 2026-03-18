@@ -1251,17 +1251,22 @@
         document.getElementById('dashboard').classList.add('active');
 
         // ===== LOAD DASHBOARD =====
+        let lastDashboardData = null;
+
         async function loadDashboard() {
             try {
                 const res = await fetch(`${API_URL}/dashboard`);
                 const data = await res.json();
 
                 if (data.success) {
+                    lastDashboardData = data.data;
                     document.getElementById('stat-customers').textContent = data.data.totalCustomers;
                     document.getElementById('stat-leads').textContent = data.data.qualifiedLeads;
                     document.getElementById('stat-revenue').textContent = 'R$ ' + 
                         (data.data.totalRevenue || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-                    document.getElementById('stat-orders').textContent = data.data.pendingFollowUps || '0';
+                    document.getElementById('stat-orders').textContent = data.data.totalOrders || '0';
+                    
+                    initCharts(data.data);
                 }
             } catch (error) {
                 console.error('Erro carregando dashboard:', error);
@@ -1322,7 +1327,7 @@
         }
 
         // ===== CHARTS INITIALIZATION =====
-        function initCharts() {
+        function initCharts(dashboardData = lastDashboardData) {
             // Revenue Chart
             const revenueCtx = document.getElementById('revenueChart');
             if (revenueCtx && !charts.revenue) {
@@ -1332,7 +1337,7 @@
                         labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
                         datasets: [{
                             label: 'Receita (R$)',
-                            data: [12000, 15000, 14000, 18000, 22000, 25000],
+                            data: [0, 0, 0, 0, 0, 0],
                             borderColor: '#488039',
                             backgroundColor: 'rgba(72, 128, 57, 0.12)',
                             tension: 0.4,
@@ -1354,20 +1359,42 @@
                 });
             }
 
+            // Update Revenue Chart Data
+            if (dashboardData && dashboardData.revenueByMonth && charts.revenue) {
+                charts.revenue.data.labels = dashboardData.revenueByMonth.map(r => r.label);
+                charts.revenue.data.datasets[0].data = dashboardData.revenueByMonth.map(r => r.value);
+                charts.revenue.update();
+            }
+
             // Leads Status Chart
             const leadsCtx = document.getElementById('leadsChart');
             if (leadsCtx && !charts.leads) {
                 charts.leads = new Chart(leadsCtx, {
                     type: 'doughnut',
                     data: {
-                        labels: ['Novos', 'Contatados', 'Qualificados', 'Perdidos'],
+                        labels: ['Aguardando'],
                         datasets: [{
-                            data: [8, 15, 24, 5],
-                            backgroundColor: ['#488039', '#f59e0b', '#10b981', '#6b7280']
+                            data: [1],
+                            backgroundColor: ['#cbd5e1', '#488039', '#f59e0b', '#10b981', '#6b7280', '#ef4444', '#3b82f6', '#8b5cf6']
                         }]
                     },
                     options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
                 });
+            }
+
+            // Update Leads Chart Data
+            if (dashboardData && dashboardData.leadsByStatus && charts.leads) {
+                const colors = {
+                    'new': '#488039',
+                    'contacted': '#f59e0b',
+                    'qualified': '#10b981',
+                    'lost': '#6b7280',
+                    'won': '#3b82f6'
+                };
+                charts.leads.data.labels = dashboardData.leadsByStatus.map(s => s.label);
+                charts.leads.data.datasets[0].data = dashboardData.leadsByStatus.map(s => s.value);
+                charts.leads.data.datasets[0].backgroundColor = dashboardData.leadsByStatus.map(s => colors[s.label] || '#94a3b8');
+                charts.leads.update();
             }
 
             // Performance Chart
@@ -1827,19 +1854,21 @@
 
                 if (data.success) {
                     const totalRevenue = data.data.totalRevenue || 0;
-                    const totalOrders = 5; // Dados simulados
-                    const averageTicket = totalOrders > 0 ? (totalRevenue / totalOrders).toFixed(2) : 0;
+                    const confirmedOrders = data.data.confirmedOrders || 0;
+                    const totalOrders = data.data.totalOrders || 0;
+                    const averageTicket = confirmedOrders > 0 ? (totalRevenue / confirmedOrders).toFixed(2) : 0;
+                    const conversionRate = totalOrders > 0 ? ((confirmedOrders / totalOrders) * 100).toFixed(1) : 0;
 
                     document.getElementById('report-revenue').textContent = 'R$ ' + totalRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-                    document.getElementById('report-orders').textContent = totalOrders;
+                    document.getElementById('report-orders').textContent = confirmedOrders;
                     document.getElementById('report-average').textContent = 'R$ ' + parseFloat(averageTicket).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-                    document.getElementById('report-conversion').textContent = (totalOrders > 0 ? (totalOrders * 20) : 0) + '%';
+                    document.getElementById('report-conversion').textContent = conversionRate + '%';
 
                     // Top clients
                     loadTopRevenueClients();
                     
                     // Insights
-                    generateFinancialInsights(totalRevenue, totalOrders, averageTicket);
+                    generateFinancialInsights(totalRevenue, confirmedOrders, averageTicket);
                 }
             } catch (error) {
                 console.error('Erro carregando relatórios:', error);
