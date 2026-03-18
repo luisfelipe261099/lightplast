@@ -2226,7 +2226,8 @@
         // ===== PDF GENERATOR =====
         async function generatePDF(type, id) {
             const endpoint = type === 'budget' ? 'budgets' : 'orders';
-            const titleLabel = type === 'budget' ? 'ORÇAMENTO' : 'PEDIDO';
+            const titleLabel = type === 'budget' ? 'ORCAMENTO' : 'PEDIDO';
+            const displayLabel = type === 'budget' ? 'ORÇAMENTO' : 'PEDIDO';
 
             try {
                 const res = await fetch(`${API_URL}/${endpoint}/${id}`);
@@ -2259,7 +2260,7 @@
                 // Document Info (Right side)
                 doc.setFontSize(14);
                 doc.setFont("helvetica", "bold");
-                doc.text(`${titleLabel} #${data.id}`, 195, 20, { align: "right" });
+                doc.text(`${displayLabel} #${data.id}`, 195, 20, { align: "right" });
                 
                 doc.setFontSize(10);
                 doc.setFont("helvetica", "normal");
@@ -2337,8 +2338,11 @@
                     doc.text("Página " + i + " de " + pageCount, 105, 290, { align: "center" });
                 }
 
-                doc.save(`${titleLabel}_${data.id}_LightPlast.pdf`);
-                showAlert(`${titleLabel} gerado com sucesso!`, 'success');
+                // Salvar o arquivo
+                const fileName = `${titleLabel}_${data.id}_LightPlast.pdf`;
+                doc.save(fileName);
+                
+                showAlert(`${displayLabel} gerado com sucesso!`, 'success');
 
             } catch (err) {
                 console.error(err);
