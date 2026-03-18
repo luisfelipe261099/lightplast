@@ -1549,11 +1549,11 @@
                                 <div>${b.customer_name || b.customer_id}</div>
                                 <div>R$ ${b.total_value ? parseFloat(b.total_value).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '0,00'}</div>
                                 <div><span class="badge badge-warning">${b.status}</span></div>
-                                <div>
-                                    <button class="btn btn-small btn-primary" onclick="generatePDF('budget', ${b.id})" title="Gerar PDF">
+                                <div style="display:flex; gap:8px;">
+                                    <button class="btn btn-icon btn-primary" style="background:#488039; width:36px; height:36px; border-radius:50%; justify-content:center; padding:0; box-shadow:0 4px 6px rgba(0,0,0,0.1);" onclick="generatePDF('budget', ${b.id})" title="Gerar PDF">
                                         <i class="fas fa-file-pdf"></i>
                                     </button>
-                                    <button class="btn btn-small btn-danger" onclick="deleteBudget(${b.id})" title="Excluir">
+                                    <button class="btn btn-icon btn-danger" style="background:#ef4444; width:36px; height:36px; border-radius:50%; justify-content:center; padding:0; box-shadow:0 4px 6px rgba(0,0,0,0.1);" onclick="deleteBudget(${b.id})" title="Excluir">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
@@ -1591,14 +1591,14 @@
                                 <div>${o.customer_name || o.customer_id}</div>
                                 <div>R$ ${o.value ? parseFloat(o.value).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '0,00'}</div>
                                 <div><span class="badge badge-success">${o.status}</span></div>
-                                <div>
-                                    <button class="btn btn-small btn-primary" onclick="generatePDF('order', ${o.id})" title="Gerar PDF">
+                                <div style="display:flex; gap:8px;">
+                                    <button class="btn btn-icon btn-primary" style="background:#488039; width:36px; height:36px; border-radius:50%; justify-content:center; padding:0; box-shadow:0 4px 6px rgba(0,0,0,0.1);" onclick="generatePDF('order', ${o.id})" title="Gerar PDF">
                                         <i class="fas fa-file-pdf"></i>
                                     </button>
-                                    <button class="btn btn-small btn-primary" onclick="editOrder(${o.id})" title="Editar">
+                                    <button class="btn btn-icon btn-primary" style="background:#3b82f6; width:36px; height:36px; border-radius:50%; justify-content:center; padding:0; box-shadow:0 4px 6px rgba(0,0,0,0.1);" onclick="editOrder(${o.id})" title="Editar">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button class="btn btn-small btn-danger" onclick="deleteOrder(${o.id})" title="Excluir">
+                                    <button class="btn btn-icon btn-danger" style="background:#ef4444; width:36px; height:36px; border-radius:50%; justify-content:center; padding:0; box-shadow:0 4px 6px rgba(0,0,0,0.1);" onclick="deleteOrder(${o.id})" title="Excluir">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
@@ -2338,9 +2338,22 @@
                     doc.text("Página " + i + " de " + pageCount, 105, 290, { align: "center" });
                 }
 
-                // Salvar o arquivo
-                const fileName = `${titleLabel}_${data.id}_LightPlast.pdf`;
-                doc.save(fileName);
+                // Gerar Blob
+                const pdfBlob = doc.output('blob');
+                const url = URL.createObjectURL(pdfBlob);
+                
+                // Criar link de download manual para forçar nome e extensão
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `${titleLabel}_${data.id}_LightPlast.pdf`;
+                document.body.appendChild(link);
+                link.click();
+                
+                // Limpar
+                setTimeout(() => {
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(url);
+                }, 100);
                 
                 showAlert(`${displayLabel} gerado com sucesso!`, 'success');
 
