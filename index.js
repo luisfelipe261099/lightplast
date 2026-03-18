@@ -23,9 +23,13 @@ app.get('/', (req, res) => {
   res.sendFile(join(__dirname, 'index.html'));
 });
 
-// Rewrite /crm para /crm-pro.html (nova versão)
+// Rewrite /crm para tela de login fictícia antes do dashboard
 app.get('/crm', (req, res) => {
-  res.sendFile(join(__dirname, 'crm-pro.html'));
+  res.sendFile(join(__dirname, 'crm-login.html'));
+});
+
+app.get('/crm-login', (req, res) => {
+  res.sendFile(join(__dirname, 'crm-login.html'));
 });
 
 // Database connection pool
