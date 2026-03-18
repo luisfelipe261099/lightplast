@@ -689,11 +689,12 @@
                 <span>LightPlast CRM Pro</span>
             </div>
             <nav class="nav-tabs">
-                <button class="tab-btn active" data-tab="dashboard"><i class="fas fa-chart-line"></i> Dashboard</button>
+                <button class="tab-btn" data-tab="dashboard"><i class="fas fa-chart-line"></i> Dashboard</button>
                 <button class="tab-btn" data-tab="customers"><i class="fas fa-users"></i> Clientes</button>
                 <button class="tab-btn" data-tab="leads"><i class="fas fa-bullseye"></i> Leads</button>
                 <button class="tab-btn" data-tab="budgets"><i class="fas fa-file-invoice"></i> Orçamentos</button>
                 <button class="tab-btn" data-tab="orders"><i class="fas fa-shopping-cart"></i> Pedidos</button>
+                <button class="tab-btn" data-tab="agenda" id="agenda-tab-btn"><i class="fas fa-bell"></i> Agenda <span id="agenda-badge" style="background:#ef4444;color:white;border-radius:50%;padding:1px 6px;font-size:0.72rem;margin-left:4px;display:none;">0</span></button>
                 <button class="tab-btn" data-tab="reports"><i class="fas fa-money-bill-wave"></i> Relatórios</button>
             </nav>
             <div class="header-actions">
@@ -760,13 +761,16 @@
                 </div>
             </div>
 
-            <!-- Recent Activity -->
+            <!-- Alertas Follow-ups Dashboard -->
             <div class="mt-30">
-                <h2 class="section-title mt-30"><i class="fas fa-history"></i> Atividades Recentes</h2>
-                <div class="list-container" id="recent-activity-container">
-                    <div class="empty-state">
-                        <p>Carregando atividades...</p>
-                    </div>
+                <h2 class="section-title mt-30"><i class="fas fa-bell"></i> Lembretes &amp; Alertas</h2>
+                <div id="dashboard-alerts-container">
+                    <div class="empty-state"><p>Carregando alertas...</p></div>
+                </div>
+                <div style="margin-top:12px;">
+                    <button class="btn btn-primary" onclick="switchTab('agenda')">
+                        <i class="fas fa-calendar-plus"></i> Ver Agenda Completa
+                    </button>
                 </div>
             </div>
         </section>
@@ -865,6 +869,32 @@
             </div>
         </section>
 
+        <!-- ===== AGENDA / FOLLOW-UPS ===== -->
+        <section id="agenda" class="section">
+            <div class="section-header">
+                <h1 class="section-title"><i class="fas fa-bell"></i> Agenda &amp; Follow-ups</h1>
+                <button class="btn btn-primary" onclick="openFollowUpModal()">
+                    <i class="fas fa-plus"></i> Novo Lembrete
+                </button>
+            </div>
+
+            <!-- Filtros de Urgência -->
+            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:18px;">
+                <button class="btn btn-secondary" onclick="loadFollowUps('all')" id="filter-all" style="border:2px solid var(--primary);">Todos</button>
+                <button class="btn btn-secondary" onclick="loadFollowUps('overdue')" id="filter-overdue">🔴 Atrasados</button>
+                <button class="btn btn-secondary" onclick="loadFollowUps('today')" id="filter-today">🟡 Hoje</button>
+                <button class="btn btn-secondary" onclick="loadFollowUps('upcoming')" id="filter-upcoming">🟢 Próximos</button>
+                <button class="btn btn-secondary" onclick="loadFollowUps('done')" id="filter-done">✅ Concluídos</button>
+            </div>
+
+            <div class="list-container" id="followups-container">
+                <div class="empty-state">
+                    <div class="empty-state-icon"><i class="fas fa-bell"></i></div>
+                    <p>Carregando agenda...</p>
+                </div>
+            </div>
+        </section>
+
         <!-- ===== RELATÓRIOS FINANCEIROS ===== -->
         <section id="reports" class="section">
             <h1 class="section-title"><i class="fas fa-money-bill-wave"></i> Relatórios Financeiros</h1>
@@ -946,6 +976,46 @@
     </div>
 
     <!-- ===== MODALS ===== -->
+
+    <!-- Follow-up Modal -->
+    <div class="modal" id="followUpModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('followUpModal')">✕</button>
+            <div class="modal-header"><i class="fas fa-bell"></i> Novo Lembrete / Follow-up</div>
+            <form onsubmit="saveFollowUp(event)">
+                <div class="form-group">
+                    <label>Cliente *</label>
+                    <select id="followUpCustomerId" required>
+                        <option value="">Selecionar cliente...</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Tipo de Atividade</label>
+                        <select id="followUpType">
+                            <option value="call">📞 Ligação</option>
+                            <option value="meeting">🤝 Reunião / Visita</option>
+                            <option value="email">✉️ E-mail</option>
+                            <option value="order_followup">📦 Retorno de Pedido</option>
+                            <option value="visit">🏢 Visita ao Cliente</option>
+                            <option value="proposal">📋 Apresentar Proposta</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Data Agendada *</label>
+                        <input type="datetime-local" id="followUpDate" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Descrição / Motivo</label>
+                    <textarea id="followUpDescription" rows="3" placeholder="Ex: Cliente pediu retorno em 30 dias para novo pedido..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    <i class="fas fa-save"></i> Salvar Lembrete
+                </button>
+            </form>
+        </div>
+    </div>
 
     <!-- Customer Modal -->
     <div class="modal" id="customerModal">
@@ -1139,6 +1209,11 @@
         document.getElementById('logoutBtn')?.addEventListener('click', logoutFakeSession);
 
         // ===== TAB NAVIGATION =====
+        function switchTab(tabName) {
+            const btn = document.querySelector(`[data-tab="${tabName}"]`);
+            if (btn) btn.click();
+        }
+
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 // Remove active from all
@@ -1162,12 +1237,18 @@
                     loadBudgets();
                 } else if (tab === 'orders') {
                     loadOrders();
+                } else if (tab === 'agenda') {
+                    loadFollowUps('all');
                 } else if (tab === 'reports') {
                     loadFinancialReports();
                     initFinancialCharts();
                 }
             });
         });
+
+        // Activate dashboard on load
+        document.querySelector('[data-tab="dashboard"]').classList.add('active');
+        document.getElementById('dashboard').classList.add('active');
 
         // ===== LOAD DASHBOARD =====
         async function loadDashboard() {
@@ -1180,11 +1261,63 @@
                     document.getElementById('stat-leads').textContent = data.data.qualifiedLeads;
                     document.getElementById('stat-revenue').textContent = 'R$ ' + 
                         (data.data.totalRevenue || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-                    document.getElementById('stat-orders').textContent = '0'; // Você pode contar pedidos depois
+                    document.getElementById('stat-orders').textContent = data.data.pendingFollowUps || '0';
                 }
             } catch (error) {
                 console.error('Erro carregando dashboard:', error);
-                showAlert('Erro ao carregar dashboard', 'error');
+            }
+
+            // Load dashboard alerts from follow-ups
+            loadDashboardAlerts();
+        }
+
+        async function loadDashboardAlerts() {
+            try {
+                const res = await fetch(`${API_URL}/follow-ups`);
+                const data = await res.json();
+                const container = document.getElementById('dashboard-alerts-container');
+
+                if (!data.success || !data.data.length) {
+                    container.innerHTML = '<div class="empty-state"><div class="empty-state-icon"><i class="fas fa-check-circle"></i></div><p>Nenhum lembrete pendente. Tudo em dia! ✅</p></div>';
+                    return;
+                }
+
+                const now = new Date();
+                const today = now.toDateString();
+                const pending = data.data.filter(f => !f.completed).slice(0, 6);
+                
+                // Update badge
+                const overdue = pending.filter(f => new Date(f.scheduled_date) < now).length;
+                const badge = document.getElementById('agenda-badge');
+                if (overdue > 0) { badge.textContent = overdue; badge.style.display = 'inline'; }
+
+                if (!pending.length) {
+                    container.innerHTML = '<div class="empty-state"><p>Sem lembretes pendentes ✅</p></div>';
+                    return;
+                }
+
+                const typeIcons = { call:'📞', meeting:'🤝', email:'✉️', order_followup:'📦', visit:'🏢', proposal:'📋' };
+
+                container.innerHTML = '<div class="list-container" style="padding:0;border:none;">' +
+                    '<div class="list-header"><div>Tipo</div><div>Cliente</div><div>Descrição</div><div>Data</div><div>Status</div></div>' +
+                    pending.map(f => {
+                        const dt = new Date(f.scheduled_date);
+                        const isOverdue = dt < now;
+                        const isToday = dt.toDateString() === today;
+                        const badge = isOverdue ? '<span class="badge" style="background:#fef2f2;color:#dc2626;border:1px solid #fca5a5;">⚠️ Atrasado</span>' :
+                                      isToday   ? '<span class="badge" style="background:#fffbeb;color:#d97706;border:1px solid #fcd34d;">🟡 Hoje</span>' :
+                                                  '<span class="badge" style="background:#f0fdf4;color:#16a34a;border:1px solid #86efac;">🟢 Futuro</span>';
+                        return `<div class="list-item" style="${isOverdue ? 'border-left:4px solid #ef4444;' : isToday ? 'border-left:4px solid #f59e0b;' : ''}">` +
+                            `<div style="font-size:1.4rem;">${typeIcons[f.type] || '📌'}</div>` +
+                            `<div style="font-weight:600;">Cliente #${f.customer_id}</div>` +
+                            `<div style="color:#64748b;">${f.description || '-'}</div>` +
+                            `<div>${dt.toLocaleDateString('pt-BR')} ${dt.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'})}</div>` +
+                            `<div>${badge}</div>` +
+                        '</div>';
+                    }).join('') +
+                '</div>';
+            } catch(e) {
+                console.error('Erro alertas dashboard:', e);
             }
         }
 
@@ -1343,11 +1476,14 @@
                             <div class="list-item">
                                 <div class="item-name">${l.name}</div>
                                 <div>${l.phone || '-'}</div>
-                                <div>R$ ${l.value ? l.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '0'}</div>
+                                <div>R$ ${l.value ? parseFloat(l.value).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '0,00'}</div>
                                 <div><span class="badge badge-primary">${l.status}</span></div>
                                 <div>
                                     <button class="btn btn-small btn-primary" onclick="editLead(${l.id})">
                                         <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-small btn-danger" onclick="deleteLead(${l.id})">
+                                        <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
                             </div>
@@ -1381,12 +1517,15 @@
                         ${data.data.map(b => `
                             <div class="list-item">
                                 <div>${b.id}</div>
-                                <div>${b.customer_id}</div>
-                                <div>R$ ${b.total_value ? b.total_value.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '0'}</div>
+                                <div>${b.customer_name || b.customer_id}</div>
+                                <div>R$ ${b.total_value ? parseFloat(b.total_value).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '0,00'}</div>
                                 <div><span class="badge badge-warning">${b.status}</span></div>
                                 <div>
                                     <button class="btn btn-small btn-primary">
                                         <i class="fas fa-file-pdf"></i>
+                                    </button>
+                                    <button class="btn btn-small btn-danger" onclick="deleteBudget(${b.id})">
+                                        <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
                             </div>
@@ -1420,12 +1559,15 @@
                         ${data.data.map(o => `
                             <div class="list-item">
                                 <div>${o.id}</div>
-                                <div>${o.customer_id}</div>
-                                <div>R$ ${o.value ? o.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '0'}</div>
+                                <div>${o.customer_name || o.customer_id}</div>
+                                <div>R$ ${o.value ? parseFloat(o.value).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '0,00'}</div>
                                 <div><span class="badge badge-success">${o.status}</span></div>
                                 <div>
-                                    <button class="btn btn-small btn-primary">
+                                    <button class="btn btn-small btn-primary" onclick="editOrder(${o.id})">
                                         <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-small btn-danger" onclick="deleteOrder(${o.id})">
+                                        <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
                             </div>
@@ -1631,6 +1773,52 @@
             alert('Funcionalidade de edição em desenvolvimento');
         }
 
+        async function deleteLead(id) {
+            if (!confirm('Tem certeza que deseja excluir este lead?')) return;
+            try {
+                const res = await fetch(`${API_URL}/leads/${id}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (data.success) {
+                    showAlert('Lead excluído com sucesso!', 'success');
+                    loadLeads();
+                }
+            } catch (error) {
+                showAlert('Erro ao excluir lead', 'error');
+            }
+        }
+
+        async function deleteBudget(id) {
+            if (!confirm('Tem certeza que deseja excluir este orçamento?')) return;
+            try {
+                const res = await fetch(`${API_URL}/budgets/${id}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (data.success) {
+                    showAlert('Orçamento excluído com sucesso!', 'success');
+                    loadBudgets();
+                }
+            } catch (error) {
+                showAlert('Erro ao excluir orçamento', 'error');
+            }
+        }
+
+        async function deleteOrder(id) {
+            if (!confirm('Tem certeza que deseja excluir este pedido?')) return;
+            try {
+                const res = await fetch(`${API_URL}/orders/${id}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (data.success) {
+                    showAlert('Pedido excluído com sucesso!', 'success');
+                    loadOrders();
+                }
+            } catch (error) {
+                showAlert('Erro ao excluir pedido', 'error');
+            }
+        }
+
+        function editOrder(id) {
+            alert('Funcionalidade de edição em desenvolvimento');
+        }
+
         // ===== FINANCIAL REPORTS =====
         async function loadFinancialReports() {
             try {
@@ -1775,7 +1963,7 @@
                             },
                             {
                                 label: 'Mês Anterior',
-                                data: [6500, 7500, 8500, 09500],
+                                data: [6500, 7500, 8500, 9500],
                                 backgroundColor: '#cbd5e1',
                                 borderRadius: 6
                             }
@@ -1842,6 +2030,162 @@
                         }
                     }
                 });
+            }
+        }
+
+        // ===== AGENDA / FOLLOW-UPS =====
+        let allFollowUps = [];
+
+        async function loadFollowUps(filter = 'all') {
+            const container = document.getElementById('followups-container');
+            container.innerHTML = '<div class="empty-state"><p>Carregando...</p></div>';
+
+            // Update active filter button
+            ['all','overdue','today','upcoming','done'].forEach(f => {
+                const btn = document.getElementById('filter-' + f);
+                if (btn) btn.style.border = f === filter ? '2px solid var(--primary)' : '';
+            });
+
+            try {
+                const res = await fetch(`${API_URL}/follow-ups`);
+                const data = await res.json();
+                if (!data.success) throw new Error(data.error);
+                allFollowUps = data.data;
+
+                const now = new Date();
+                const todayStr = now.toDateString();
+                let filtered = allFollowUps;
+
+                if (filter === 'overdue') filtered = allFollowUps.filter(f => !f.completed && new Date(f.scheduled_date) < now);
+                else if (filter === 'today') filtered = allFollowUps.filter(f => !f.completed && new Date(f.scheduled_date).toDateString() === todayStr);
+                else if (filter === 'upcoming') filtered = allFollowUps.filter(f => !f.completed && new Date(f.scheduled_date) >= now && new Date(f.scheduled_date).toDateString() !== todayStr);
+                else if (filter === 'done') filtered = allFollowUps.filter(f => f.completed);
+                else filtered = allFollowUps; // all
+
+                if (!filtered.length) {
+                    container.innerHTML = '<div class="empty-state"><div class="empty-state-icon"><i class="fas fa-bell-slash"></i></div><p>Nenhum lembrete nesta categoria.</p></div>';
+                    return;
+                }
+
+                const typeLabels = { call:'📞 Ligação', meeting:'🤝 Reunião/Visita', email:'✉️ E-mail', order_followup:'📦 Retorno Pedido', visit:'🏢 Visita', proposal:'📋 Proposta' };
+
+                container.innerHTML = `
+                    <div class="list-header">
+                        <div>Tipo</div>
+                        <div>Cliente</div>
+                        <div>Descrição</div>
+                        <div>Data / Hora</div>
+                        <div>Status</div>
+                        <div>Ações</div>
+                    </div>
+                    ${filtered.map(f => {
+                        const dt = new Date(f.scheduled_date);
+                        const isOverdue = !f.completed && dt < now;
+                        const isToday = !f.completed && dt.toDateString() === todayStr;
+                        const statusBadge = f.completed
+                            ? '<span class="badge" style="background:#f0fdf4;color:#16a34a;border:1px solid #86efac;">✅ Concluído</span>'
+                            : isOverdue ? '<span class="badge" style="background:#fef2f2;color:#dc2626;border:1px solid #fca5a5;">⚠️ Atrasado</span>'
+                            : isToday ? '<span class="badge" style="background:#fffbeb;color:#d97706;border:1px solid #fcd34d;">🟡 Hoje</span>'
+                            : '<span class="badge" style="background:#f0fdf4;color:#16a34a;border:1px solid #86efac;">🟢 Agendado</span>';
+                        const rowStyle = isOverdue ? 'border-left:4px solid #ef4444;' : isToday ? 'border-left:4px solid #f59e0b;' : '';
+                        return `
+                            <div class="list-item" style="${rowStyle}">
+                                <div>${typeLabels[f.type] || f.type}</div>
+                                <div style="font-weight:600;">Cliente #${f.customer_id}</div>
+                                <div style="color:#64748b;">${f.description || '-'}</div>
+                                <div>${dt.toLocaleDateString('pt-BR')} ${dt.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'})}</div>
+                                <div>${statusBadge}</div>
+                                <div style="display:flex;gap:6px;">
+                                    ${!f.completed ? `<button class="btn btn-small btn-primary" onclick="completeFollowUp(${f.id})" title="Marcar como concluído"><i class="fas fa-check"></i></button>` : ''}
+                                    <button class="btn btn-small btn-danger" onclick="deleteFollowUp(${f.id})" title="Excluir"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </div>`;
+                    }).join('')}
+                `;
+            } catch (e) {
+                container.innerHTML = '<div class="empty-state"><p>Erro ao carregar agenda.</p></div>';
+                console.error(e);
+            }
+        }
+
+        async function openFollowUpModal() {
+            // Set default date to now + 1 day
+            const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+            document.getElementById('followUpDate').value = tomorrow.toISOString().slice(0,16);
+
+            // Populate customers
+            try {
+                const res = await fetch(`${API_URL}/customers`);
+                const data = await res.json();
+                const sel = document.getElementById('followUpCustomerId');
+                sel.innerHTML = '<option value="">Selecionar cliente...</option>';
+                if (data.success) {
+                    data.data.forEach(c => {
+                        sel.innerHTML += `<option value="${c.id}">${c.name}${c.company ? ' - ' + c.company : ''}</option>`;
+                    });
+                }
+            } catch(e) {}
+
+            document.getElementById('followUpDescription').value = '';
+            document.getElementById('followUpType').value = 'call';
+            document.getElementById('followUpModal').style.display = 'flex';
+        }
+
+        async function saveFollowUp(event) {
+            event.preventDefault();
+            const customer_id = document.getElementById('followUpCustomerId').value;
+            const type = document.getElementById('followUpType').value;
+            const description = document.getElementById('followUpDescription').value;
+            const scheduled_date = document.getElementById('followUpDate').value;
+
+            if (!customer_id) { showAlert('Selecione um cliente!', 'error'); return; }
+
+            try {
+                const res = await fetch(`${API_URL}/follow-ups`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ customer_id, type, description, scheduled_date })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showAlert('Lembrete salvo com sucesso! ✅', 'success');
+                    closeModal('followUpModal');
+                    loadFollowUps('all');
+                    loadDashboardAlerts();
+                } else {
+                    showAlert('Erro ao salvar: ' + (data.error || ''), 'error');
+                }
+            } catch(e) {
+                showAlert('Erro ao salvar lembrete', 'error');
+            }
+        }
+
+        async function completeFollowUp(id) {
+            try {
+                const res = await fetch(`${API_URL}/follow-ups/${id}/complete`, { method: 'PUT' });
+                const data = await res.json();
+                if (data.success) {
+                    showAlert('Lembrete marcado como concluído! ✅', 'success');
+                    loadFollowUps('all');
+                    loadDashboardAlerts();
+                }
+            } catch(e) {
+                showAlert('Erro ao atualizar lembrete', 'error');
+            }
+        }
+
+        async function deleteFollowUp(id) {
+            if (!confirm('Excluir este lembrete?')) return;
+            try {
+                const res = await fetch(`${API_URL}/follow-ups/${id}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (data.success) {
+                    showAlert('Lembrete excluído!', 'success');
+                    loadFollowUps('all');
+                    loadDashboardAlerts();
+                }
+            } catch(e) {
+                showAlert('Erro ao excluir', 'error');
             }
         }
 

@@ -273,6 +273,16 @@ app.put('/api/budgets/:id', async (req, res) => {
   }
 });
 
+app.delete('/api/budgets/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await query('DELETE FROM budgets WHERE id=?', [id]);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // ==================== ORDERS ====================
 app.get('/api/orders', async (req, res) => {
   try {
@@ -327,6 +337,16 @@ app.put('/api/orders/:id', async (req, res) => {
   }
 });
 
+app.delete('/api/orders/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await query('DELETE FROM orders WHERE id=?', [id]);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // ==================== FOLLOW-UPS ====================
 app.get('/api/follow-ups', async (req, res) => {
   try {
@@ -345,6 +365,26 @@ app.post('/api/follow-ups', async (req, res) => {
       [customer_id, type, description, scheduled_date]
     );
     res.json({ success: true, id: result.insertId });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+app.put('/api/follow-ups/:id/complete', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await query('UPDATE follow_ups SET completed = 1 WHERE id=?', [id]);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+app.delete('/api/follow-ups/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await query('DELETE FROM follow_ups WHERE id=?', [id]);
+    res.json({ success: true });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
