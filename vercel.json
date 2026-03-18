@@ -12,6 +12,22 @@
         "maxLambdaSize": "50mb",
         "runtime": "nodejs20.x"
       }
+    },
+    {
+      "src": "index.html",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "crm-pro.html",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "style.css",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "assets/(.*)",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
