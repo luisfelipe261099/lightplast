@@ -1,34 +1,34 @@
 {
   "version": 2,
   "buildCommand": "npm install",
-  "outputDirectory": ".",
   "env": {
     "NODE_ENV": "production"
   },
-  "functions": {
-    "index.js": {
-      "memory": 1024,
-      "maxDuration": 30,
-      "includeFiles": [
-        "index.html",
-        "crm-pro.html",
-        "style.css",
-        "assets/**"
-      ]
+  "builds": [
+    {
+      "src": "index.js",
+      "use": "@vercel/node",
+      "config": {
+        "maxLambdaSize": "50mb",
+        "runtime": "nodejs20.x"
+      }
     }
-  },
-  "rewrites": [
+  ],
+  "routes": [
     {
-      "source": "/api/(.*)",
-      "destination": "/index.js"
+      "handle": "filesystem"
     },
     {
-      "source": "/crm",
-      "destination": "/crm-pro.html"
+      "src": "^/api/(.*)$",
+      "dest": "/index.js"
     },
     {
-      "source": "/",
-      "destination": "/index.html"
+      "src": "^/crm$",
+      "dest": "/crm-pro.html"
+    },
+    {
+      "src": "^/$",
+      "dest": "/index.html"
     }
   ]
 }
