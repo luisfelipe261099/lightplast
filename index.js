@@ -3,7 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-import mysql from 'mysql2';
+import mysql from 'mysql';
 
 dotenv.config();
 
@@ -18,27 +18,29 @@ app.use(express.json());
 // Servir arquivos estáticos (HTML, CSS, JS)
 app.use(express.static(__dirname));
 
-// Rewrite /crm para /crm.html
+// Rewrite /crm para /crm-pro.html (nova versão)
 app.get('/crm', (req, res) => {
-  res.sendFile(join(__dirname, 'crm.html'));
+  res.sendFile(join(__dirname, 'crm-pro.html'));
 });
 
 // Database connection
 const pool = mysql.createPool({
   connectionLimit: 10,
-  host: process.env.TIDB_HOST || 'gateway01.us-east-1.prod.aws.tidbcloud.com',
-  port: Number(process.env.TIDB_PORT) || 4000,
-  user: process.env.TIDB_USER || 'wYESZBLpqwYM6hn.root',
-  password: process.env.TIDB_PASSWORD || '4u5Ukx0YsaVWTcs4',
-  database: process.env.TIDB_DATABASE || 'test',
-  ssl: {
-    minVersion: 'TLSv1.2',
-    rejectUnauthorized: false
-  },
+  host: process.env.TIDB_HOST,
+  port: process.env.TIDB_PORT || 4000,
+  user: process.env.TIDB_USER,
+  password: process.env.TIDB_PASSWORD,
+  database: process.env.TIDB_DATABASE,
   charset: 'utf8mb4',
-  waitForConnections: true,
-  queueLimit: 0
+  supportBigNumbers: true,
+  bigNumberStrings: true,
 });
+
+// Validar se variáveis de ambiente existem
+if (!process.env.TIDB_HOST || !process.env.TIDB_USER || !process.env.TIDB_PASSWORD || !process.env.TIDB_DATABASE) {
+  console.warn('⚠️  Aviso: Variáveis de ambiente de banco de dados não configuradas');
+  console.warn('Certifique-se de que TIDB_HOST, TIDB_USER, TIDB_PASSWORD e TIDB_DATABASE estão definidas');
+}
 
 const query = (sql, args) => new Promise((resolve, reject) => {
   pool.query(sql, args, (err, results) => {
@@ -50,7 +52,17 @@ const query = (sql, args) => new Promise((resolve, reject) => {
 // ==================== CUSTOMERS ====================
 app.get('/api/customers', async (req, res) => {
   try {
-    const customers = await query('SELECT * FROM customers ORDER BY last_contact DESC LIMIT 100');
+    const { search } = req.query;
+    let sql = 'SELECT * FROM customers';
+    let params = [];
+
+    if (search) {
+      sql += ' WHERE name LIKE ? OR email LIKE ? OR phone LIKE ? OR company LIKE ?';
+      params = [`%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`];
+    }
+
+    sql += ' ORDER BY last_contact DESC LIMIT 100';
+    const customers = await query(sql, params);
     res.json({ success: true, data: customers });
   } catch (error) {
     console.error('Error:', error.message);
@@ -61,9 +73,14 @@ app.get('/api/customers', async (req, res) => {
 app.post('/api/customers', async (req, res) => {
   try {
     const { name, email, phone, company, status, source, notes } = req.body;
+    
+    if (!name || !phone) {
+      return res.status(400).json({ success: false, error: 'Nome e telefone são obrigatórios' });
+    }
+
     const result = await query(
       'INSERT INTO customers (name, email, phone, company, status, source, notes, created_at, last_contact) VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())',
-      [name, email, phone, company, status || 'prospect', source, notes]
+      [name, email, phone, company, status || 'prospect', source || 'website', notes]
     );
     res.json({ success: true, id: result.insertId });
   } catch (error) {
@@ -71,11 +88,12 @@ app.post('/api/customers', async (req, res) => {
   }
 });
 
-app.put('/api/customers', async (req, res) => {
+app.put('/api/customers/:id', async (req, res) => {
   try {
-    const { id, name, email, phone, company, status, source, notes } = req.body;
+    const { id } = req.params;
+    const { name, email, phone, company, status, source, notes } = req.body;
     await query(
-      'UPDATE customers SET name=?, email=?, phone=?, company=?, status=?, source=?, notes=? WHERE id=?',
+      'UPDATE customers SET name=?, email=?, phone=?, company=?, status=?, source=?, notes=?, last_contact=NOW() WHERE id=?',
       [name, email, phone, company, status, source, notes, id]
     );
     res.json({ success: true });
@@ -97,7 +115,22 @@ app.delete('/api/customers/:id', async (req, res) => {
 // ==================== LEADS ====================
 app.get('/api/leads', async (req, res) => {
   try {
-    const leads = await query('SELECT * FROM leads ORDER BY created_at DESC LIMIT 100');
+    const { search, status } = req.query;
+    let sql = 'SELECT * FROM leads WHERE 1=1';
+    let params = [];
+
+    if (search) {
+      sql += ' AND (name LIKE ? OR phone LIKE ? OR email LIKE ? OR company LIKE ?)';
+      params.push(`%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`);
+    }
+
+    if (status) {
+      sql += ' AND status = ?';
+      params.push(status);
+    }
+
+    sql += ' ORDER BY created_at DESC LIMIT 100';
+    const leads = await query(sql, params);
     res.json({ success: true, data: leads });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
@@ -106,12 +139,41 @@ app.get('/api/leads', async (req, res) => {
 
 app.post('/api/leads', async (req, res) => {
   try {
-    const { customer_id, title, description, value, status, priority } = req.body;
+    const { customer_id, name, email, phone, company, title, description, value, status, priority } = req.body;
+    
+    if (!name || !phone) {
+      return res.status(400).json({ success: false, error: 'Nome e telefone são obrigatórios' });
+    }
+
     const result = await query(
-      'INSERT INTO leads (customer_id, title, description, value, status, priority, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())',
-      [customer_id, title, description, value, status || 'open', priority || 'medium']
+      'INSERT INTO leads (customer_id, name, email, phone, company, title, description, value, status, priority, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())',
+      [customer_id || null, name, email, phone, company, title, description, value || 0, status || 'new', priority || 'medium']
     );
     res.json({ success: true, id: result.insertId });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+app.put('/api/leads/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, email, phone, company, status, value, priority, description } = req.body;
+    await query(
+      'UPDATE leads SET name=?, email=?, phone=?, company=?, status=?, value=?, priority=?, description=?, updated_at=NOW() WHERE id=?',
+      [name, email, phone, company, status, value, priority, description, id]
+    );
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+app.delete('/api/leads/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await query('DELETE FROM leads WHERE id=?', [id]);
+    res.json({ success: true });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -120,7 +182,22 @@ app.post('/api/leads', async (req, res) => {
 // ==================== BUDGETS ====================
 app.get('/api/budgets', async (req, res) => {
   try {
-    const budgets = await query('SELECT * FROM budgets ORDER BY created_at DESC LIMIT 100');
+    const { search, status } = req.query;
+    let sql = 'SELECT b.*, c.name as customer_name FROM budgets b JOIN customers c ON b.customer_id = c.id WHERE 1=1';
+    let params = [];
+
+    if (search) {
+      sql += ' AND (b.title LIKE ? OR c.name LIKE ?)';
+      params.push(`%${search}%`, `%${search}%`);
+    }
+
+    if (status) {
+      sql += ' AND b.status = ?';
+      params.push(status);
+    }
+
+    sql += ' ORDER BY b.created_at DESC LIMIT 100';
+    const budgets = await query(sql, params);
     res.json({ success: true, data: budgets });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
@@ -129,10 +206,15 @@ app.get('/api/budgets', async (req, res) => {
 
 app.post('/api/budgets', async (req, res) => {
   try {
-    const { customer_id, title, description, items, total_value, status, tax, discount } = req.body;
+    const { customer_id, title, description, total_value, status, tax, discount, valid_until } = req.body;
+    
+    if (!customer_id || !title || !total_value) {
+      return res.status(400).json({ success: false, error: 'Cliente, título e valor são obrigatórios' });
+    }
+
     const result = await query(
-      'INSERT INTO budgets (customer_id, title, description, items, total_value, status, tax, discount, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())',
-      [customer_id, title, description, JSON.stringify(items), total_value, status || 'draft', tax || 0, discount || 0]
+      'INSERT INTO budgets (customer_id, title, description, total_value, status, tax, discount, valid_until, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())',
+      [customer_id, title, description, total_value, status || 'draft', tax || 0, discount || 0, valid_until]
     );
     res.json({ success: true, id: result.insertId });
   } catch (error) {
@@ -140,9 +222,10 @@ app.post('/api/budgets', async (req, res) => {
   }
 });
 
-app.put('/api/budgets', async (req, res) => {
+app.put('/api/budgets/:id', async (req, res) => {
   try {
-    const { id, status } = req.body;
+    const { id } = req.params;
+    const { status } = req.body;
     await query('UPDATE budgets SET status=?, updated_at=NOW() WHERE id=?', [status, id]);
     res.json({ success: true });
   } catch (error) {
@@ -153,7 +236,22 @@ app.put('/api/budgets', async (req, res) => {
 // ==================== ORDERS ====================
 app.get('/api/orders', async (req, res) => {
   try {
-    const orders = await query('SELECT * FROM orders ORDER BY created_at DESC LIMIT 100');
+    const { search, status } = req.query;
+    let sql = 'SELECT o.*, c.name as customer_name FROM orders o JOIN customers c ON o.customer_id = c.id WHERE 1=1';
+    let params = [];
+
+    if (search) {
+      sql += ' AND (c.name LIKE ? OR o.id LIKE ?)';
+      params.push(`%${search}%`, `%${search}%`);
+    }
+
+    if (status) {
+      sql += ' AND o.status = ?';
+      params.push(status);
+    }
+
+    sql += ' ORDER BY o.created_at DESC LIMIT 100';
+    const orders = await query(sql, params);
     res.json({ success: true, data: orders });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
@@ -162,12 +260,28 @@ app.get('/api/orders', async (req, res) => {
 
 app.post('/api/orders', async (req, res) => {
   try {
-    const { customer_id, budget_id, value, status } = req.body;
+    const { customer_id, budget_id, value, status, description } = req.body;
+    
+    if (!customer_id || !value) {
+      return res.status(400).json({ success: false, error: 'Cliente e valor são obrigatórios' });
+    }
+
     const result = await query(
-      'INSERT INTO orders (customer_id, budget_id, value, status, created_at, updated_at) VALUES (?, ?, ?, ?, NOW(), NOW())',
-      [customer_id, budget_id || null, value, status || 'pending']
+      'INSERT INTO orders (customer_id, budget_id, value, status, description, created_at, updated_at) VALUES (?, ?, ?, ?, ?, NOW(), NOW())',
+      [customer_id, budget_id || null, value, status || 'pending', description]
     );
     res.json({ success: true, id: result.insertId });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+app.put('/api/orders/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    await query('UPDATE orders SET status=?, updated_at=NOW() WHERE id=?', [status, id]);
+    res.json({ success: true });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -200,101 +314,169 @@ app.post('/api/follow-ups', async (req, res) => {
 app.get('/api/dashboard', async (req, res) => {
   try {
     const [totalCustomers] = await query('SELECT COUNT(*) as count FROM customers');
-    const [totalLeads] = await query('SELECT COUNT(*) as count FROM leads');
+    const [qualifiedLeads] = await query('SELECT COUNT(*) as count FROM leads WHERE status IN ("qualified", "contacted")');
     const [pendingFollowUps] = await query('SELECT COUNT(*) as count FROM follow_ups WHERE completed = 0');
-    const [totalRevenue] = await query('SELECT SUM(value) as total FROM orders WHERE status = "confirmed"');
-    const recentFollowUps = await query(
-      `SELECT f.scheduled_date, f.type AS follow_up_type, COALESCE(c.name, 'Sem contato') AS contact_name
-       FROM follow_ups f
-       LEFT JOIN customers c ON c.id = f.customer_id
-       ORDER BY f.scheduled_date ASC
-       LIMIT 5`
-    );
-    const topCustomers = await query(
-      `SELECT c.name, c.company, c.phone, COALESCE(SUM(o.value), 0) AS total_spent
-       FROM customers c
-       LEFT JOIN orders o ON o.customer_id = c.id
-       GROUP BY c.id
-       ORDER BY total_spent DESC
-       LIMIT 5`
-    );
+    const [totalRevenue] = await query('SELECT SUM(value) as total FROM orders WHERE status IN ("confirmed", "completed")');
     
     res.json({
       success: true,
       data: {
         totalCustomers: totalCustomers?.count || 0,
-        qualifiedLeads: totalLeads?.count || 0,
+        qualifiedLeads: qualifiedLeads?.count || 0,
         pendingFollowUps: pendingFollowUps?.count || 0,
-        totalRevenue: totalRevenue?.total || 0
-      },
-      stats: {
-        total_customers: totalCustomers?.count || 0,
-        total_leads: totalLeads?.count || 0,
-        pending_follow_ups: pendingFollowUps?.count || 0,
-        total_revenue: totalRevenue?.total || 0
-      },
-      recent_follow_ups: recentFollowUps,
-      top_customers: topCustomers
+        totalRevenue: parseFloat(totalRevenue?.total) || 0
+      }
     });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 });
 
-// ==================== PHP COMPATIBILITY ====================
-app.get('/api/customers.php', (req, res) => {
-  req.url = '/api/customers';
-  return app._router.handle(req, res);
-});
-app.get('/api/leads.php', (req, res) => {
-  req.url = '/api/leads';
-  return app._router.handle(req, res);
-});
-app.get('/api/budgets.php', (req, res) => {
-  req.url = '/api/budgets';
-  return app._router.handle(req, res);
-});
-app.get('/api/orders.php', (req, res) => {
-  req.url = '/api/orders';
-  return app._router.handle(req, res);
-});
-app.get('/api/follow-ups.php', (req, res) => {
-  req.url = '/api/follow-ups';
-  return app._router.handle(req, res);
-});
-app.get('/api/dashboard.php', (req, res) => {
-  req.url = '/api/dashboard';
-  return app._router.handle(req, res);
+// ==================== EXPORTS ====================
+app.get('/api/export/customers', async (req, res) => {
+  try {
+    const customers = await query('SELECT id, name, email, phone, company, status, source, created_at FROM customers ORDER BY created_at DESC');
+    
+    let csv = 'ID,Nome,Email,Telefone,Empresa,Status,Origem,Data de Criação\n';
+    customers.forEach(c => {
+      csv += `"${c.id}","${c.name}","${c.email || ''}","${c.phone}","${c.company || ''}","${c.status}","${c.source || ''}","${c.created_at}"\n`;
+    });
+
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename="clientes.csv"');
+    res.send(csv);
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
 });
 
-// Endpoint de diagnóstico avançado
-app.get('/api/debug', async (req, res) => {
+app.get('/api/export/orders', async (req, res) => {
   try {
-    const startTime = Date.now();
-    const result = await query('SELECT 1 + 1 AS test');
-    const duration = Date.now() - startTime;
+    const orders = await query('SELECT o.id, c.name, o.value, o.status, o.created_at FROM orders o JOIN customers c ON o.customer_id = c.id ORDER BY o.created_at DESC');
     
+    let csv = 'ID,Cliente,Valor,Status,Data de Criação\n';
+    orders.forEach(o => {
+      csv += `"${o.id}","${o.name}","R$ ${parseFloat(o.value).toFixed(2)}","${o.status}","${o.created_at}"\n`;
+    });
+
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename="pedidos.csv"');
+    res.send(csv);
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ==================== FINANCIAL REPORTS ====================
+app.get('/api/reports/summary', async (req, res) => {
+  try {
+    const [currentMonth] = await query(`
+      SELECT 
+        SUM(value) as total_revenue, 
+        COUNT(*) as total_orders
+      FROM orders 
+      WHERE MONTH(created_at) = MONTH(NOW()) 
+      AND YEAR(created_at) = YEAR(NOW())
+      AND status IN ("confirmed", "completed")
+    `);
+
+    const [previousMonth] = await query(`
+      SELECT 
+        SUM(value) as total_revenue
+      FROM orders 
+      WHERE MONTH(created_at) = MONTH(DATE_SUB(NOW(), INTERVAL 1 MONTH))
+      AND YEAR(created_at) = YEAR(DATE_SUB(NOW(), INTERVAL 1 MONTH))
+      AND status IN ("confirmed", "completed")
+    `);
+
+    const currentRev = currentMonth?.total_revenue || 0;
+    const previousRev = previousMonth?.total_revenue || 0;
+    const percentChange = previousRev > 0 ? (((currentRev - previousRev) / previousRev) * 100).toFixed(2) : 0;
+
     res.json({
-      status: 'success',
-      message: 'Conexão com o banco de dados realizada com sucesso!',
-      duration: `${duration}ms`,
-      config: {
-        host: process.env.TIDB_HOST || 'FALLBACK',
-        user: (process.env.TIDB_USER || 'FALLBACK').split('.')[0] + '... (obscured)',
-        database: process.env.TIDB_DATABASE || 'test'
-      },
-      data: result[0]
+      success: true,
+      data: {
+        currentMonthRevenue: parseFloat(currentRev),
+        currentMonthOrders: currentMonth?.total_orders || 0,
+        previousMonthRevenue: parseFloat(previousRev),
+        percentChange: parseFloat(percentChange),
+        averageTicket: (currentMonth?.total_orders > 0) ? (currentRev / currentMonth.total_orders).toFixed(2) : 0
+      }
     });
   } catch (error) {
-    res.status(500).json({
-      status: 'error',
-      message: 'Falha na conexão com o banco de dados',
-      error: error.message,
-      code: error.code,
-      errno: error.errno,
-      hint: 'Verifique se o Usuário e a Senha no Vercel estão exatamente iguais ao console do TiDB Cloud.',
-      doc: 'https://docs.pingcap.com/tidbcloud/select-cluster-tier#user-name-prefix'
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+app.get('/api/reports/monthly', async (req, res) => {
+  try {
+    const data = await query(`
+      SELECT 
+        DATE_FORMAT(created_at, '%Y-%m') as month,
+        SUM(value) as total_revenue,
+        COUNT(*) as order_count
+      FROM orders
+      WHERE status IN ("confirmed", "completed")
+      GROUP BY DATE_FORMAT(created_at, '%Y-%m')
+      ORDER BY month DESC
+      LIMIT 12
+    `);
+
+    res.json({
+      success: true,
+      data: data.reverse()
     });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+app.get('/api/reports/top-clients', async (req, res) => {
+  try {
+    const topClients = await query(`
+      SELECT 
+        c.id,
+        c.name,
+        c.company,
+        SUM(o.value) as total_spent,
+        COUNT(o.id) as order_count
+      FROM customers c
+      LEFT JOIN orders o ON c.id = o.customer_id AND o.status IN ("confirmed", "completed")
+      GROUP BY c.id
+      ORDER BY total_spent DESC
+      LIMIT 10
+    `);
+
+    res.json({
+      success: true,
+      data: topClients
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+app.get('/api/reports/weekly', async (req, res) => {
+  try {
+    const weekly = await query(`
+      SELECT 
+        DATE_FORMAT(created_at, '%W') as week,
+        DATE_FORMAT(created_at, '%Y-%m-%d') as date,
+        SUM(value) as total_revenue,
+        COUNT(*) as order_count
+      FROM orders
+      WHERE status IN ("confirmed", "completed")
+      AND created_at >= DATE_SUB(NOW(), INTERVAL 8 WEEK)
+      GROUP BY WEEK(created_at)
+      ORDER BY created_at DESC
+    `);
+
+    res.json({
+      success: true,
+      data: weekly
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 
