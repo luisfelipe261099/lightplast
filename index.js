@@ -18,6 +18,11 @@ app.use(express.json());
 // Servir arquivos estáticos (HTML, CSS, JS)
 app.use(express.static(__dirname));
 
+// Rota raiz explícita para evitar "Cannot GET /" em ambiente serverless
+app.get('/', (req, res) => {
+  res.sendFile(join(__dirname, 'index.html'));
+});
+
 // Rewrite /crm para /crm-pro.html (nova versão)
 app.get('/crm', (req, res) => {
   res.sendFile(join(__dirname, 'crm-pro.html'));
@@ -542,8 +547,12 @@ app.get('/api/reports/weekly', async (req, res) => {
   }
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-  console.log(`📊 CRM Dashboard: http://localhost:${PORT}/crm`);
-});
+// Start server apenas em ambiente local (no Vercel, exportamos o app)
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`CRM Dashboard: http://localhost:${PORT}/crm`);
+  });
+}
+
+export default app;
