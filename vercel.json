@@ -1,50 +1,20 @@
 {
   "version": 2,
-  "buildCommand": "npm install",
   "env": {
     "NODE_ENV": "production"
   },
-  "builds": [
+  "rewrites": [
     {
-      "src": "index.js",
-      "use": "@vercel/node",
-      "config": {
-        "maxLambdaSize": "50mb",
-        "runtime": "nodejs20.x"
-      }
+      "source": "/api/(.*)",
+      "destination": "/api/index.js"
     },
     {
-      "src": "index.html",
-      "use": "@vercel/static"
+      "source": "/crm",
+      "destination": "/crm-pro.html"
     },
     {
-      "src": "crm-pro.html",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "style.css",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "assets/(.*)",
-      "use": "@vercel/static"
-    }
-  ],
-  "routes": [
-    {
-      "handle": "filesystem"
-    },
-    {
-      "src": "^/api/(.*)$",
-      "dest": "/index.js"
-    },
-    {
-      "src": "^/crm$",
-      "dest": "/crm-pro.html"
-    },
-    {
-      "src": "^/$",
-      "dest": "/index.html"
+      "source": "/",
+      "destination": "/index.html"
     }
   ]
 }
