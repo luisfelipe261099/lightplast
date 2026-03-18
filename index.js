@@ -44,12 +44,15 @@ async function initDatabase() {
       user: process.env.TIDB_USER,
       password: process.env.TIDB_PASSWORD,
       database: process.env.TIDB_DATABASE,
+      ssl: {
+        minVersion: 'TLSv1.2',
+        rejectUnauthorized: true
+      },
       charset: 'utf8mb4',
       supportBigNumbers: true,
       bigNumberStrings: true,
       waitForConnections: true,
-      enableKeepAlive: true,
-      keepAliveInitialDelayMs: 0,
+      enableKeepAlive: true
     });
     console.log('✅ Banco de dados conectado');
   } catch (error) {
