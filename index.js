@@ -270,7 +270,7 @@ app.post('/api/auth/login', async (req, res) => {
       return res.status(400).json({ success: false, error: 'E-mail e senha são obrigatórios' });
     }
 
-    const [users] = await query('SELECT * FROM users WHERE email = ? LIMIT 1', [email]);
+    const users = await query('SELECT * FROM users WHERE email = ? LIMIT 1', [email]);
     
     if (!users || users.length === 0) {
       return res.status(401).json({ success: false, error: 'E-mail ou senha incorretos' });
@@ -352,7 +352,7 @@ app.put('/api/users/:id', authenticateToken, async (req, res) => {
       return res.status(403).json({ success: false, error: 'Sem permissão para editar este usuário' });
     }
 
-    const [users] = await query('SELECT * FROM users WHERE id = ? LIMIT 1', [id]);
+    const users = await query('SELECT * FROM users WHERE id = ? LIMIT 1', [id]);
     if (!users || users.length === 0) {
       return res.status(404).json({ success: false, error: 'Usuário não encontrado' });
     }
@@ -398,7 +398,7 @@ app.delete('/api/users/:id', authenticateToken, async (req, res) => {
       return res.status(400).json({ success: false, error: 'Você não pode deletar sua própria conta' });
     }
 
-    const [users] = await query('SELECT * FROM users WHERE id = ? LIMIT 1', [id]);
+    const users = await query('SELECT * FROM users WHERE id = ? LIMIT 1', [id]);
     if (!users || users.length === 0) {
       return res.status(404).json({ success: false, error: 'Usuário não encontrado' });
     }
