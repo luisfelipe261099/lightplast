@@ -304,6 +304,23 @@ app.put('/api/leads/:id', async (req, res) => {
   }
 });
 
+app.post('/api/leads/bulk-delete', async (req, res) => {
+  try {
+    const ids = Array.isArray(req.body?.ids) ? req.body.ids : [];
+    const parsedIds = ids.map((id) => Number(id)).filter((id) => Number.isInteger(id) && id > 0);
+
+    if (!parsedIds.length) {
+      return res.status(400).json({ success: false, error: 'Nenhum ID válido informado' });
+    }
+
+    const placeholders = parsedIds.map(() => '?').join(',');
+    await query(`DELETE FROM leads WHERE id IN (${placeholders})`, parsedIds);
+    res.json({ success: true, message: `${parsedIds.length} lead(s) excluído(s)` });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 app.delete('/api/leads/:id', async (req, res) => {
   try {
     const { id } = req.params;
@@ -368,6 +385,23 @@ app.put('/api/budgets/:id', async (req, res) => {
   }
 });
 
+app.post('/api/budgets/bulk-delete', async (req, res) => {
+  try {
+    const ids = Array.isArray(req.body?.ids) ? req.body.ids : [];
+    const parsedIds = ids.map((id) => Number(id)).filter((id) => Number.isInteger(id) && id > 0);
+
+    if (!parsedIds.length) {
+      return res.status(400).json({ success: false, error: 'Nenhum ID válido informado' });
+    }
+
+    const placeholders = parsedIds.map(() => '?').join(',');
+    await query(`DELETE FROM budgets WHERE id IN (${placeholders})`, parsedIds);
+    res.json({ success: true, message: `${parsedIds.length} orçamento(s) excluído(s)` });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 app.delete('/api/budgets/:id', async (req, res) => {
   try {
     const { id } = req.params;
@@ -427,6 +461,23 @@ app.put('/api/orders/:id', async (req, res) => {
     const { status } = req.body;
     await query('UPDATE orders SET status=?, updated_at=NOW() WHERE id=?', [status, id]);
     res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+app.post('/api/orders/bulk-delete', async (req, res) => {
+  try {
+    const ids = Array.isArray(req.body?.ids) ? req.body.ids : [];
+    const parsedIds = ids.map((id) => Number(id)).filter((id) => Number.isInteger(id) && id > 0);
+
+    if (!parsedIds.length) {
+      return res.status(400).json({ success: false, error: 'Nenhum ID válido informado' });
+    }
+
+    const placeholders = parsedIds.map(() => '?').join(',');
+    await query(`DELETE FROM orders WHERE id IN (${placeholders})`, parsedIds);
+    res.json({ success: true, message: `${parsedIds.length} pedido(s) excluído(s)` });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }

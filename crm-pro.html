@@ -902,6 +902,9 @@
                     <div class="search-bar">
                         <input type="text" id="leadsSearch" placeholder="🔍 Buscar lead...">
                     </div>
+                    <button class="btn btn-danger" type="button" onclick="deleteSelectedLeads()">
+                        <i class="fas fa-trash"></i> Excluir Selecionados
+                    </button>
                     <button class="btn btn-primary" onclick="openLeadModal()">
                         <i class="fas fa-plus"></i> Novo Lead
                     </button>
@@ -924,6 +927,9 @@
                     <div class="search-bar">
                         <input type="text" id="budgetsSearch" placeholder="🔍 Buscar orçamento...">
                     </div>
+                    <button class="btn btn-danger" type="button" onclick="deleteSelectedBudgets()">
+                        <i class="fas fa-trash"></i> Excluir Selecionados
+                    </button>
                     <button class="btn btn-primary" onclick="openBudgetModal()">
                         <i class="fas fa-plus"></i> Novo Orçamento
                     </button>
@@ -946,6 +952,9 @@
                     <div class="search-bar">
                         <input type="text" id="ordersSearch" placeholder="🔍 Buscar pedido...">
                     </div>
+                    <button class="btn btn-danger" type="button" onclick="deleteSelectedOrders()">
+                        <i class="fas fa-trash"></i> Excluir Selecionados
+                    </button>
                     <button class="btn btn-secondary btn-icon" onclick="exportOrders()" title="Exportar para CSV">
                         <i class="fas fa-download"></i> Exportar
                     </button>
@@ -1518,6 +1527,11 @@
     <script>
         const API_URL = '/api';
         let charts = {};
+        const bulkSelection = {
+            leads: new Set(),
+            budgets: new Set(),
+            orders: new Set(),
+        };
         const cmsState = {
             pages: [],
             selectedFile: '',
@@ -2372,6 +2386,7 @@
                 if (data.data.length > 0) {
                     const html = `
                         <div class="list-header">
+                            <div><input type="checkbox" onchange="toggleSelectAll('leads', this.checked)"></div>
                             <div>Nome</div>
                             <div>Telefone</div>
                             <div>Valor Est.</div>
@@ -2380,6 +2395,7 @@
                         </div>
                         ${data.data.map(l => `
                             <div class="list-item">
+                                <div><input type="checkbox" ${bulkSelection.leads.has(l.id) ? 'checked' : ''} onchange="toggleBulkSelection('leads', ${l.id}, this.checked)"></div>
                                 <div class="item-name">${l.name}</div>
                                 <div>${l.phone || '-'}</div>
                                 <div>R$ ${l.value ? l.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '0'}</div>
@@ -2420,6 +2436,7 @@
                 if (data.data.length > 0) {
                     const html = `
                         <div class="list-header">
+                            <div><input type="checkbox" onchange="toggleSelectAll('budgets', this.checked)"></div>
                             <div>ID</div>
                             <div>Cliente</div>
                             <div>Valor</div>
@@ -2428,6 +2445,7 @@
                         </div>
                         ${data.data.map(b => `
                             <div class="list-item">
+                                <div><input type="checkbox" ${bulkSelection.budgets.has(b.id) ? 'checked' : ''} onchange="toggleBulkSelection('budgets', ${b.id}, this.checked)"></div>
                                 <div>${b.id}</div>
                                 <div>${b.customer_id}</div>
                                 <div>R$ ${b.total_value ? b.total_value.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '0'}</div>
@@ -2468,6 +2486,7 @@
                 if (data.data.length > 0) {
                     const html = `
                         <div class="list-header">
+                            <div><input type="checkbox" onchange="toggleSelectAll('orders', this.checked)"></div>
                             <div>ID</div>
                             <div>Cliente</div>
                             <div>Valor</div>
@@ -2476,6 +2495,7 @@
                         </div>
                         ${data.data.map(o => `
                             <div class="list-item">
+                                <div><input type="checkbox" ${bulkSelection.orders.has(o.id) ? 'checked' : ''} onchange="toggleBulkSelection('orders', ${o.id}, this.checked)"></div>
                                 <div>${o.id}</div>
                                 <div>${o.customer_id}</div>
                                 <div>R$ ${o.value ? o.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '0'}</div>
@@ -2733,6 +2753,114 @@
                 }
             } catch (error) {
                 showAlert(error.message || 'Erro ao excluir pedido', 'error');
+            }
+        }
+
+        function toggleBulkSelection(type, id, checked) {
+            const bucket = bulkSelection[type];
+            if (!bucket) return;
+            if (checked) bucket.add(id);
+            else bucket.delete(id);
+        }
+
+        function toggleSelectAll(type, checked) {
+            const selectorMap = {
+                leads: '#leads-container .list-item input[type="checkbox"]',
+                budgets: '#budgets-container .list-item input[type="checkbox"]',
+                orders: '#orders-container .list-item input[type="checkbox"]',
+            };
+
+            const bucket = bulkSelection[type];
+            const selector = selectorMap[type];
+            if (!bucket || !selector) return;
+
+            const checkboxes = document.querySelectorAll(selector);
+            checkboxes.forEach((el) => {
+                el.checked = checked;
+                const inline = el.getAttribute('onchange') || '';
+                const match = inline.match(/,\s*(\d+),/);
+                const id = Number(match?.[1]);
+                if (!id) return;
+                if (checked) bucket.add(id);
+                else bucket.delete(id);
+            });
+        }
+
+        async function deleteSelectedLeads() {
+            const ids = Array.from(bulkSelection.leads);
+            if (!ids.length) {
+                showAlert('Selecione pelo menos um lead', 'warning');
+                return;
+            }
+
+            if (!confirm(`Excluir ${ids.length} lead(s) selecionado(s)?`)) return;
+
+            try {
+                const res = await fetch(`${API_URL}/leads/bulk-delete`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ids })
+                });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.error || 'Falha ao excluir leads');
+
+                bulkSelection.leads.clear();
+                showAlert(data.message || 'Leads excluídos com sucesso', 'success');
+                loadLeads(document.getElementById('leadsSearch')?.value || '');
+            } catch (error) {
+                showAlert(error.message || 'Erro ao excluir leads', 'error');
+            }
+        }
+
+        async function deleteSelectedBudgets() {
+            const ids = Array.from(bulkSelection.budgets);
+            if (!ids.length) {
+                showAlert('Selecione pelo menos um orçamento', 'warning');
+                return;
+            }
+
+            if (!confirm(`Excluir ${ids.length} orçamento(s) selecionado(s)?`)) return;
+
+            try {
+                const res = await fetch(`${API_URL}/budgets/bulk-delete`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ids })
+                });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.error || 'Falha ao excluir orçamentos');
+
+                bulkSelection.budgets.clear();
+                showAlert(data.message || 'Orçamentos excluídos com sucesso', 'success');
+                loadBudgets(document.getElementById('budgetsSearch')?.value || '');
+            } catch (error) {
+                showAlert(error.message || 'Erro ao excluir orçamentos', 'error');
+            }
+        }
+
+        async function deleteSelectedOrders() {
+            const ids = Array.from(bulkSelection.orders);
+            if (!ids.length) {
+                showAlert('Selecione pelo menos um pedido', 'warning');
+                return;
+            }
+
+            if (!confirm(`Excluir ${ids.length} pedido(s) selecionado(s)?`)) return;
+
+            try {
+                const res = await fetch(`${API_URL}/orders/bulk-delete`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ids })
+                });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.error || 'Falha ao excluir pedidos');
+
+                bulkSelection.orders.clear();
+                showAlert(data.message || 'Pedidos excluídos com sucesso', 'success');
+                loadOrders(document.getElementById('ordersSearch')?.value || '');
+            } catch (error) {
+                showAlert(error.message || 'Erro ao excluir pedidos', 'error');
             }
         }
 
