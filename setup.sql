@@ -163,6 +163,22 @@ CREATE TABLE IF NOT EXISTS audit_logs (
 -- INSERT INTO budgets (customer_id, title, items, total_value, status) VALUES
 -- (1, 'Software License Budget', '[{"description":"License Year 1","quantity":1,"unitPrice":10000,"total":10000}]', 10000.00, 'sent');
 
+-- ==================== SCHEDULING TABLE ====================
+CREATE TABLE IF NOT EXISTS scheduling (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_id INT NOT NULL,
+    type VARCHAR(100),
+    description TEXT,
+    scheduled_at DATETIME,
+    status ENUM('pending', 'confirmed', 'completed', 'cancelled') DEFAULT 'pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (customer_id) REFERENCES customers(id),
+    INDEX idx_customer_id (customer_id),
+    INDEX idx_scheduled_at (scheduled_at),
+    INDEX idx_status (status)
+);
+
 -- ==================== VERIFICATION ====================
 -- Execute isto para verificar se as tabelas foram criadas:
 -- SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'test';

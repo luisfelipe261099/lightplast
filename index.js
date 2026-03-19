@@ -156,7 +156,7 @@ const authenticateToken = (req, res, next) => {
   if (!token) {
     return res.status(401).json({ success: false, error: 'Token não fornecido' });
   }
-  
+
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
     req.user = decoded;
@@ -171,7 +171,7 @@ const logAudit = async (userId, action, tableName, recordId, oldValues = null, n
   try {
     const [ipAddress] = req?.ip?.split(':') || [''];
     const userAgent = req?.get('user-agent') || '';
-    
+
     await query(
       `INSERT INTO audit_logs (user_id, action, table_name, record_id, old_values, new_values, ip_address, user_agent, created_at)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
@@ -241,20 +241,20 @@ app.post('/api/auth/register', authenticateToken, async (req, res) => {
     }
 
     const { email, password, name, role } = req.body;
-    
+
     if (!email || !password || !name) {
       return res.status(400).json({ success: false, error: 'E-mail, senha e nome são obrigatórios' });
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
-    
+
     const result = await query(
       'INSERT INTO users (email, password_hash, name, role, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, NOW(), NOW())',
       [email, passwordHash, name, role || 'user', 'active']
     );
 
     await logAudit(req.user.id, 'CREATE_USER', 'users', result.insertId, null, { email, name, role }, req);
-    
+
     res.json({ success: true, id: result.insertId, message: 'Usuário criado com sucesso' });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
@@ -265,25 +265,25 @@ app.post('/api/auth/register', authenticateToken, async (req, res) => {
 app.post('/api/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body;
-    
+
     if (!email || !password) {
       return res.status(400).json({ success: false, error: 'E-mail e senha são obrigatórios' });
     }
 
     const users = await query('SELECT * FROM users WHERE email = ? LIMIT 1', [email]);
-    
+
     if (!users || users.length === 0) {
       return res.status(401).json({ success: false, error: 'E-mail ou senha incorretos' });
     }
 
     const user = users[0];
-    
+
     if (user.status !== 'active') {
       return res.status(403).json({ success: false, error: 'Usuário inativo' });
     }
 
     const passwordMatch = await bcrypt.compare(password, user.password_hash);
-    
+
     if (!passwordMatch) {
       return res.status(401).json({ success: false, error: 'E-mail ou senha incorretos' });
     }
@@ -300,15 +300,15 @@ app.post('/api/auth/login', async (req, res) => {
 
     await logAudit(user.id, 'LOGIN', 'users', user.id, null, { email }, req);
 
-    res.json({ 
-      success: true, 
-      token, 
-      user: { 
-        id: user.id, 
-        email: user.email, 
-        name: user.name, 
-        role: user.role 
-      } 
+    res.json({
+      success: true,
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role
+      }
     });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
@@ -376,7 +376,7 @@ app.put('/api/users/:id', authenticateToken, async (req, res) => {
     updateQuery += ' WHERE id = ?';
 
     await query(updateQuery, params);
-    
+
     await logAudit(req.user.id, 'UPDATE_USER', 'users', id, oldUser, { name, role, status }, req);
 
     res.json({ success: true, message: 'Usuário atualizado com sucesso' });
@@ -404,7 +404,7 @@ app.delete('/api/users/:id', authenticateToken, async (req, res) => {
     }
 
     await query('DELETE FROM users WHERE id = ?', [id]);
-    
+
     await logAudit(req.user.id, 'DELETE_USER', 'users', id, users[0], null, req);
 
     res.json({ success: true, message: 'Usuário deletado com sucesso' });
@@ -492,7 +492,7 @@ app.get('/api/customers', async (req, res) => {
 app.post('/api/customers', async (req, res) => {
   try {
     const { name, email, phone, company, status, source, notes } = req.body;
-    
+
     if (!name || !phone) {
       return res.status(400).json({ success: false, error: 'Nome e telefone são obrigatórios' });
     }
@@ -586,7 +586,7 @@ app.get('/api/leads', async (req, res) => {
 app.post('/api/leads', async (req, res) => {
   try {
     const { customer_id, name, email, phone, company, title, description, value, status, priority } = req.body;
-    
+
     if (!name || !phone) {
       return res.status(400).json({ success: false, error: 'Nome e telefone são obrigatórios' });
     }
@@ -776,7 +776,7 @@ app.get('/api/orders', async (req, res) => {
 app.post('/api/orders', async (req, res) => {
   try {
     const { customer_id, budget_id, value, status, description } = req.body;
-    
+
     if (!customer_id || !value) {
       return res.status(400).json({ success: false, error: 'Cliente e valor são obrigatórios' });
     }
@@ -832,7 +832,12 @@ app.delete('/api/orders/:id', async (req, res) => {
 // ==================== FOLLOW-UPS ====================
 app.get('/api/follow-ups', async (req, res) => {
   try {
-    const followUps = await query('SELECT * FROM follow_ups ORDER BY scheduled_date ASC LIMIT 100');
+    const followUps = await query(`
+      SELECT f.*, c.name as customer_name 
+      FROM follow_ups f
+      LEFT JOIN customers c ON f.customer_id = c.id
+      ORDER BY f.scheduled_date ASC LIMIT 100
+    `);
     res.json({ success: true, data: followUps });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
@@ -847,6 +852,75 @@ app.post('/api/follow-ups', async (req, res) => {
       [customer_id, type, description, scheduled_date]
     );
     res.json({ success: true, id: result.insertId });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+app.post('/api/follow-ups/:id/complete', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await query('UPDATE follow_ups SET completed = 1 WHERE id = ?', [id]);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+app.delete('/api/follow-ups/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await query('DELETE FROM follow_ups WHERE id = ?', [id]);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ==================== SCHEDULING ====================
+app.get('/api/scheduling', async (req, res) => {
+  try {
+    const scheduling = await query(`
+      SELECT s.*, c.name as customer_name 
+      FROM scheduling s
+      LEFT JOIN customers c ON s.customer_id = c.id
+      ORDER BY s.scheduled_at ASC LIMIT 100
+    `);
+    res.json({ success: true, data: scheduling });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+app.post('/api/scheduling', async (req, res) => {
+  try {
+    const { customer_id, type, description, scheduled_at } = req.body;
+    const result = await query(
+      'INSERT INTO scheduling (customer_id, type, description, scheduled_at, status) VALUES (?, ?, ?, ?, "pending")',
+      [customer_id, type, description, scheduled_at]
+    );
+    res.json({ success: true, id: result.insertId });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+app.post('/api/scheduling/:id/status', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    await query('UPDATE scheduling SET status = ? WHERE id = ?', [status, id]);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+app.delete('/api/scheduling/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await query('DELETE FROM scheduling WHERE id = ?', [id]);
+    res.json({ success: true });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -872,7 +946,7 @@ app.get('/api/dashboard', async (req, res) => {
     const [qualifiedLeads] = await query('SELECT COUNT(*) as count FROM leads WHERE status IN ("qualified", "contacted")');
     const [pendingFollowUps] = await query('SELECT COUNT(*) as count FROM follow_ups WHERE completed = 0');
     const [totalRevenue] = await query('SELECT SUM(value) as total FROM orders WHERE status IN ("confirmed", "completed")');
-    
+
     res.json({
       success: true,
       data: {
@@ -891,7 +965,7 @@ app.get('/api/dashboard', async (req, res) => {
 app.get('/api/export/customers', async (req, res) => {
   try {
     const customers = await query('SELECT id, name, email, phone, company, status, source, created_at FROM customers ORDER BY created_at DESC');
-    
+
     let csv = 'ID,Nome,Email,Telefone,Empresa,Status,Origem,Data de Criação\n';
     customers.forEach(c => {
       csv += `"${c.id}","${c.name}","${c.email || ''}","${c.phone}","${c.company || ''}","${c.status}","${c.source || ''}","${c.created_at}"\n`;
@@ -908,7 +982,7 @@ app.get('/api/export/customers', async (req, res) => {
 app.get('/api/export/orders', async (req, res) => {
   try {
     const orders = await query('SELECT o.id, c.name, o.value, o.status, o.created_at FROM orders o JOIN customers c ON o.customer_id = c.id ORDER BY o.created_at DESC');
-    
+
     let csv = 'ID,Cliente,Valor,Status,Data de Criação\n';
     orders.forEach(o => {
       csv += `"${o.id}","${o.name}","R$ ${parseFloat(o.value).toFixed(2)}","${o.status}","${o.created_at}"\n`;
@@ -1128,10 +1202,10 @@ app.get('/api/cms/pages', async (req, res) => {
 
     const filtered = normalizedSearch
       ? allPages.filter((page) =>
-          page.fileName.toLowerCase().includes(normalizedSearch) ||
-          page.title.toLowerCase().includes(normalizedSearch) ||
-          page.type.toLowerCase().includes(normalizedSearch)
-        )
+        page.fileName.toLowerCase().includes(normalizedSearch) ||
+        page.title.toLowerCase().includes(normalizedSearch) ||
+        page.type.toLowerCase().includes(normalizedSearch)
+      )
       : allPages;
 
     res.json({ success: true, data: filtered });
@@ -1390,7 +1464,7 @@ function buildBlogPageTemplate({ title, excerpt, content, imagePath, slug }) {
   const blogSlug = slug || slugify(title);
   const blogUrl = `https://lightplast.vercel.app/blog-${blogSlug}.html`;
   const publishDate = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
-  
+
   const paragraphs = String(content || '')
     .split(/\r?\n+/)
     .map((line) => line.trim())
@@ -2176,7 +2250,7 @@ app.post('/api/cms/page', async (req, res) => {
 async function regenerateSitemap() {
   try {
     const baseUrl = 'https://lightplast.vercel.app';
-    
+
     // Páginas estáticas
     const staticPages = [
       { url: '/', changefreq: 'weekly', priority: 1.0 },
