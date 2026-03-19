@@ -67,9 +67,17 @@ Object.entries(staticPageRoutes).forEach(([route, fileName]) => {
 
 // Database connection pool
 let pool = null;
+let dbState = {
+  connected: false,
+  lastError: null,
+  lastCheckedAt: null,
+};
 
 async function initDatabase() {
   try {
+    const useSsl = process.env.TIDB_SSL !== 'false';
+    const rejectUnauthorized = process.env.TIDB_SSL_REJECT_UNAUTHORIZED !== 'false';
+
     pool = await mysql.createPool({
       connectionLimit: 10,
       host: process.env.TIDB_HOST,
@@ -82,10 +90,27 @@ async function initDatabase() {
       bigNumberStrings: true,
       waitForConnections: true,
       enableKeepAlive: true,
+      ssl: useSsl
+        ? {
+          minVersion: 'TLSv1.2',
+          rejectUnauthorized,
+        }
+        : undefined,
     });
+
+    const connection = await pool.getConnection();
+    await connection.ping();
+    connection.release();
+
+    dbState.connected = true;
+    dbState.lastError = null;
+    dbState.lastCheckedAt = new Date().toISOString();
 
     console.log('✅ Banco de dados conectado');
   } catch (error) {
+    dbState.connected = false;
+    dbState.lastError = error.message;
+    dbState.lastCheckedAt = new Date().toISOString();
     console.error('❌ Erro ao conectar banco de dados:', error.message);
   }
 }
@@ -96,22 +121,38 @@ initDatabase();
 // Função para executar queries
 const query = async (sql, args) => {
   if (!pool) {
+    dbState.connected = false;
+    dbState.lastError = 'Pool de banco de dados não inicializado';
+    dbState.lastCheckedAt = new Date().toISOString();
     throw new Error('Pool de banco de dados não inicializado');
   }
-  const connection = await pool.getConnection();
+  let connection;
   try {
+    connection = await pool.getConnection();
     const [results] = await connection.execute(sql, args || []);
+    dbState.connected = true;
+    dbState.lastError = null;
+    dbState.lastCheckedAt = new Date().toISOString();
     return results;
+  } catch (error) {
+    dbState.connected = false;
+    dbState.lastError = error.message;
+    dbState.lastCheckedAt = new Date().toISOString();
+    throw error;
   } finally {
-    connection.release();
+    if (connection) {
+      connection.release();
+    }
   }
 };
 
 // ==================== HEALTH CHECK ====================
 app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'OK', 
-    database: pool ? 'connected' : 'disconnected',
+  res.json({
+    status: dbState.connected ? 'OK' : 'DEGRADED',
+    database: dbState.connected ? 'connected' : 'disconnected',
+    databaseError: dbState.lastError,
+    lastDatabaseCheck: dbState.lastCheckedAt,
     timestamp: new Date().toISOString()
   });
 });
@@ -908,10 +949,14 @@ function buildProductPageTemplate({ title, summary, content, imagePath }) {
 `;
 }
 
-function buildBlogPageTemplate({ title, excerpt, content, imagePath }) {
+function buildBlogPageTemplate({ title, excerpt, content, imagePath, slug }) {
   const safeTitle = escapeHtml(title);
   const safeExcerpt = escapeHtml(excerpt || 'Conteúdo técnico LightPlast para operações B2B.');
   const safeImage = normalizeAssetPath(imagePath);
+  const blogSlug = slug || slugify(title);
+  const blogUrl = `https://lightplast.vercel.app/blog-${blogSlug}.html`;
+  const publishDate = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+  
   const paragraphs = String(content || '')
     .split(/\r?\n+/)
     .map((line) => line.trim())
@@ -926,7 +971,42 @@ function buildBlogPageTemplate({ title, excerpt, content, imagePath }) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${safeTitle} | Blog LightPlast</title>
     <meta name="description" content="${safeExcerpt}">
+    <link rel="canonical" href="${blogUrl}">
+    <meta property="og:title" content="${safeTitle} | Blog LightPlast">
+    <meta property="og:description" content="${safeExcerpt}">
+    <meta property="og:url" content="${blogUrl}">
+    <meta property="og:type" content="article">
+    <meta property="article:published_time" content="${publishDate}">
+    <meta property="og:image" content="${safeImage}">
     <link rel="stylesheet" href="style.css">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "${safeTitle}",
+      "description": "${safeExcerpt}",
+      "image": "${safeImage}",
+      "datePublished": "${publishDate}",
+      "dateModified": "${publishDate}",
+      "author": {
+        "@type": "Organization",
+        "name": "LightPlast - Fábrica de Embalagens Plásticas",
+        "url": "https://lightplast.vercel.app"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "LightPlast - Fábrica de Embalagens Plásticas",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://lightplast.vercel.app/assets/hero_bg.png"
+        }
+      },
+      "mainEntity": {
+        "@type": "Article",
+        "url": "${blogUrl}"
+      }
+    }
+    </script>
 </head>
 <body>
     <header class="header">
@@ -950,7 +1030,7 @@ function buildBlogPageTemplate({ title, excerpt, content, imagePath }) {
         <section class="page-section">
             <div class="container article-page">
                 <h1>${safeTitle}</h1>
-                <p class="article-meta">Publicado pela equipe LightPlast</p>
+                <p class="article-meta">Publicado em ${publishDate} pela equipe LightPlast</p>
                 <img src="${safeImage}" alt="${safeTitle}" loading="lazy" decoding="async" width="1200" height="700">
                 <p>${safeExcerpt}</p>
                 ${paragraphs || '<p>Edite este artigo no CRM para incluir o conteúdo final.</p>'}
@@ -1535,6 +1615,7 @@ app.post('/api/cms/publish/product', async (req, res) => {
     await writeFile(filePath, productPage, 'utf-8');
     await appendProductToCatalog({ fileName, title: safeTitle });
     await appendProductToCategory({ fileName, title: safeTitle, categoryFile });
+    await regenerateSitemap();
 
     res.json({
       success: true,
@@ -1572,6 +1653,7 @@ app.post('/api/cms/publish/blog', async (req, res) => {
       excerpt,
       content: body,
       imagePath: image,
+      slug: slugValue,
     });
 
     await writeFile(filePath, blogPage, 'utf-8');
@@ -1581,6 +1663,7 @@ app.post('/api/cms/publish/blog', async (req, res) => {
       excerpt: String(excerpt || '').trim() || 'Novo conteúdo publicado pela LightPlast.',
       imagePath: image,
     });
+    await regenerateSitemap();
 
     res.json({
       success: true,
@@ -1635,6 +1718,54 @@ app.post('/api/cms/page', async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 });
+
+async function regenerateSitemap() {
+  try {
+    const baseUrl = 'https://lightplast.vercel.app';
+    
+    // Páginas estáticas
+    const staticPages = [
+      { url: '/', changefreq: 'weekly', priority: 1.0 },
+      { url: '/catalogo.html', changefreq: 'weekly', priority: 0.9 },
+      { url: '/sobre.html', changefreq: 'monthly', priority: 0.8 },
+      { url: '/blog.html', changefreq: 'weekly', priority: 0.8 },
+      { url: '/categoria-sacos-de-lixo.html', changefreq: 'weekly', priority: 0.85 },
+      { url: '/categoria-sacolas-personalizadas.html', changefreq: 'weekly', priority: 0.85 },
+      { url: '/categoria-filmes-tecnicos.html', changefreq: 'weekly', priority: 0.85 },
+    ];
+
+    // Páginas dinâmicas
+    const files = await readdir(__dirname);
+    const dynamicPages = files
+      .filter(f => f.endsWith('.html') && (f.startsWith('produto-') || f.startsWith('blog-')) && f !== 'blog.html')
+      .map(f => ({
+        url: `/${f}`,
+        priority: f.startsWith('produto-') ? 0.75 : 0.7,
+        changefreq: 'weekly'
+      }));
+
+    const allPages = [...staticPages, ...dynamicPages];
+
+    let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+
+    allPages.forEach(page => {
+      xml += '  <url>\n';
+      xml += `    <loc>${baseUrl}${page.url}</loc>\n`;
+      xml += `    <changefreq>${page.changefreq}</changefreq>\n`;
+      xml += `    <priority>${page.priority}</priority>\n`;
+      xml += '  </url>\n';
+    });
+
+    xml += '</urlset>';
+
+    const sitemapPath = join(__dirname, 'sitemap.xml');
+    await writeFile(sitemapPath, xml, 'utf-8');
+    console.log(`[SEO] Sitemap regenerated with ${allPages.length} URLs`);
+  } catch (error) {
+    console.error('[SEO] Erro ao gerar sitemap:', error.message);
+  }
+}
 
 // Start server apenas em ambiente local (no Vercel, exportamos o app)
 if (!process.env.VERCEL) {

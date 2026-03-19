@@ -1570,16 +1570,18 @@
                 const res = await fetch(`${API_URL}/dashboard`);
                 const data = await res.json();
 
-                if (data.success) {
-                    document.getElementById('stat-customers').textContent = data.data.totalCustomers;
-                    document.getElementById('stat-leads').textContent = data.data.qualifiedLeads;
-                    document.getElementById('stat-revenue').textContent = 'R$ ' + 
-                        (data.data.totalRevenue || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-                    document.getElementById('stat-orders').textContent = '0'; // Você pode contar pedidos depois
+                if (!data.success) {
+                    throw new Error(data.error || 'Falha ao carregar dashboard');
                 }
+
+                document.getElementById('stat-customers').textContent = data.data.totalCustomers;
+                document.getElementById('stat-leads').textContent = data.data.qualifiedLeads;
+                document.getElementById('stat-revenue').textContent = 'R$ ' +
+                    (data.data.totalRevenue || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+                document.getElementById('stat-orders').textContent = '0'; // Você pode contar pedidos depois
             } catch (error) {
                 console.error('Erro carregando dashboard:', error);
-                showAlert('Erro ao carregar dashboard', 'error');
+                showAlert(`Erro ao carregar dashboard: ${error.message}`, 'error');
             }
         }
 
@@ -2315,7 +2317,11 @@
                 const res = await fetch(url);
                 const data = await res.json();
 
-                if (data.success && data.data.length > 0) {
+                if (!data.success) {
+                    throw new Error(data.error || 'Falha ao carregar clientes');
+                }
+
+                if (data.data.length > 0) {
                     const html = `
                         <div class="list-header">
                             <div>Nome</div>
@@ -2348,6 +2354,8 @@
                 }
             } catch (error) {
                 console.error('Erro carregando clientes:', error);
+                document.getElementById('customers-container').innerHTML =
+                    `<div class="empty-state"><div class="empty-state-icon"><i class="fas fa-triangle-exclamation"></i></div><p>${error.message}</p></div>`;
             }
         }
 
@@ -2357,7 +2365,11 @@
                 const res = await fetch(url);
                 const data = await res.json();
 
-                if (data.success && data.data.length > 0) {
+                if (!data.success) {
+                    throw new Error(data.error || 'Falha ao carregar leads');
+                }
+
+                if (data.data.length > 0) {
                     const html = `
                         <div class="list-header">
                             <div>Nome</div>
@@ -2387,6 +2399,8 @@
                 }
             } catch (error) {
                 console.error('Erro carregando leads:', error);
+                document.getElementById('leads-container').innerHTML =
+                    `<div class="empty-state"><div class="empty-state-icon"><i class="fas fa-triangle-exclamation"></i></div><p>${error.message}</p></div>`;
             }
         }
 
@@ -2396,7 +2410,11 @@
                 const res = await fetch(url);
                 const data = await res.json();
 
-                if (data.success && data.data.length > 0) {
+                if (!data.success) {
+                    throw new Error(data.error || 'Falha ao carregar orçamentos');
+                }
+
+                if (data.data.length > 0) {
                     const html = `
                         <div class="list-header">
                             <div>ID</div>
@@ -2426,6 +2444,8 @@
                 }
             } catch (error) {
                 console.error('Erro carregando orçamentos:', error);
+                document.getElementById('budgets-container').innerHTML =
+                    `<div class="empty-state"><div class="empty-state-icon"><i class="fas fa-triangle-exclamation"></i></div><p>${error.message}</p></div>`;
             }
         }
 
@@ -2435,7 +2455,11 @@
                 const res = await fetch(url);
                 const data = await res.json();
 
-                if (data.success && data.data.length > 0) {
+                if (!data.success) {
+                    throw new Error(data.error || 'Falha ao carregar pedidos');
+                }
+
+                if (data.data.length > 0) {
                     const html = `
                         <div class="list-header">
                             <div>ID</div>
@@ -2465,6 +2489,8 @@
                 }
             } catch (error) {
                 console.error('Erro carregando pedidos:', error);
+                document.getElementById('orders-container').innerHTML =
+                    `<div class="empty-state"><div class="empty-state-icon"><i class="fas fa-triangle-exclamation"></i></div><p>${error.message}</p></div>`;
             }
         }
 
