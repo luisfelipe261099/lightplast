@@ -660,6 +660,18 @@
             .modal-content {
                 padding: 30px 20px;
             }
+
+            .content-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .content-page-list {
+                max-height: 280px;
+            }
+
+            .code-editor {
+                min-height: 360px;
+            }
         }
 
         /* ===== UTILITIES ===== */
@@ -678,6 +690,91 @@
         .mb-30 {
             margin-bottom: 30px;
         }
+
+        .content-layout {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 16px;
+            align-items: start;
+        }
+
+        .content-card {
+            background: var(--bg-white);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            padding: 16px;
+        }
+
+        .content-card h3 {
+            margin-bottom: 12px;
+            font-size: 1.05rem;
+        }
+
+        .content-page-list {
+            max-height: 540px;
+            overflow-y: auto;
+            display: grid;
+            gap: 8px;
+        }
+
+        .content-page-btn {
+            width: 100%;
+            text-align: left;
+            border: 1px solid var(--border);
+            background: #fff;
+            border-radius: 10px;
+            padding: 10px 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .content-page-btn:hover {
+            border-color: var(--primary);
+            background: #f7faf6;
+        }
+
+        .content-page-btn.active {
+            border-color: var(--primary);
+            background: rgba(72, 128, 57, 0.08);
+        }
+
+        .content-page-name {
+            font-weight: 700;
+            color: var(--text-dark);
+            font-size: 0.9rem;
+            margin-bottom: 3px;
+        }
+
+        .content-page-meta {
+            font-size: 0.78rem;
+            color: var(--text-light);
+        }
+
+        .editor-grid {
+            display: grid;
+            gap: 12px;
+        }
+
+        .code-editor {
+            width: 100%;
+            min-height: 460px;
+            resize: vertical;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px;
+            font-family: Consolas, 'Courier New', monospace;
+            font-size: 0.84rem;
+            line-height: 1.55;
+            color: #0f172a;
+            background: #fbfffa;
+        }
+
+        .editor-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
     </style>
 </head>
 
@@ -695,6 +792,7 @@
                 <button class="tab-btn" data-tab="budgets"><i class="fas fa-file-invoice"></i> Orçamentos</button>
                 <button class="tab-btn" data-tab="orders"><i class="fas fa-shopping-cart"></i> Pedidos</button>
                 <button class="tab-btn" data-tab="reports"><i class="fas fa-money-bill-wave"></i> Relatórios</button>
+                <button class="tab-btn" data-tab="content"><i class="fas fa-pen-to-square"></i> Conteúdo do Site</button>
             </nav>
             <div class="header-actions">
                 <button id="logoutBtn" class="logout-btn" title="Sair do CRM">
@@ -943,6 +1041,281 @@
                 </div>
             </div>
         </section>
+
+        <section id="content" class="section">
+            <div class="section-header">
+                <h1 class="section-title"><i class="fas fa-pen-to-square"></i> Conteúdo do Site</h1>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <div class="search-bar">
+                        <input type="text" id="cmsSearch" placeholder="🔍 Buscar páginas por nome, título ou tipo...">
+                    </div>
+                    <button class="btn btn-secondary" id="cmsReloadBtn" type="button">
+                        <i class="fas fa-rotate"></i> Atualizar Lista
+                    </button>
+                </div>
+            </div>
+
+            <div class="content-layout">
+                <aside class="content-card">
+                    <h3><i class="fas fa-folder-open"></i> Páginas Editáveis</h3>
+                    <div id="cmsPageList" class="content-page-list">
+                        <div class="empty-state" style="padding: 25px 10px;">
+                            <p>Carregando páginas...</p>
+                        </div>
+                    </div>
+                </aside>
+
+                <div class="editor-grid">
+                    <div class="content-card">
+                        <h3><i class="fas fa-file-code"></i> Editor de Página</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Arquivo</label>
+                                <input id="cmsCurrentFile" type="text" readonly placeholder="Selecione uma página da lista">
+                            </div>
+                            <div class="form-group">
+                                <label>Título</label>
+                                <input id="cmsPageTitle" type="text" placeholder="Título da página" readonly>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>HTML da página</label>
+                            <textarea id="cmsPageContent" class="code-editor" placeholder="Selecione uma página para editar o conteúdo HTML completo."></textarea>
+                        </div>
+                        <div class="editor-actions">
+                            <button class="btn btn-primary" type="button" id="cmsSaveBtn">
+                                <i class="fas fa-floppy-disk"></i> Salvar Página
+                            </button>
+                            <button class="btn btn-secondary" type="button" id="cmsPreviewBtn">
+                                <i class="fas fa-up-right-from-square"></i> Abrir Página
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="content-card">
+                        <h3><i class="fas fa-file-circle-plus"></i> Criar Nova Página</h3>
+                        <form id="cmsCreateForm">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Tipo de página</label>
+                                    <select id="cmsCreateType" required>
+                                        <option value="produto">Produto (produto-slug.html)</option>
+                                        <option value="blog-artigo">Blog artigo (blog-slug.html)</option>
+                                        <option value="categoria">Categoria (categoria-slug.html)</option>
+                                        <option value="pagina">Página geral (slug.html)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Slug</label>
+                                    <input id="cmsCreateSlug" type="text" placeholder="ex: novo-produto" required>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Título</label>
+                                    <input id="cmsCreateTitle" type="text" placeholder="Ex: Saco Hospitalar 200L" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Descrição curta</label>
+                                    <input id="cmsCreateDescription" type="text" placeholder="Resumo da página para SEO e hero">
+                                </div>
+                            </div>
+                            <button class="btn btn-primary" type="submit">
+                                <i class="fas fa-plus"></i> Criar Página
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="content-card">
+                        <h3><i class="fas fa-box-open"></i> Publicação Guiada de Produto</h3>
+                        <form id="cmsPublishProductForm">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Título do produto *</label>
+                                    <input id="cmsProductTitle" type="text" placeholder="Ex: Saco Hospitalar 200L" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Slug (opcional)</label>
+                                    <input id="cmsProductSlug" type="text" placeholder="ex: saco-hospitalar-200l">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Resumo curto *</label>
+                                    <input id="cmsProductSummary" type="text" placeholder="Descrição curta para a página" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Imagem (assets/...)</label>
+                                    <input id="cmsProductImage" type="text" placeholder="assets/cat_hospitalar.jpg">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Categoria para inserir (opcional)</label>
+                                    <select id="cmsProductCategoryFile">
+                                        <option value="">Somente catálogo geral</option>
+                                        <option value="categoria-sacos-de-lixo.html">Sacos de Lixo</option>
+                                        <option value="categoria-sacolas-personalizadas.html">Sacolas Personalizadas</option>
+                                        <option value="categoria-filmes-tecnicos.html">Filmes Técnicos</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Conteúdo da página</label>
+                                <textarea id="cmsProductBody" rows="4" placeholder="Texto principal da página do produto"></textarea>
+                            </div>
+                            <button class="btn btn-primary" type="submit">
+                                <i class="fas fa-upload"></i> Publicar Produto no Catálogo
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="content-card">
+                        <h3><i class="fas fa-newspaper"></i> Publicação Guiada de Artigo</h3>
+                        <form id="cmsPublishBlogForm">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Título do artigo *</label>
+                                    <input id="cmsBlogTitle" type="text" placeholder="Ex: Guia de compra para hospitais" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Slug (opcional)</label>
+                                    <input id="cmsBlogSlug" type="text" placeholder="ex: guia-compra-hospitais">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Resumo para card *</label>
+                                    <input id="cmsBlogExcerpt" type="text" placeholder="Texto curto para aparecer na listagem do blog" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Imagem (assets/...)</label>
+                                    <input id="cmsBlogImage" type="text" placeholder="assets/cat_embalagens.jpg">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Conteúdo do artigo</label>
+                                <textarea id="cmsBlogBody" rows="5" placeholder="Escreva os parágrafos do artigo; use uma linha em branco para separar blocos."></textarea>
+                            </div>
+                            <button class="btn btn-primary" type="submit">
+                                <i class="fas fa-upload"></i> Publicar Artigo no Blog
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="content-card">
+                        <h3><i class="fas fa-pen-ruler"></i> Edição Guiada de Existentes</h3>
+
+                        <form id="cmsEditProductForm" style="margin-bottom: 24px; border-bottom: 1px solid var(--border); padding-bottom: 20px;">
+                            <h4 style="margin-bottom: 10px;">Editar Produto Existente</h4>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Arquivo do produto *</label>
+                                    <select id="cmsEditProductFile" required>
+                                        <option value="">Selecione um produto...</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" style="display: flex; align-items: end;">
+                                    <button class="btn btn-secondary" type="button" id="cmsLoadProductEditBtn">
+                                        <i class="fas fa-download"></i> Carregar Dados
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Título *</label>
+                                    <input id="cmsEditProductTitle" type="text" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Imagem (assets/...)</label>
+                                    <input id="cmsEditProductImage" type="text" placeholder="assets/cat_hospitalar.jpg">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Resumo curto *</label>
+                                    <input id="cmsEditProductSummary" type="text" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Categoria</label>
+                                    <select id="cmsEditProductCategoryFile">
+                                        <option value="">Sem categoria específica</option>
+                                        <option value="categoria-sacos-de-lixo.html">Sacos de Lixo</option>
+                                        <option value="categoria-sacolas-personalizadas.html">Sacolas Personalizadas</option>
+                                        <option value="categoria-filmes-tecnicos.html">Filmes Técnicos</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Conteúdo da página</label>
+                                <textarea id="cmsEditProductBody" rows="4" placeholder="Texto principal da página"></textarea>
+                            </div>
+                            <button class="btn btn-primary" type="submit">
+                                <i class="fas fa-floppy-disk"></i> Salvar Edição do Produto
+                            </button>
+                            <button class="btn btn-danger" type="button" id="cmsDeleteProductBtn">
+                                <i class="fas fa-trash"></i> Remover Produto
+                            </button>
+                        </form>
+
+                        <form id="cmsEditBlogForm">
+                            <h4 style="margin-bottom: 10px;">Editar Artigo Existente</h4>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Arquivo do artigo *</label>
+                                    <select id="cmsEditBlogFile" required>
+                                        <option value="">Selecione um artigo...</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" style="display: flex; align-items: end;">
+                                    <button class="btn btn-secondary" type="button" id="cmsLoadBlogEditBtn">
+                                        <i class="fas fa-download"></i> Carregar Dados
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Título *</label>
+                                    <input id="cmsEditBlogTitle" type="text" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Imagem (assets/...)</label>
+                                    <input id="cmsEditBlogImage" type="text" placeholder="assets/cat_embalagens.jpg">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Resumo para card *</label>
+                                <input id="cmsEditBlogExcerpt" type="text" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Conteúdo do artigo</label>
+                                <textarea id="cmsEditBlogBody" rows="5" placeholder="Parágrafos do artigo"></textarea>
+                            </div>
+                            <button class="btn btn-primary" type="submit">
+                                <i class="fas fa-floppy-disk"></i> Salvar Edição do Artigo
+                            </button>
+                            <button class="btn btn-danger" type="button" id="cmsDeleteBlogBtn">
+                                <i class="fas fa-trash"></i> Remover Artigo
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="content-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 10px;">
+                            <h3 style="margin: 0;"><i class="fas fa-trash-can"></i> Lixeira CMS</h3>
+                            <button class="btn btn-secondary" type="button" id="cmsTrashReloadBtn">
+                                <i class="fas fa-rotate"></i> Atualizar Lixeira
+                            </button>
+                        </div>
+                        <div id="cmsTrashList" class="list-container">
+                            <div class="empty-state" style="padding: 25px 10px;">
+                                <p>Carregando itens removidos...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
     </div>
 
     <!-- ===== MODALS ===== -->
@@ -1130,6 +1503,10 @@
     <script>
         const API_URL = '/api';
         let charts = {};
+        const cmsState = {
+            pages: [],
+            selectedFile: '',
+        };
 
         function logoutFakeSession() {
             sessionStorage.removeItem('crmFakeAuth');
@@ -1165,6 +1542,9 @@
                 } else if (tab === 'reports') {
                     loadFinancialReports();
                     initFinancialCharts();
+                } else if (tab === 'content') {
+                    loadCmsPages();
+                    loadCmsTrash();
                 }
             });
         });
@@ -1280,6 +1660,560 @@
             const search = e.target.value;
             loadOrders(search);
         });
+
+        document.getElementById('cmsSearch')?.addEventListener('input', (e) => {
+            loadCmsPages(e.target.value);
+        });
+
+        document.getElementById('cmsReloadBtn')?.addEventListener('click', () => {
+            loadCmsPages(document.getElementById('cmsSearch')?.value || '');
+        });
+
+        document.getElementById('cmsSaveBtn')?.addEventListener('click', saveCmsPage);
+        document.getElementById('cmsPreviewBtn')?.addEventListener('click', previewCmsPage);
+        document.getElementById('cmsCreateForm')?.addEventListener('submit', createCmsPage);
+        document.getElementById('cmsPublishProductForm')?.addEventListener('submit', publishProductGuided);
+        document.getElementById('cmsPublishBlogForm')?.addEventListener('submit', publishBlogGuided);
+        document.getElementById('cmsLoadProductEditBtn')?.addEventListener('click', loadGuidedProductData);
+        document.getElementById('cmsEditProductForm')?.addEventListener('submit', saveGuidedProductData);
+        document.getElementById('cmsLoadBlogEditBtn')?.addEventListener('click', loadGuidedBlogData);
+        document.getElementById('cmsEditBlogForm')?.addEventListener('submit', saveGuidedBlogData);
+        document.getElementById('cmsDeleteProductBtn')?.addEventListener('click', deleteGuidedProduct);
+        document.getElementById('cmsDeleteBlogBtn')?.addEventListener('click', deleteGuidedBlog);
+        document.getElementById('cmsTrashReloadBtn')?.addEventListener('click', loadCmsTrash);
+
+        // ===== CMS CONTENT MANAGEMENT =====
+        function getTypeLabel(type) {
+            const labels = {
+                produto: 'Produto',
+                'blog-artigo': 'Blog Artigo',
+                categoria: 'Categoria',
+                'blog-lista': 'Blog Lista',
+                catalogo: 'Catalogo',
+                pagina: 'Pagina',
+            };
+            return labels[type] || type || 'Pagina';
+        }
+
+        function renderCmsPageList() {
+            const listEl = document.getElementById('cmsPageList');
+            if (!listEl) return;
+
+            if (!cmsState.pages.length) {
+                listEl.innerHTML = '<div class="empty-state" style="padding: 25px 10px;"><p>Nenhuma pagina encontrada.</p></div>';
+                return;
+            }
+
+            listEl.innerHTML = cmsState.pages.map((page) => {
+                const activeClass = page.fileName === cmsState.selectedFile ? 'active' : '';
+                return `
+                    <button class="content-page-btn ${activeClass}" type="button" onclick="openCmsPage('${page.fileName.replace(/'/g, "\\'")}')">
+                        <div class="content-page-name">${page.fileName}</div>
+                        <div class="content-page-meta">${getTypeLabel(page.type)} | ${page.title || ''}</div>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function populateGuidedEditSelectors() {
+            const productSelect = document.getElementById('cmsEditProductFile');
+            const blogSelect = document.getElementById('cmsEditBlogFile');
+            if (!productSelect || !blogSelect) return;
+
+            const selectedProduct = productSelect.value;
+            const selectedBlog = blogSelect.value;
+
+            const productPages = cmsState.pages.filter((p) => p.type === 'produto');
+            const blogPages = cmsState.pages.filter((p) => p.type === 'blog-artigo');
+
+            productSelect.innerHTML = '<option value="">Selecione um produto...</option>' +
+                productPages.map((p) => `<option value="${p.fileName}">${p.fileName}</option>`).join('');
+            blogSelect.innerHTML = '<option value="">Selecione um artigo...</option>' +
+                blogPages.map((p) => `<option value="${p.fileName}">${p.fileName}</option>`).join('');
+
+            if (selectedProduct && productPages.some((p) => p.fileName === selectedProduct)) {
+                productSelect.value = selectedProduct;
+            }
+            if (selectedBlog && blogPages.some((p) => p.fileName === selectedBlog)) {
+                blogSelect.value = selectedBlog;
+            }
+        }
+
+        function renderCmsTrash(entries = []) {
+            const container = document.getElementById('cmsTrashList');
+            if (!container) return;
+
+            if (!entries.length) {
+                container.innerHTML = '<div class="empty-state" style="padding: 25px 10px;"><p>Nenhum item na lixeira.</p></div>';
+                return;
+            }
+
+            const rows = entries.map((item) => {
+                const deletedAt = item.deletedAt ? new Date(item.deletedAt).toLocaleString('pt-BR') : '-';
+                return `
+                    <div class="list-item" style="grid-template-columns: 2fr 1fr 1fr 1fr;">
+                        <div>
+                            <div class="item-name">${item.fileName}</div>
+                            <small style="color: var(--text-light);">${item.type || 'conteudo'}</small>
+                        </div>
+                        <div>${deletedAt}</div>
+                        <div>
+                            <button class="btn btn-small btn-primary" type="button" onclick="restoreCmsTrashItem('${item.id}')">
+                                <i class="fas fa-rotate-left"></i> Restaurar
+                            </button>
+                        </div>
+                        <div>
+                            <button class="btn btn-small btn-danger" type="button" onclick="deleteCmsTrashItem('${item.id}')">
+                                <i class="fas fa-trash"></i> Excluir
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = `
+                <div class="list-header" style="grid-template-columns: 2fr 1fr 1fr 1fr;">
+                    <div>Arquivo</div>
+                    <div>Removido em</div>
+                    <div>Restaurar</div>
+                    <div>Excluir permanente</div>
+                </div>
+                ${rows}
+            `;
+        }
+
+        async function loadCmsTrash() {
+            try {
+                const res = await fetch(`${API_URL}/cms/trash`);
+                const data = await res.json();
+                if (!data.success) {
+                    throw new Error(data.error || 'Erro ao carregar lixeira');
+                }
+                renderCmsTrash(data.data || []);
+            } catch (error) {
+                const container = document.getElementById('cmsTrashList');
+                if (container) {
+                    container.innerHTML = '<div class="empty-state" style="padding: 25px 10px;"><p>Erro ao carregar lixeira.</p></div>';
+                }
+            }
+        }
+
+        async function restoreCmsTrashItem(itemId) {
+            if (!itemId) return;
+
+            try {
+                const res = await fetch(`${API_URL}/cms/trash/${encodeURIComponent(itemId)}/restore`, {
+                    method: 'POST',
+                });
+                const data = await res.json();
+                if (!data.success) {
+                    throw new Error(data.error || 'Erro ao restaurar item');
+                }
+
+                showAlert(data.message || 'Item restaurado com sucesso', 'success');
+                await loadCmsPages(document.getElementById('cmsSearch')?.value || '');
+                await loadCmsTrash();
+            } catch (error) {
+                showAlert(error.message || 'Falha ao restaurar item', 'error');
+            }
+        }
+
+        async function deleteCmsTrashItem(itemId) {
+            if (!itemId) return;
+
+            const confirmed = confirm('Deseja excluir permanentemente este item da lixeira?');
+            if (!confirmed) return;
+
+            try {
+                const res = await fetch(`${API_URL}/cms/trash/${encodeURIComponent(itemId)}`, {
+                    method: 'DELETE',
+                });
+                const data = await res.json();
+                if (!data.success) {
+                    throw new Error(data.error || 'Erro ao excluir permanentemente');
+                }
+
+                showAlert(data.message || 'Item excluído permanentemente', 'success');
+                await loadCmsTrash();
+            } catch (error) {
+                showAlert(error.message || 'Falha ao excluir item da lixeira', 'error');
+            }
+        }
+
+        async function loadCmsPages(search = '') {
+            try {
+                const url = search
+                    ? `${API_URL}/cms/pages?search=${encodeURIComponent(search)}`
+                    : `${API_URL}/cms/pages`;
+                const res = await fetch(url);
+                const data = await res.json();
+
+                if (!data.success) {
+                    throw new Error(data.error || 'Falha ao carregar paginas');
+                }
+
+                cmsState.pages = data.data || [];
+
+                if (cmsState.selectedFile && !cmsState.pages.some((p) => p.fileName === cmsState.selectedFile)) {
+                    cmsState.selectedFile = '';
+                }
+
+                renderCmsPageList();
+                populateGuidedEditSelectors();
+
+                if (!cmsState.selectedFile && cmsState.pages.length) {
+                    await openCmsPage(cmsState.pages[0].fileName);
+                }
+            } catch (error) {
+                showAlert('Erro ao carregar paginas do site', 'error');
+            }
+        }
+
+        async function openCmsPage(fileName) {
+            try {
+                const res = await fetch(`${API_URL}/cms/page?file=${encodeURIComponent(fileName)}`);
+                const data = await res.json();
+
+                if (!data.success) {
+                    throw new Error(data.error || 'Falha ao carregar pagina');
+                }
+
+                cmsState.selectedFile = data.data.fileName;
+                document.getElementById('cmsCurrentFile').value = data.data.fileName;
+                document.getElementById('cmsPageTitle').value = data.data.title || '';
+                document.getElementById('cmsPageContent').value = data.data.content || '';
+                renderCmsPageList();
+            } catch (error) {
+                showAlert('Nao foi possivel abrir a pagina selecionada', 'error');
+            }
+        }
+
+        async function saveCmsPage() {
+            const fileName = document.getElementById('cmsCurrentFile')?.value;
+            const content = document.getElementById('cmsPageContent')?.value;
+
+            if (!fileName) {
+                showAlert('Selecione uma pagina para salvar', 'warning');
+                return;
+            }
+
+            if (!content || !content.trim()) {
+                showAlert('Conteudo vazio. Edite antes de salvar', 'warning');
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/cms/page`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ fileName, content }),
+                });
+                const data = await res.json();
+
+                if (!data.success) {
+                    throw new Error(data.error || 'Erro ao salvar pagina');
+                }
+
+                showAlert('Pagina salva com sucesso!', 'success');
+                await loadCmsPages(document.getElementById('cmsSearch')?.value || '');
+                await openCmsPage(fileName);
+            } catch (error) {
+                showAlert('Erro ao salvar a pagina', 'error');
+            }
+        }
+
+        function previewCmsPage() {
+            const fileName = document.getElementById('cmsCurrentFile')?.value;
+            if (!fileName) {
+                showAlert('Selecione uma pagina para abrir', 'warning');
+                return;
+            }
+            window.open(`/${fileName}`, '_blank', 'noopener');
+        }
+
+        async function createCmsPage(event) {
+            event.preventDefault();
+
+            const payload = {
+                pageType: document.getElementById('cmsCreateType').value,
+                slug: document.getElementById('cmsCreateSlug').value,
+                title: document.getElementById('cmsCreateTitle').value,
+                description: document.getElementById('cmsCreateDescription').value,
+            };
+
+            try {
+                const res = await fetch(`${API_URL}/cms/page`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                });
+                const data = await res.json();
+
+                if (!data.success) {
+                    throw new Error(data.error || 'Erro ao criar pagina');
+                }
+
+                showAlert(`Pagina criada: ${data.data.fileName}`, 'success');
+                document.getElementById('cmsCreateForm').reset();
+                await loadCmsPages('');
+                if (data.data.fileName) {
+                    await openCmsPage(data.data.fileName);
+                }
+            } catch (error) {
+                showAlert(error.message || 'Erro ao criar pagina', 'error');
+            }
+        }
+
+        async function publishProductGuided(event) {
+            event.preventDefault();
+
+            const payload = {
+                title: document.getElementById('cmsProductTitle').value,
+                slug: document.getElementById('cmsProductSlug').value,
+                summary: document.getElementById('cmsProductSummary').value,
+                body: document.getElementById('cmsProductBody').value,
+                image: document.getElementById('cmsProductImage').value,
+                categoryFile: document.getElementById('cmsProductCategoryFile').value,
+            };
+
+            try {
+                const res = await fetch(`${API_URL}/cms/publish/product`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                });
+                const data = await res.json();
+
+                if (!data.success) {
+                    throw new Error(data.error || 'Erro ao publicar produto');
+                }
+
+                showAlert(data.message || 'Produto publicado com sucesso!', 'success');
+                document.getElementById('cmsPublishProductForm').reset();
+                await loadCmsPages('');
+                await loadCmsTrash();
+                if (data.data?.fileName) {
+                    await openCmsPage(data.data.fileName);
+                }
+            } catch (error) {
+                showAlert(error.message || 'Falha ao publicar produto', 'error');
+            }
+        }
+
+        async function publishBlogGuided(event) {
+            event.preventDefault();
+
+            const payload = {
+                title: document.getElementById('cmsBlogTitle').value,
+                slug: document.getElementById('cmsBlogSlug').value,
+                excerpt: document.getElementById('cmsBlogExcerpt').value,
+                body: document.getElementById('cmsBlogBody').value,
+                image: document.getElementById('cmsBlogImage').value,
+            };
+
+            try {
+                const res = await fetch(`${API_URL}/cms/publish/blog`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                });
+                const data = await res.json();
+
+                if (!data.success) {
+                    throw new Error(data.error || 'Erro ao publicar artigo');
+                }
+
+                showAlert(data.message || 'Artigo publicado com sucesso!', 'success');
+                document.getElementById('cmsPublishBlogForm').reset();
+                await loadCmsPages('');
+                await loadCmsTrash();
+                if (data.data?.fileName) {
+                    await openCmsPage(data.data.fileName);
+                }
+            } catch (error) {
+                showAlert(error.message || 'Falha ao publicar artigo', 'error');
+            }
+        }
+
+        async function loadGuidedProductData() {
+            const fileName = document.getElementById('cmsEditProductFile')?.value;
+            if (!fileName) {
+                showAlert('Selecione um produto para carregar', 'warning');
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/cms/guided/product?file=${encodeURIComponent(fileName)}`);
+                const data = await res.json();
+                if (!data.success) {
+                    throw new Error(data.error || 'Erro ao carregar produto');
+                }
+
+                document.getElementById('cmsEditProductTitle').value = data.data.title || '';
+                document.getElementById('cmsEditProductSummary').value = data.data.summary || '';
+                document.getElementById('cmsEditProductBody').value = data.data.body || '';
+                document.getElementById('cmsEditProductImage').value = data.data.image || '';
+                document.getElementById('cmsEditProductCategoryFile').value = data.data.categoryFile || '';
+                showAlert('Dados do produto carregados', 'success');
+            } catch (error) {
+                showAlert(error.message || 'Falha ao carregar produto', 'error');
+            }
+        }
+
+        async function saveGuidedProductData(event) {
+            event.preventDefault();
+
+            const payload = {
+                fileName: document.getElementById('cmsEditProductFile').value,
+                title: document.getElementById('cmsEditProductTitle').value,
+                summary: document.getElementById('cmsEditProductSummary').value,
+                body: document.getElementById('cmsEditProductBody').value,
+                image: document.getElementById('cmsEditProductImage').value,
+                categoryFile: document.getElementById('cmsEditProductCategoryFile').value,
+            };
+
+            if (!payload.fileName) {
+                showAlert('Selecione um produto para salvar', 'warning');
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/cms/guided/product`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                });
+                const data = await res.json();
+
+                if (!data.success) {
+                    throw new Error(data.error || 'Erro ao salvar produto');
+                }
+
+                showAlert(data.message || 'Produto atualizado com sucesso', 'success');
+                await loadCmsPages(document.getElementById('cmsSearch')?.value || '');
+                await loadCmsTrash();
+                await openCmsPage(payload.fileName);
+            } catch (error) {
+                showAlert(error.message || 'Falha ao salvar produto', 'error');
+            }
+        }
+
+        async function loadGuidedBlogData() {
+            const fileName = document.getElementById('cmsEditBlogFile')?.value;
+            if (!fileName) {
+                showAlert('Selecione um artigo para carregar', 'warning');
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/cms/guided/blog?file=${encodeURIComponent(fileName)}`);
+                const data = await res.json();
+                if (!data.success) {
+                    throw new Error(data.error || 'Erro ao carregar artigo');
+                }
+
+                document.getElementById('cmsEditBlogTitle').value = data.data.title || '';
+                document.getElementById('cmsEditBlogExcerpt').value = data.data.excerpt || '';
+                document.getElementById('cmsEditBlogBody').value = data.data.body || '';
+                document.getElementById('cmsEditBlogImage').value = data.data.image || '';
+                showAlert('Dados do artigo carregados', 'success');
+            } catch (error) {
+                showAlert(error.message || 'Falha ao carregar artigo', 'error');
+            }
+        }
+
+        async function saveGuidedBlogData(event) {
+            event.preventDefault();
+
+            const payload = {
+                fileName: document.getElementById('cmsEditBlogFile').value,
+                title: document.getElementById('cmsEditBlogTitle').value,
+                excerpt: document.getElementById('cmsEditBlogExcerpt').value,
+                body: document.getElementById('cmsEditBlogBody').value,
+                image: document.getElementById('cmsEditBlogImage').value,
+            };
+
+            if (!payload.fileName) {
+                showAlert('Selecione um artigo para salvar', 'warning');
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/cms/guided/blog`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                });
+                const data = await res.json();
+
+                if (!data.success) {
+                    throw new Error(data.error || 'Erro ao salvar artigo');
+                }
+
+                showAlert(data.message || 'Artigo atualizado com sucesso', 'success');
+                await loadCmsPages(document.getElementById('cmsSearch')?.value || '');
+                await loadCmsTrash();
+                await openCmsPage(payload.fileName);
+            } catch (error) {
+                showAlert(error.message || 'Falha ao salvar artigo', 'error');
+            }
+        }
+
+        async function deleteGuidedProduct() {
+            const fileName = document.getElementById('cmsEditProductFile')?.value;
+            if (!fileName) {
+                showAlert('Selecione um produto para remover', 'warning');
+                return;
+            }
+
+            const confirmed = confirm(`Deseja mover o produto ${fileName} para a lixeira?`);
+            if (!confirmed) return;
+
+            try {
+                const res = await fetch(`${API_URL}/cms/guided/product?file=${encodeURIComponent(fileName)}`, {
+                    method: 'DELETE',
+                });
+                const data = await res.json();
+                if (!data.success) {
+                    throw new Error(data.error || 'Erro ao remover produto');
+                }
+
+                showAlert(data.message || 'Produto enviado para a lixeira', 'success');
+                document.getElementById('cmsEditProductForm').reset();
+                await loadCmsPages(document.getElementById('cmsSearch')?.value || '');
+                await loadCmsTrash();
+            } catch (error) {
+                showAlert(error.message || 'Falha ao remover produto', 'error');
+            }
+        }
+
+        async function deleteGuidedBlog() {
+            const fileName = document.getElementById('cmsEditBlogFile')?.value;
+            if (!fileName) {
+                showAlert('Selecione um artigo para remover', 'warning');
+                return;
+            }
+
+            const confirmed = confirm(`Deseja mover o artigo ${fileName} para a lixeira?`);
+            if (!confirmed) return;
+
+            try {
+                const res = await fetch(`${API_URL}/cms/guided/blog?file=${encodeURIComponent(fileName)}`, {
+                    method: 'DELETE',
+                });
+                const data = await res.json();
+                if (!data.success) {
+                    throw new Error(data.error || 'Erro ao remover artigo');
+                }
+
+                showAlert(data.message || 'Artigo enviado para a lixeira', 'success');
+                document.getElementById('cmsEditBlogForm').reset();
+                await loadCmsPages(document.getElementById('cmsSearch')?.value || '');
+                await loadCmsTrash();
+            } catch (error) {
+                showAlert(error.message || 'Falha ao remover artigo', 'error');
+            }
+        }
 
         // ===== LOAD DATA FUNCTIONS =====
         async function loadCustomers(search = '') {
