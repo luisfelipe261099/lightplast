@@ -562,7 +562,7 @@ app.delete('/api/customers/:id', async (req, res) => {
 app.get('/api/leads', async (req, res) => {
   try {
     const { search, status } = req.query;
-    let sql = 'SELECT l.*, c.name as customer_name FROM leads l LEFT JOIN customers c ON l.customer_id = c.id WHERE 1=1';
+    let sql = 'SELECT l.*, c.name as name, c.phone as phone FROM leads l LEFT JOIN customers c ON l.customer_id = c.id WHERE 1=1';
     let params = [];
 
     if (search) {
@@ -646,7 +646,7 @@ app.delete('/api/leads/:id', async (req, res) => {
 app.get('/api/budgets', async (req, res) => {
   try {
     const { search, status } = req.query;
-    let sql = 'SELECT b.*, c.name as customer_name FROM budgets b JOIN customers c ON b.customer_id = c.id WHERE 1=1';
+    let sql = 'SELECT b.*, c.name as customer_name FROM budgets b LEFT JOIN customers c ON b.customer_id = c.id WHERE 1=1';
     let params = [];
 
     if (search) {
@@ -752,7 +752,7 @@ app.delete('/api/budgets/:id', async (req, res) => {
 app.get('/api/orders', async (req, res) => {
   try {
     const { search, status } = req.query;
-    let sql = 'SELECT o.*, c.name as customer_name FROM orders o JOIN customers c ON o.customer_id = c.id WHERE 1=1';
+    let sql = 'SELECT o.*, c.name as customer_name FROM orders o LEFT JOIN customers c ON o.customer_id = c.id WHERE 1=1';
     let params = [];
 
     if (search) {

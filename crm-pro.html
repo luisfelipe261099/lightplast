@@ -2481,10 +2481,10 @@
                             <div>Ações</div>
                         </div>
                         ${data.data.map(b => `
-                            <div class="list-item">
-                                <div><input type="checkbox" ${bulkSelection.budgets.has(b.id) ? 'checked' : ''} onchange="toggleBulkSelection('budgets', ${b.id}, this.checked)"></div>
-                                <div>${b.id}</div>
-                                <div>${b.customer_id}</div>
+                                <div class="list-item">
+                                    <div><input type="checkbox" ${bulkSelection.budgets.has(b.id) ? 'checked' : ''} onchange="toggleBulkSelection('budgets', ${b.id}, this.checked)"></div>
+                                    <div>${b.id}</div>
+                                    <div class="item-name">${b.customer_name || 'Cliente #' + b.customer_id}</div>
                                 <div>R$ ${b.total_value ? b.total_value.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '0'}</div>
                                 <div><span class="badge badge-warning">${b.status}</span></div>
                                 <div>
@@ -2531,10 +2531,10 @@
                             <div>Ações</div>
                         </div>
                         ${data.data.map(o => `
-                            <div class="list-item">
-                                <div><input type="checkbox" ${bulkSelection.orders.has(o.id) ? 'checked' : ''} onchange="toggleBulkSelection('orders', ${o.id}, this.checked)"></div>
-                                <div>${o.id}</div>
-                                <div>${o.customer_id}</div>
+                                <div class="list-item">
+                                    <div><input type="checkbox" ${bulkSelection.orders.has(o.id) ? 'checked' : ''} onchange="toggleBulkSelection('orders', ${o.id}, this.checked)"></div>
+                                    <div>${o.id}</div>
+                                    <div class="item-name">${o.customer_name || 'Cliente #' + o.customer_id}</div>
                                 <div>R$ ${o.value ? o.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '0'}</div>
                                 <div><span class="badge badge-success">${o.status}</span></div>
                                 <div>
