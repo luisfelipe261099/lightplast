@@ -128,9 +128,9 @@
 <body>
     <main class="login-card">
         <div class="brand">LightPlast Login</div>
-        <p class="subtitle">Login fictício para acesso ao dashboard.</p>
+        <p class="subtitle">Acesse o dashboard do CRM</p>
 
-        <form id="fakeLoginForm">
+        <form id="loginForm">
             <div class="group">
                 <label for="email">E-mail</label>
                 <input id="email" type="email" placeholder="admin@lightplast.com" required>
@@ -138,45 +138,73 @@
 
             <div class="group">
                 <label for="password">Senha</label>
-                <input id="password" type="password" placeholder="Digite qualquer senha" required>
+                <input id="password" type="password" placeholder="Sua senha" required>
             </div>
 
             <div class="actions">
-                <button type="submit" class="btn-primary">Entrar no CRM</button>
-                <button type="button" id="quickAccess" class="btn-secondary">Acesso rápido (fictício)</button>
+                <button type="submit" class="btn-primary" id="loginBtn">Entrar no CRM</button>
             </div>
 
             <div class="message" id="message"></div>
         </form>
 
-        <p class="hint">Este login é apenas demonstrativo. Não valida usuário real.</p>
+        <p class="hint">Primeiro acesso? Use as credenciais fornecidas pela equipe de administração.</p>
     </main>
 
     <script>
-        const form = document.getElementById('fakeLoginForm');
-        const quickAccess = document.getElementById('quickAccess');
+        const form = document.getElementById('loginForm');
         const message = document.getElementById('message');
+        const loginBtn = document.getElementById('loginBtn');
 
-        function enterCRM() {
-            sessionStorage.setItem('crmFakeAuth', '1');
-            window.location.href = '/crm-pro.html';
-        }
-
-        form.addEventListener('submit', (event) => {
+        form.addEventListener('submit', async (event) => {
             event.preventDefault();
+            
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value.trim();
 
             if (!email || !password) {
                 message.textContent = 'Preencha e-mail e senha para continuar.';
+                message.style.color = '#b91c1c';
                 return;
             }
 
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Autenticando...';
             message.textContent = '';
-            enterCRM();
-        });
 
-        quickAccess.addEventListener('click', enterCRM);
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Armazenar token JWT no localStorage
+                    localStorage.setItem('crmToken', data.token);
+                    localStorage.setItem('crmUser', JSON.stringify(data.user));
+                    
+                    message.textContent = 'Login realizado com sucesso. Redirecionando...';
+                    message.style.color = '#10b981';
+                    
+                    setTimeout(() => {
+                        window.location.href = '/crm-pro.html';
+                    }, 1000);
+                } else {
+                    message.textContent = data.error || 'Erro ao fazer login';
+                    message.style.color = '#b91c1c';
+                    loginBtn.disabled = false;
+                    loginBtn.textContent = 'Entrar no CRM';
+                }
+            } catch (error) {
+                message.textContent = 'Erro ao conectar ao servidor: ' + error.message;
+                message.style.color = '#b91c1c';
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Entrar no CRM';
+            }
+        });
     </script>
 </body>
 </html>

@@ -5,12 +5,15 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { readdir, readFile, writeFile, stat, unlink, mkdir, rename } from 'fs/promises';
 import mysql from 'mysql2/promise';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
 dotenv.config();
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
 const PORT = process.env.PORT || 3000;
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 
 // Middleware
 app.use(cors());
@@ -146,6 +149,48 @@ const query = async (sql, args) => {
   }
 };
 
+// ==================== AUTHENTICATION & AUDIT ====================
+// Middleware para verificar JWT
+const authenticateToken = (req, res, next) => {
+  const token = req.headers['authorization']?.split(' ')[1];
+  if (!token) {
+    return res.status(401).json({ success: false, error: 'Token não fornecido' });
+  }
+  
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (error) {
+    return res.status(403).json({ success: false, error: 'Token inválido ou expirado' });
+  }
+};
+
+// Função para registrar audit log
+const logAudit = async (userId, action, tableName, recordId, oldValues = null, newValues = null, req = null) => {
+  try {
+    const [ipAddress] = req?.ip?.split(':') || [''];
+    const userAgent = req?.get('user-agent') || '';
+    
+    await query(
+      `INSERT INTO audit_logs (user_id, action, table_name, record_id, old_values, new_values, ip_address, user_agent, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
+      [
+        userId,
+        action,
+        tableName || null,
+        recordId || null,
+        oldValues ? JSON.stringify(oldValues) : null,
+        newValues ? JSON.stringify(newValues) : null,
+        ipAddress?.trim() || null,
+        userAgent
+      ]
+    );
+  } catch (error) {
+    console.warn('[AUDIT] Falha ao registrar log:', error.message);
+  }
+};
+
 // ==================== HEALTH CHECK ====================
 app.get('/api/health', (req, res) => {
   res.json({
@@ -155,6 +200,272 @@ app.get('/api/health', (req, res) => {
     lastDatabaseCheck: dbState.lastCheckedAt,
     timestamp: new Date().toISOString()
   });
+});
+
+async function syncProductInDatabase({ fileName, title, slug, summary, image, categoryFile, basePrice }) {
+  // Sincroniza o cadastro de produto do CMS com a tabela de produtos do CRM.
+  try {
+    await query(
+      `INSERT INTO products (title, slug, file_name, summary, image, category_file, base_price, active, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, 1, NOW(), NOW())
+       ON DUPLICATE KEY UPDATE
+         title = VALUES(title),
+         summary = VALUES(summary),
+         image = VALUES(image),
+         category_file = VALUES(category_file),
+         base_price = VALUES(base_price),
+         active = 1,
+         updated_at = NOW()`,
+      [
+        title,
+        slug,
+        fileName,
+        summary || '',
+        normalizeAssetPath(image),
+        categoryFile || null,
+        Number(basePrice || 0),
+      ]
+    );
+  } catch (error) {
+    // Não bloqueia publicação CMS caso a tabela products não exista ainda.
+    console.warn('[CRM] Falha ao sincronizar produto no banco:', error.message);
+  }
+}
+
+// ==================== AUTHENTICATION ====================
+// POST /api/auth/register - Criar novo usuário (apenas admin)
+app.post('/api/auth/register', authenticateToken, async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ success: false, error: 'Apenas administradores podem criar usuários' });
+    }
+
+    const { email, password, name, role } = req.body;
+    
+    if (!email || !password || !name) {
+      return res.status(400).json({ success: false, error: 'E-mail, senha e nome são obrigatórios' });
+    }
+
+    const passwordHash = await bcrypt.hash(password, 10);
+    
+    const result = await query(
+      'INSERT INTO users (email, password_hash, name, role, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, NOW(), NOW())',
+      [email, passwordHash, name, role || 'user', 'active']
+    );
+
+    await logAudit(req.user.id, 'CREATE_USER', 'users', result.insertId, null, { email, name, role }, req);
+    
+    res.json({ success: true, id: result.insertId, message: 'Usuário criado com sucesso' });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// POST /api/auth/login - Fazer login
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    
+    if (!email || !password) {
+      return res.status(400).json({ success: false, error: 'E-mail e senha são obrigatórios' });
+    }
+
+    const [users] = await query('SELECT * FROM users WHERE email = ? LIMIT 1', [email]);
+    
+    if (!users || users.length === 0) {
+      return res.status(401).json({ success: false, error: 'E-mail ou senha incorretos' });
+    }
+
+    const user = users[0];
+    
+    if (user.status !== 'active') {
+      return res.status(403).json({ success: false, error: 'Usuário inativo' });
+    }
+
+    const passwordMatch = await bcrypt.compare(password, user.password_hash);
+    
+    if (!passwordMatch) {
+      return res.status(401).json({ success: false, error: 'E-mail ou senha incorretos' });
+    }
+
+    // Atualizar last_login
+    await query('UPDATE users SET last_login = NOW() WHERE id = ?', [user.id]);
+
+    // Gerar JWT token
+    const token = jwt.sign(
+      { id: user.id, email: user.email, name: user.name, role: user.role },
+      JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+
+    await logAudit(user.id, 'LOGIN', 'users', user.id, null, { email }, req);
+
+    res.json({ 
+      success: true, 
+      token, 
+      user: { 
+        id: user.id, 
+        email: user.email, 
+        name: user.name, 
+        role: user.role 
+      } 
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// POST /api/auth/logout - Logout (apenas limpa token no cliente)
+app.post('/api/auth/logout', authenticateToken, async (req, res) => {
+  try {
+    await logAudit(req.user.id, 'LOGOUT', 'users', req.user.id, null, null, req);
+    res.json({ success: true, message: 'Logout realizado com sucesso' });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// GET /api/users - Listar todos os usuários (apenas admin)
+app.get('/api/users', authenticateToken, async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ success: false, error: 'Apenas administradores podem listar usuários' });
+    }
+
+    const users = await query(
+      'SELECT id, email, name, role, status, created_at, updated_at, last_login FROM users ORDER BY created_at DESC'
+    );
+    res.json({ success: true, data: users });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// PUT /api/users/:id - Editar usuário
+app.put('/api/users/:id', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, role, status } = req.body;
+
+    // Apenas admin pode editar role/status, usuário pode editar seu próprio name
+    if (req.user.role !== 'admin' && req.user.id !== parseInt(id)) {
+      return res.status(403).json({ success: false, error: 'Sem permissão para editar este usuário' });
+    }
+
+    const [users] = await query('SELECT * FROM users WHERE id = ? LIMIT 1', [id]);
+    if (!users || users.length === 0) {
+      return res.status(404).json({ success: false, error: 'Usuário não encontrado' });
+    }
+
+    const oldUser = users[0];
+    let updateQuery = 'UPDATE users SET updated_at = NOW()';
+    const params = [id];
+
+    if (name) {
+      updateQuery = updateQuery.replace('WHERE', 'SET name = ? WHERE');
+      params.unshift(name);
+    }
+
+    if (req.user.role === 'admin') {
+      if (role) updateQuery += ', role = ?';
+      if (status) updateQuery += ', status = ?';
+      if (role) params.push(role);
+      if (status) params.push(status);
+    }
+
+    updateQuery += ' WHERE id = ?';
+
+    await query(updateQuery, params);
+    
+    await logAudit(req.user.id, 'UPDATE_USER', 'users', id, oldUser, { name, role, status }, req);
+
+    res.json({ success: true, message: 'Usuário atualizado com sucesso' });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// DELETE /api/users/:id - Deletar usuário (apenas admin)
+app.delete('/api/users/:id', authenticateToken, async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ success: false, error: 'Apenas administradores podem deletar usuários' });
+    }
+
+    const { id } = req.params;
+
+    if (req.user.id === parseInt(id)) {
+      return res.status(400).json({ success: false, error: 'Você não pode deletar sua própria conta' });
+    }
+
+    const [users] = await query('SELECT * FROM users WHERE id = ? LIMIT 1', [id]);
+    if (!users || users.length === 0) {
+      return res.status(404).json({ success: false, error: 'Usuário não encontrado' });
+    }
+
+    await query('DELETE FROM users WHERE id = ?', [id]);
+    
+    await logAudit(req.user.id, 'DELETE_USER', 'users', id, users[0], null, req);
+
+    res.json({ success: true, message: 'Usuário deletado com sucesso' });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// GET /api/audit-logs - Listar logs de auditoria (apenas admin)
+app.get('/api/audit-logs', authenticateToken, async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ success: false, error: 'Apenas administradores podem visualizar logs' });
+    }
+
+    const { action, userId, limit = 100, offset = 0 } = req.query;
+    let sql = `SELECT al.id, al.user_id, u.email as user_email, al.action, al.table_name, al.record_id, 
+               al.old_values, al.new_values, al.ip_address, al.created_at 
+               FROM audit_logs al 
+               LEFT JOIN users u ON al.user_id = u.id 
+               WHERE 1=1`;
+    const params = [];
+
+    if (action) {
+      sql += ' AND al.action = ?';
+      params.push(action);
+    }
+
+    if (userId) {
+      sql += ' AND al.user_id = ?';
+      params.push(userId);
+    }
+
+    sql += ' ORDER BY al.created_at DESC LIMIT ? OFFSET ?';
+    params.push(parseInt(limit), parseInt(offset));
+
+    const logs = await query(sql, params);
+    res.json({ success: true, data: logs });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ==================== PRODUCTS ====================
+app.get('/api/products', async (req, res) => {
+  try {
+    const { search = '' } = req.query;
+    let sql = 'SELECT id, title, slug, file_name as fileName, summary, image, category_file as categoryFile, base_price as basePrice, active FROM products WHERE active = 1';
+    const params = [];
+
+    if (search) {
+      sql += ' AND (title LIKE ? OR slug LIKE ?)';
+      params.push(`%${search}%`, `%${search}%`);
+    }
+
+    sql += ' ORDER BY title ASC LIMIT 300';
+    const products = await query(sql, params);
+    res.json({ success: true, data: products });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
 });
 
 // ==================== CUSTOMERS ====================
@@ -358,15 +669,40 @@ app.get('/api/budgets', async (req, res) => {
 
 app.post('/api/budgets', async (req, res) => {
   try {
-    const { customer_id, title, description, total_value, status, tax, discount, valid_until } = req.body;
-    
-    if (!customer_id || !title || !total_value) {
-      return res.status(400).json({ success: false, error: 'Cliente, título e valor são obrigatórios' });
+    const { customer_id, title, description, total_value, status, tax, discount, valid_until, items } = req.body;
+
+    if (!customer_id || !title) {
+      return res.status(400).json({ success: false, error: 'Cliente e título são obrigatórios' });
+    }
+
+    const normalizedItems = Array.isArray(items) ? items.map((item) => ({
+      productId: Number(item.productId || 0),
+      title: String(item.title || ''),
+      quantity: Number(item.quantity || 0),
+      unitPrice: Number(item.unitPrice || 0),
+      total: Number(item.total || 0),
+    })) : [];
+
+    const itemsTotal = normalizedItems.reduce((sum, item) => sum + (Number(item.total) || 0), 0);
+    const resolvedTotal = Number(total_value || 0) > 0 ? Number(total_value) : itemsTotal;
+
+    if (resolvedTotal <= 0) {
+      return res.status(400).json({ success: false, error: 'Valor total do orçamento é obrigatório' });
     }
 
     const result = await query(
-      'INSERT INTO budgets (customer_id, title, description, total_value, status, tax, discount, valid_until, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())',
-      [customer_id, title, description, total_value, status || 'draft', tax || 0, discount || 0, valid_until]
+      'INSERT INTO budgets (customer_id, title, description, items, total_value, status, tax, discount, valid_until, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())',
+      [
+        customer_id,
+        title,
+        description,
+        normalizedItems.length ? JSON.stringify(normalizedItems) : null,
+        resolvedTotal,
+        status || 'draft',
+        tax || 0,
+        discount || 0,
+        valid_until,
+      ]
     );
     res.json({ success: true, id: result.insertId });
   } catch (error) {
@@ -1479,7 +1815,7 @@ app.get('/api/cms/guided/product', async (req, res) => {
 
 app.put('/api/cms/guided/product', async (req, res) => {
   try {
-    const { fileName, title, summary, body, image, categoryFile } = req.body;
+    const { fileName, title, summary, body, image, categoryFile, basePrice } = req.body;
     const safeFileName = sanitizeFileName(fileName);
 
     if (!safeFileName || !safeFileName.startsWith('produto-')) {
@@ -1503,6 +1839,17 @@ app.put('/api/cms/guided/product', async (req, res) => {
     await upsertProductLabelInCatalog(safeFileName, safeTitle);
     await removeProductFromAllCategories(safeFileName);
     await appendProductToCategory({ fileName: safeFileName, title: safeTitle, categoryFile });
+
+    const slugValue = safeFileName.replace(/^produto-/, '').replace(/\.html$/i, '');
+    await syncProductInDatabase({
+      fileName: safeFileName,
+      title: safeTitle,
+      slug: slugValue,
+      summary,
+      image,
+      categoryFile,
+      basePrice,
+    });
 
     res.json({ success: true, message: 'Produto atualizado com sucesso' });
   } catch (error) {
@@ -1684,7 +2031,7 @@ app.delete('/api/cms/trash/:id', async (req, res) => {
 
 app.post('/api/cms/publish/product', async (req, res) => {
   try {
-    const { title, slug, summary, body, image, categoryFile } = req.body;
+    const { title, slug, summary, body, image, categoryFile, basePrice } = req.body;
     const safeTitle = String(title || '').trim();
     if (!safeTitle) {
       return res.status(400).json({ success: false, error: 'Título do produto é obrigatório' });
@@ -1713,6 +2060,15 @@ app.post('/api/cms/publish/product', async (req, res) => {
     await writeFile(filePath, productPage, 'utf-8');
     await appendProductToCatalog({ fileName, title: safeTitle });
     await appendProductToCategory({ fileName, title: safeTitle, categoryFile });
+    await syncProductInDatabase({
+      fileName,
+      title: safeTitle,
+      slug: slugValue,
+      summary,
+      image,
+      categoryFile,
+      basePrice,
+    });
     await regenerateSitemap();
 
     res.json({

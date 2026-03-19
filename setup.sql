@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS leads (
     title VARCHAR(255),
     description TEXT,
     value DECIMAL(10,2),
-    status ENUM('open', 'contacted', 'qualified', 'converted', 'lost') DEFAULT 'open',
+    status ENUM('new', 'open', 'contacted', 'qualified', 'converted', 'lost') DEFAULT 'new',
     priority ENUM('low', 'medium', 'high') DEFAULT 'medium',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -35,6 +35,25 @@ CREATE TABLE IF NOT EXISTS leads (
     INDEX idx_status (status),
     INDEX idx_customer_id (customer_id),
     INDEX idx_priority (priority)
+);
+
+-- ==================== PRODUCTS TABLE ====================
+CREATE TABLE IF NOT EXISTS products (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    slug VARCHAR(255) NOT NULL,
+    file_name VARCHAR(255) NOT NULL,
+    summary TEXT,
+    image VARCHAR(500),
+    category_file VARCHAR(255),
+    base_price DECIMAL(10,2) DEFAULT 0,
+    active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_products_slug (slug),
+    UNIQUE KEY uq_products_file_name (file_name),
+    INDEX idx_products_active (active),
+    INDEX idx_products_title (title)
 );
 
 -- ==================== BUDGETS TABLE ====================
@@ -45,9 +64,10 @@ CREATE TABLE IF NOT EXISTS budgets (
     description TEXT,
     items JSON,
     total_value DECIMAL(10,2),
-    status ENUM('draft', 'sent', 'approved', 'expired', 'converted') DEFAULT 'draft',
+    status ENUM('draft', 'sent', 'approved', 'rejected', 'expired', 'converted') DEFAULT 'draft',
     tax DECIMAL(10,2) DEFAULT 0,
     discount DECIMAL(10,2) DEFAULT 0,
+    valid_until DATE NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (customer_id) REFERENCES customers(id),
@@ -61,6 +81,7 @@ CREATE TABLE IF NOT EXISTS orders (
     id INT AUTO_INCREMENT PRIMARY KEY,
     customer_id INT NOT NULL,
     budget_id INT,
+    description TEXT,
     value DECIMAL(10,2),
     status ENUM('pending', 'confirmed', 'shipped', 'delivered', 'cancelled') DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -87,8 +108,47 @@ CREATE TABLE IF NOT EXISTS follow_ups (
     INDEX idx_completed (completed)
 );
 
+-- ==================== USERS TABLE ====================
+CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    role ENUM('admin', 'manager', 'user') DEFAULT 'user',
+    status ENUM('active', 'inactive') DEFAULT 'active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    last_login TIMESTAMP NULL,
+    INDEX idx_email (email),
+    INDEX idx_status (status),
+    INDEX idx_role (role)
+);
+
+-- ==================== AUDIT_LOGS TABLE ====================
+CREATE TABLE IF NOT EXISTS audit_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    action VARCHAR(100) NOT NULL,
+    table_name VARCHAR(100),
+    record_id INT,
+    old_values JSON,
+    new_values JSON,
+    ip_address VARCHAR(45),
+    user_agent TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    INDEX idx_user_id (user_id),
+    INDEX idx_created_at (created_at),
+    INDEX idx_action (action),
+    INDEX idx_table_name (table_name)
+);
+
 -- ==================== SAMPLE DATA (OPCIONAL) ====================
 -- Descomente as linhas abaixo para inserir dados de exemplo
+
+-- Usuário padrão (senha: admin123 - hash gerado pelo backend)
+-- INSERT INTO users (email, password_hash, name, role, status) VALUES
+-- ('admin@lightplast.com', '$2b$10$...', 'Administrador', 'admin', 'active');
 
 -- INSERT INTO customers (name, email, phone, company, status, source) VALUES
 -- ('João Silva', 'joao@example.com', '11999999999', 'Tech Solutions', 'active', 'website'),
