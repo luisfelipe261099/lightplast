@@ -213,8 +213,35 @@ app.put('/api/customers/:id', async (req, res) => {
 app.delete('/api/customers/:id', async (req, res) => {
   try {
     const { id } = req.params;
+
+    const [customer] = await query('SELECT id, name FROM customers WHERE id=? LIMIT 1', [id]);
+    if (!customer) {
+      return res.status(404).json({ success: false, error: 'Cliente não encontrado' });
+    }
+
+    const [leadCount] = await query('SELECT COUNT(*) AS count FROM leads WHERE customer_id=?', [id]);
+    const [budgetCount] = await query('SELECT COUNT(*) AS count FROM budgets WHERE customer_id=?', [id]);
+    const [orderCount] = await query('SELECT COUNT(*) AS count FROM orders WHERE customer_id=?', [id]);
+    const [followUpCount] = await query('SELECT COUNT(*) AS count FROM follow_ups WHERE customer_id=?', [id]);
+
+    const related = {
+      leads: Number(leadCount?.count || 0),
+      budgets: Number(budgetCount?.count || 0),
+      orders: Number(orderCount?.count || 0),
+      followUps: Number(followUpCount?.count || 0),
+    };
+
+    const totalRelated = related.leads + related.budgets + related.orders + related.followUps;
+    if (totalRelated > 0) {
+      return res.status(409).json({
+        success: false,
+        error: 'Não é possível deletar cliente com histórico vinculado. Inative o cliente em vez de excluir.',
+        data: related,
+      });
+    }
+
     await query('DELETE FROM customers WHERE id=?', [id]);
-    res.json({ success: true });
+    res.json({ success: true, message: 'Cliente deletado com sucesso' });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -341,6 +368,16 @@ app.put('/api/budgets/:id', async (req, res) => {
   }
 });
 
+app.delete('/api/budgets/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await query('DELETE FROM budgets WHERE id=?', [id]);
+    res.json({ success: true, message: 'Orçamento deletado com sucesso' });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // ==================== ORDERS ====================
 app.get('/api/orders', async (req, res) => {
   try {
@@ -390,6 +427,16 @@ app.put('/api/orders/:id', async (req, res) => {
     const { status } = req.body;
     await query('UPDATE orders SET status=?, updated_at=NOW() WHERE id=?', [status, id]);
     res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+app.delete('/api/orders/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await query('DELETE FROM orders WHERE id=?', [id]);
+    res.json({ success: true, message: 'Pedido deletado com sucesso' });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }

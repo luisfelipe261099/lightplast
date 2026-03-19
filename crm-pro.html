@@ -2388,6 +2388,9 @@
                                     <button class="btn btn-small btn-primary" onclick="editLead(${l.id})">
                                         <i class="fas fa-edit"></i>
                                     </button>
+                                    <button class="btn btn-small btn-danger" onclick="deleteLead(${l.id})">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
                                 </div>
                             </div>
                         `).join('')}
@@ -2433,6 +2436,9 @@
                                     <button class="btn btn-small btn-primary">
                                         <i class="fas fa-file-pdf"></i>
                                     </button>
+                                    <button class="btn btn-small btn-danger" onclick="deleteBudget(${b.id})">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
                                 </div>
                             </div>
                         `).join('')}
@@ -2477,6 +2483,9 @@
                                 <div>
                                     <button class="btn btn-small btn-primary">
                                         <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-small btn-danger" onclick="deleteOrder(${o.id})">
+                                        <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
                             </div>
@@ -2669,10 +2678,61 @@
                     showAlert('Cliente deletado com sucesso!', 'success');
                     loadCustomers();
                 } else {
-                    showAlert('Erro ao deletar cliente', 'error');
+                    const details = data?.data
+                        ? ` (leads: ${data.data.leads || 0}, orçamentos: ${data.data.budgets || 0}, pedidos: ${data.data.orders || 0}, follow-ups: ${data.data.followUps || 0})`
+                        : '';
+                    showAlert((data.error || 'Erro ao deletar cliente') + details, 'error');
                 }
             } catch (error) {
-                showAlert('Erro ao deletar cliente', 'error');
+                showAlert(error.message || 'Erro ao deletar cliente', 'error');
+            }
+        }
+
+        async function deleteLead(id) {
+            if (!confirm('Tem certeza que deseja excluir este lead?')) return;
+            try {
+                const res = await fetch(`${API_URL}/leads/${id}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (data.success) {
+                    showAlert('Lead excluído com sucesso!', 'success');
+                    loadLeads(document.getElementById('leadsSearch')?.value || '');
+                } else {
+                    showAlert(data.error || 'Erro ao excluir lead', 'error');
+                }
+            } catch (error) {
+                showAlert(error.message || 'Erro ao excluir lead', 'error');
+            }
+        }
+
+        async function deleteBudget(id) {
+            if (!confirm('Tem certeza que deseja excluir este orçamento?')) return;
+            try {
+                const res = await fetch(`${API_URL}/budgets/${id}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (data.success) {
+                    showAlert('Orçamento excluído com sucesso!', 'success');
+                    loadBudgets(document.getElementById('budgetsSearch')?.value || '');
+                } else {
+                    showAlert(data.error || 'Erro ao excluir orçamento', 'error');
+                }
+            } catch (error) {
+                showAlert(error.message || 'Erro ao excluir orçamento', 'error');
+            }
+        }
+
+        async function deleteOrder(id) {
+            if (!confirm('Tem certeza que deseja excluir este pedido?')) return;
+            try {
+                const res = await fetch(`${API_URL}/orders/${id}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (data.success) {
+                    showAlert('Pedido excluído com sucesso!', 'success');
+                    loadOrders(document.getElementById('ordersSearch')?.value || '');
+                } else {
+                    showAlert(data.error || 'Erro ao excluir pedido', 'error');
+                }
+            } catch (error) {
+                showAlert(error.message || 'Erro ao excluir pedido', 'error');
             }
         }
 
