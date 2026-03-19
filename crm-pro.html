@@ -792,10 +792,10 @@
                 <button class="tab-btn active" data-tab="dashboard"><i class="fas fa-chart-line"></i> Dashboard</button>
                 <button class="tab-btn" data-tab="customers"><i class="fas fa-users"></i> Clientes</button>
                 <button class="tab-btn" data-tab="leads"><i class="fas fa-bullseye"></i> Leads</button>
-                <button class="tab-btn" data-tab="budgets"><i class="fas fa-file-invoice"></i> Or├ºamentos</button>
+                <button class="tab-btn" data-tab="budgets"><i class="fas fa-file-invoice"></i> Orçamentos</button>
                 <button class="tab-btn" data-tab="orders"><i class="fas fa-shopping-cart"></i> Pedidos</button>
-                <button class="tab-btn" data-tab="reports"><i class="fas fa-money-bill-wave"></i> Relat├│rios</button>
-                <button class="tab-btn" data-tab="content"><i class="fas fa-pen-to-square"></i> Conte├║do do Site</button>
+                <button class="tab-btn" data-tab="reports"><i class="fas fa-money-bill-wave"></i> Relatórios</button>
+                <button class="tab-btn" data-tab="content"><i class="fas fa-pen-to-square"></i> Conteúdo do Site</button>
             </nav>
             <div class="header-actions">
                 <button id="logoutBtn" class="logout-btn" title="Sair do CRM">
@@ -817,21 +817,21 @@
                     <div class="stat-icon"><i class="fas fa-users"></i></div>
                     <div class="stat-label">Clientes Ativos</div>
                     <div class="stat-number" id="stat-customers">0</div>
-                    <div class="stat-percent"><i class="fas fa-arrow-up"></i> +12% este m├¬s</div>
+                    <div class="stat-percent"><i class="fas fa-arrow-up"></i> +12% este mês</div>
                 </div>
 
                 <div class="stat-card">
                     <div class="stat-icon"><i class="fas fa-bullseye"></i></div>
                     <div class="stat-label">Leads Qualificados</div>
                     <div class="stat-number" id="stat-leads">0</div>
-                    <div class="stat-percent"><i class="fas fa-arrow-up"></i> +8% este m├¬s</div>
+                    <div class="stat-percent"><i class="fas fa-arrow-up"></i> +8% este mês</div>
                 </div>
 
                 <div class="stat-card">
                     <div class="stat-icon"><i class="fas fa-dollar-sign"></i></div>
                     <div class="stat-label">Receita Total</div>
                     <div class="stat-number" id="stat-revenue">R$ 0</div>
-                    <div class="stat-percent"><i class="fas fa-arrow-up"></i> +25% este m├¬s</div>
+                    <div class="stat-percent"><i class="fas fa-arrow-up"></i> +25% este mês</div>
                 </div>
 
                 <div class="stat-card">
@@ -845,7 +845,7 @@
             <!-- Charts -->
             <div class="charts-row">
                 <div class="chart-container">
-                    <h3 class="chart-title"><i class="fas fa-line-chart"></i> Receita por M├¬s</h3>
+                    <h3 class="chart-title"><i class="fas fa-line-chart"></i> Receita por Mês</h3>
                     <canvas id="revenueChart"></canvas>
                 </div>
                 <div class="chart-container">
@@ -878,7 +878,7 @@
                 <h1 class="section-title"><i class="fas fa-users"></i> Clientes</h1>
                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                     <div class="search-bar">
-                        <input type="text" id="customerSearch" placeholder="­ƒöì Buscar cliente...">
+                        <input type="text" id="customerSearch" placeholder="Buscar cliente...">
                     </div>
                     <button class="btn btn-secondary btn-icon" onclick="exportCustomers()" title="Exportar para CSV">
                         <i class="fas fa-download"></i> Exportar
@@ -903,7 +903,7 @@
                 <h1 class="section-title"><i class="fas fa-bullseye"></i> Leads</h1>
                 <div style="display: flex; gap: 10px;">
                     <div class="search-bar">
-                        <input type="text" id="leadsSearch" placeholder="­ƒöì Buscar lead...">
+                        <input type="text" id="leadsSearch" placeholder="Buscar lead...">
                     </div>
                     <button class="btn btn-danger" type="button" onclick="deleteSelectedLeads()">
                         <i class="fas fa-trash"></i> Excluir Selecionados
@@ -925,16 +925,16 @@
         <!-- ===== BUDGETS ===== -->
         <section id="budgets" class="section">
             <div class="section-header">
-                <h1 class="section-title"><i class="fas fa-file-invoice"></i> Or├ºamentos</h1>
+                <h1 class="section-title"><i class="fas fa-file-invoice"></i> Orçamentos</h1>
                 <div style="display: flex; gap: 10px;">
                     <div class="search-bar">
-                        <input type="text" id="budgetsSearch" placeholder="­ƒöì Buscar or├ºamento...">
+                        <input type="text" id="budgetsSearch" placeholder="Buscar orçamento...">
                     </div>
                     <button class="btn btn-danger" type="button" onclick="deleteSelectedBudgets()">
                         <i class="fas fa-trash"></i> Excluir Selecionados
                     </button>
                     <button class="btn btn-primary" onclick="openBudgetModal()">
-                        <i class="fas fa-plus"></i> Novo Or├ºamento
+                        <i class="fas fa-plus"></i> Novo Orçamento
                     </button>
                 </div>
             </div>
@@ -942,7 +942,7 @@
             <div class="list-container" id="budgets-container">
                 <div class="empty-state">
                     <div class="empty-state-icon"><i class="fas fa-file-invoice"></i></div>
-                    <p>Carregando or├ºamentos...</p>
+                    <p>Carregando orçamentos...</p>
                 </div>
             </div>
         </section>
@@ -953,7 +953,7 @@
                 <h1 class="section-title"><i class="fas fa-shopping-cart"></i> Pedidos</h1>
                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                     <div class="search-bar">
-                        <input type="text" id="ordersSearch" placeholder="­ƒöì Buscar pedido...">
+                        <input type="text" id="ordersSearch" placeholder="Buscar pedido...">
                     </div>
                     <button class="btn btn-danger" type="button" onclick="deleteSelectedOrders()">
                         <i class="fas fa-trash"></i> Excluir Selecionados
@@ -975,9 +975,9 @@
             </div>
         </section>
 
-        <!-- ===== RELAT├ôRIOS FINANCEIROS ===== -->
+        <!-- ===== RELATÓRIOS FINANCEIROS ===== -->
         <section id="reports" class="section">
-            <h1 class="section-title"><i class="fas fa-money-bill-wave"></i> Relat├│rios Financeiros</h1>
+            <h1 class="section-title"><i class="fas fa-money-bill-wave"></i> Relatórios Financeiros</h1>
 
             <!-- KPI Financeiros -->
             <div class="dashboard-grid">
@@ -985,55 +985,55 @@
                     <div class="stat-icon"><i class="fas fa-arrow-trending-up"></i></div>
                     <div class="stat-label">Faturamento Total</div>
                     <div class="stat-number" id="report-revenue">R$ 0</div>
-                    <div class="stat-percent"><i class="fas fa-arrow-up"></i> +18% vs m├¬s anterior</div>
+                    <div class="stat-percent"><i class="fas fa-arrow-up"></i> +18% vs mês anterior</div>
                 </div>
 
                 <div class="stat-card">
                     <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
                     <div class="stat-label">Pedidos Confirmados</div>
                     <div class="stat-number" id="report-orders">0</div>
-                    <div class="stat-percent"><i class="fas fa-arrow-up"></i> +5 pedidos este m├¬s</div>
+                    <div class="stat-percent"><i class="fas fa-arrow-up"></i> +5 pedidos este mês</div>
                 </div>
 
                 <div class="stat-card">
                     <div class="stat-icon"><i class="fas fa-handshake"></i></div>
-                    <div class="stat-label">Ticket M├®dio</div>
+                    <div class="stat-label">Ticket Médio</div>
                     <div class="stat-number" id="report-average">R$ 0</div>
-                    <div class="stat-percent"><i class="fas fa-arrow-right"></i> Est├ível</div>
+                    <div class="stat-percent"><i class="fas fa-arrow-right"></i> Estável</div>
                 </div>
 
                 <div class="stat-card">
                     <div class="stat-icon"><i class="fas fa-zap"></i></div>
-                    <div class="stat-label">Taxa Convers├úo</div>
+                    <div class="stat-label">Taxa Conversão</div>
                     <div class="stat-number" id="report-conversion">0%</div>
                     <div class="stat-percent"><i class="fas fa-arrow-up"></i> +2.5% vs passado</div>
                 </div>
             </div>
 
-            <!-- Gr├íficos Financeiros -->
+            <!-- Gráficos Financeiros -->
             <div class="charts-row">
                 <div class="chart-container">
                     <h3 class="chart-title"><i class="fas fa-line-chart"></i> Faturamento Mensal</h3>
                     <canvas id="revenueMonthlyChart"></canvas>
                 </div>
                 <div class="chart-container">
-                    <h3 class="chart-title"><i class="fas fa-bar-chart"></i> Comparativo Per├¡odo</h3>
+                    <h3 class="chart-title"><i class="fas fa-bar-chart"></i> Comparativo Período</h3>
                     <canvas id="comparisonChart"></canvas>
                 </div>
             </div>
 
             <div class="charts-row">
                 <div class="chart-container">
-                    <h3 class="chart-title"><i class="fas fa-area-chart"></i> Evolu├º├úo de Vendas</h3>
+                    <h3 class="chart-title"><i class="fas fa-area-chart"></i> Evolução de Vendas</h3>
                     <canvas id="evolutionChart"></canvas>
                 </div>
                 <div class="chart-container">
-                    <h3 class="chart-title"><i class="fas fa-chart-pie"></i> Distribui├º├úo por Status</h3>
+                    <h3 class="chart-title"><i class="fas fa-chart-pie"></i> Distribuição por Status</h3>
                     <canvas id="statusDistributionChart"></canvas>
                 </div>
             </div>
 
-            <!-- An├ílise Detalhada -->
+            <!-- Análise Detalhada -->
             <div class="chart-container" style="margin-top: 20px;">
                 <h3 class="chart-title"><i class="fas fa-table"></i> Top Clientes por Receita</h3>
                 <div class="list-container" id="top-revenue-customers">
@@ -1048,7 +1048,7 @@
                 <h3 class="chart-title"><i class="fas fa-lightbulb"></i> Insights Financeiros</h3>
                 <div id="financial-insights" style="padding: 20px;">
                     <p style="font-size: 0.95rem; line-height: 1.8; color: var(--text-light);">
-                        Carregando an├ílises...
+                        Carregando análises...
                     </p>
                 </div>
             </div>
@@ -1056,10 +1056,10 @@
 
         <section id="content" class="section">
             <div class="section-header">
-                <h1 class="section-title"><i class="fas fa-pen-to-square"></i> Conte├║do do Site</h1>
+                <h1 class="section-title"><i class="fas fa-pen-to-square"></i> Conteúdo do Site</h1>
                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                     <div class="search-bar">
-                        <input type="text" id="cmsSearch" placeholder="­ƒöì Buscar p├íginas por nome, t├¡tulo ou tipo...">
+                        <input type="text" id="cmsSearch" placeholder="Buscar páginas por nome, título ou tipo...">
                     </div>
                     <button class="btn btn-secondary" id="cmsReloadBtn" type="button">
                         <i class="fas fa-rotate"></i> Atualizar Lista
@@ -1069,52 +1069,52 @@
 
             <div class="content-layout">
                 <aside class="content-card">
-                    <h3><i class="fas fa-folder-open"></i> P├íginas Edit├íveis</h3>
+                    <h3><i class="fas fa-folder-open"></i> Páginas Editáveis</h3>
                     <div id="cmsPageList" class="content-page-list">
                         <div class="empty-state" style="padding: 25px 10px;">
-                            <p>Carregando p├íginas...</p>
+                            <p>Carregando páginas...</p>
                         </div>
                     </div>
                 </aside>
 
                 <div class="editor-grid">
                     <div class="content-card">
-                        <h3><i class="fas fa-file-code"></i> Editor de P├ígina</h3>
+                        <h3><i class="fas fa-file-code"></i> Editor de Página</h3>
                         <div class="form-row">
                             <div class="form-group">
                                 <label>Arquivo</label>
-                                <input id="cmsCurrentFile" type="text" readonly placeholder="Selecione uma p├ígina da lista">
+                                <input id="cmsCurrentFile" type="text" readonly placeholder="Selecione uma página da lista">
                             </div>
                             <div class="form-group">
-                                <label>T├¡tulo</label>
-                                <input id="cmsPageTitle" type="text" placeholder="T├¡tulo da p├ígina" readonly>
+                                <label>Título</label>
+                                <input id="cmsPageTitle" type="text" placeholder="Título da página" readonly>
                             </div>
                         </div>
                         <div class="form-group">
-                            <label>HTML da p├ígina</label>
-                            <textarea id="cmsPageContent" class="code-editor" placeholder="Selecione uma p├ígina para editar o conte├║do HTML completo."></textarea>
+                            <label>HTML da página</label>
+                            <textarea id="cmsPageContent" class="code-editor" placeholder="Selecione uma página para editar o conteúdo HTML completo."></textarea>
                         </div>
                         <div class="editor-actions">
                             <button class="btn btn-primary" type="button" id="cmsSaveBtn">
-                                <i class="fas fa-floppy-disk"></i> Salvar P├ígina
+                                <i class="fas fa-floppy-disk"></i> Salvar Página
                             </button>
                             <button class="btn btn-secondary" type="button" id="cmsPreviewBtn">
-                                <i class="fas fa-up-right-from-square"></i> Abrir P├ígina
+                                <i class="fas fa-up-right-from-square"></i> Abrir Página
                             </button>
                         </div>
                     </div>
 
                     <div class="content-card">
-                        <h3><i class="fas fa-file-circle-plus"></i> Criar Nova P├ígina</h3>
+                        <h3><i class="fas fa-file-circle-plus"></i> Criar Nova Página</h3>
                         <form id="cmsCreateForm">
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label>Tipo de p├ígina</label>
+                                    <label>Tipo de página</label>
                                     <select id="cmsCreateType" required>
                                         <option value="produto">Produto (produto-slug.html)</option>
                                         <option value="blog-artigo">Blog artigo (blog-slug.html)</option>
                                         <option value="categoria">Categoria (categoria-slug.html)</option>
-                                        <option value="pagina">P├ígina geral (slug.html)</option>
+                                        <option value="pagina">Página geral (slug.html)</option>
                                     </select>
                                 </div>
                                 <div class="form-group">
@@ -1124,26 +1124,26 @@
                             </div>
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label>T├¡tulo</label>
+                                    <label>Título</label>
                                     <input id="cmsCreateTitle" type="text" placeholder="Ex: Saco Hospitalar 200L" required>
                                 </div>
                                 <div class="form-group">
-                                    <label>Descri├º├úo curta</label>
-                                    <input id="cmsCreateDescription" type="text" placeholder="Resumo da p├ígina para SEO e hero">
+                                    <label>Descrição curta</label>
+                                    <input id="cmsCreateDescription" type="text" placeholder="Resumo da página para SEO e hero">
                                 </div>
                             </div>
                             <button class="btn btn-primary" type="submit">
-                                <i class="fas fa-plus"></i> Criar P├ígina
+                                <i class="fas fa-plus"></i> Criar Página
                             </button>
                         </form>
                     </div>
 
                     <div class="content-card">
-                        <h3><i class="fas fa-box-open"></i> Publica├º├úo Guiada de Produto</h3>
+                        <h3><i class="fas fa-box-open"></i> Publicação Guiada de Produto</h3>
                         <form id="cmsPublishProductForm">
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label>T├¡tulo do produto *</label>
+                                    <label>Título do produto *</label>
                                     <input id="cmsProductTitle" type="text" placeholder="Ex: Saco Hospitalar 200L" required>
                                 </div>
                                 <div class="form-group">
@@ -1154,7 +1154,7 @@
                             <div class="form-row">
                                 <div class="form-group">
                                     <label>Resumo curto *</label>
-                                    <input id="cmsProductSummary" type="text" placeholder="Descri├º├úo curta para a p├ígina" required>
+                                    <input id="cmsProductSummary" type="text" placeholder="Descrição curta para a página" required>
                                 </div>
                                 <div class="form-group">
                                     <label>Imagem (assets/...)</label>
@@ -1165,29 +1165,29 @@
                                 <div class="form-group">
                                     <label>Categoria para inserir (opcional)</label>
                                     <select id="cmsProductCategoryFile">
-                                        <option value="">Somente cat├ílogo geral</option>
+                                        <option value="">Somente catálogo geral</option>
                                         <option value="categoria-sacos-de-lixo.html">Sacos de Lixo</option>
                                         <option value="categoria-sacolas-personalizadas.html">Sacolas Personalizadas</option>
-                                        <option value="categoria-filmes-tecnicos.html">Filmes T├®cnicos</option>
+                                        <option value="categoria-filmes-tecnicos.html">Filmes Técnicos</option>
                                     </select>
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label>Conte├║do da p├ígina</label>
-                                <textarea id="cmsProductBody" rows="4" placeholder="Texto principal da p├ígina do produto"></textarea>
+                                <label>Conteúdo da página</label>
+                                <textarea id="cmsProductBody" rows="4" placeholder="Texto principal da página do produto"></textarea>
                             </div>
                             <button class="btn btn-primary" type="submit">
-                                <i class="fas fa-upload"></i> Publicar Produto no Cat├ílogo
+                                <i class="fas fa-upload"></i> Publicar Produto no Catálogo
                             </button>
                         </form>
                     </div>
 
                     <div class="content-card">
-                        <h3><i class="fas fa-newspaper"></i> Publica├º├úo Guiada de Artigo</h3>
+                        <h3><i class="fas fa-newspaper"></i> Publicação Guiada de Artigo</h3>
                         <form id="cmsPublishBlogForm">
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label>T├¡tulo do artigo *</label>
+                                    <label>Título do artigo *</label>
                                     <input id="cmsBlogTitle" type="text" placeholder="Ex: Guia de compra para hospitais" required>
                                 </div>
                                 <div class="form-group">
@@ -1206,8 +1206,8 @@
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label>Conte├║do do artigo</label>
-                                <textarea id="cmsBlogBody" rows="5" placeholder="Escreva os par├ígrafos do artigo; use uma linha em branco para separar blocos."></textarea>
+                                <label>Conteúdo do artigo</label>
+                                <textarea id="cmsBlogBody" rows="5" placeholder="Escreva os parágrafos do artigo; use uma linha em branco para separar blocos."></textarea>
                             </div>
                             <button class="btn btn-primary" type="submit">
                                 <i class="fas fa-upload"></i> Publicar Artigo no Blog
@@ -1216,7 +1216,7 @@
                     </div>
 
                     <div class="content-card">
-                        <h3><i class="fas fa-pen-ruler"></i> Edi├º├úo Guiada de Existentes</h3>
+                        <h3><i class="fas fa-pen-ruler"></i> Edição Guiada de Existentes</h3>
 
                         <form id="cmsEditProductForm" style="margin-bottom: 24px; border-bottom: 1px solid var(--border); padding-bottom: 20px;">
                             <h4 style="margin-bottom: 10px;">Editar Produto Existente</h4>
@@ -1235,7 +1235,7 @@
                             </div>
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label>T├¡tulo *</label>
+                                    <label>Título *</label>
                                     <input id="cmsEditProductTitle" type="text" required>
                                 </div>
                                 <div class="form-group">
@@ -1251,19 +1251,19 @@
                                 <div class="form-group">
                                     <label>Categoria</label>
                                     <select id="cmsEditProductCategoryFile">
-                                        <option value="">Sem categoria espec├¡fica</option>
+                                        <option value="">Sem categoria específica</option>
                                         <option value="categoria-sacos-de-lixo.html">Sacos de Lixo</option>
                                         <option value="categoria-sacolas-personalizadas.html">Sacolas Personalizadas</option>
-                                        <option value="categoria-filmes-tecnicos.html">Filmes T├®cnicos</option>
+                                        <option value="categoria-filmes-tecnicos.html">Filmes Técnicos</option>
                                     </select>
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label>Conte├║do da p├ígina</label>
-                                <textarea id="cmsEditProductBody" rows="4" placeholder="Texto principal da p├ígina"></textarea>
+                                <label>Conteúdo da página</label>
+                                <textarea id="cmsEditProductBody" rows="4" placeholder="Texto principal da página"></textarea>
                             </div>
                             <button class="btn btn-primary" type="submit">
-                                <i class="fas fa-floppy-disk"></i> Salvar Edi├º├úo do Produto
+                                <i class="fas fa-floppy-disk"></i> Salvar Edição do Produto
                             </button>
                             <button class="btn btn-danger" type="button" id="cmsDeleteProductBtn">
                                 <i class="fas fa-trash"></i> Remover Produto
@@ -1287,7 +1287,7 @@
                             </div>
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label>T├¡tulo *</label>
+                                    <label>Título *</label>
                                     <input id="cmsEditBlogTitle" type="text" required>
                                 </div>
                                 <div class="form-group">
@@ -1300,11 +1300,11 @@
                                 <input id="cmsEditBlogExcerpt" type="text" required>
                             </div>
                             <div class="form-group">
-                                <label>Conte├║do do artigo</label>
-                                <textarea id="cmsEditBlogBody" rows="5" placeholder="Par├ígrafos do artigo"></textarea>
+                                <label>Conteúdo do artigo</label>
+                                <textarea id="cmsEditBlogBody" rows="5" placeholder="Parágrafos do artigo"></textarea>
                             </div>
                             <button class="btn btn-primary" type="submit">
-                                <i class="fas fa-floppy-disk"></i> Salvar Edi├º├úo do Artigo
+                                <i class="fas fa-floppy-disk"></i> Salvar Edição do Artigo
                             </button>
                             <button class="btn btn-danger" type="button" id="cmsDeleteBlogBtn">
                                 <i class="fas fa-trash"></i> Remover Artigo
@@ -1350,7 +1350,7 @@
     <!-- Customer Modal -->
     <div class="modal" id="customerModal">
         <div class="modal-content">
-            <button class="modal-close" onclick="closeModal('customerModal')">Ô£ò</button>
+            <button class="modal-close" onclick="closeModal('customerModal')">×</button>
             <div class="modal-header"><i class="fas fa-user-plus"></i> Novo Cliente</div>
             <form onsubmit="saveCustomer(event)">
                 <div class="form-row">
@@ -1375,7 +1375,7 @@
                 </div>
                 <div class="form-group">
                     <label>Notas</label>
-                    <textarea id="customerNotes" rows="3" placeholder="Informa├º├Áes adicionais..."></textarea>
+                    <textarea id="customerNotes" rows="3" placeholder="Informações adicionais..."></textarea>
                 </div>
                 <button type="submit" class="btn btn-primary" style="width: 100%;">
                     <i class="fas fa-save"></i> Salvar Cliente
@@ -1387,7 +1387,7 @@
     <!-- Lead Modal -->
     <div class="modal" id="leadModal">
         <div class="modal-content">
-            <button class="modal-close" onclick="closeModal('leadModal')">Ô£ò</button>
+            <button class="modal-close" onclick="closeModal('leadModal')">×</button>
             <div class="modal-header"><i class="fas fa-bullseye"></i> Novo Lead</div>
             <form onsubmit="saveLead(event)">
                 <div class="form-row">
@@ -1439,8 +1439,8 @@
     <!-- Budget Modal -->
     <div class="modal" id="budgetModal">
         <div class="modal-content">
-            <button class="modal-close" onclick="closeModal('budgetModal')">Ô£ò</button>
-            <div class="modal-header"><i class="fas fa-file-invoice"></i> Novo Or├ºamento</div>
+            <button class="modal-close" onclick="closeModal('budgetModal')">×</button>
+            <div class="modal-header"><i class="fas fa-file-invoice"></i> Novo Orçamento</div>
             <form onsubmit="saveBudget(event)">
                 <div class="form-group">
                     <label>Cliente *</label>
@@ -1450,7 +1450,7 @@
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label>T├¡tulo *</label>
+                        <label>Título *</label>
                         <input type="text" id="budgetTitle" placeholder="Ex: Reforma Completa" required>
                     </div>
                     <div class="form-group">
@@ -1459,8 +1459,8 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Descri├º├úo</label>
-                    <textarea id="budgetDesc" rows="3" placeholder="Detalhes do or├ºamento..."></textarea>
+                    <label>Descrição</label>
+                    <textarea id="budgetDesc" rows="3" placeholder="Detalhes do orçamento..."></textarea>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
@@ -1473,12 +1473,12 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>V├ílido at├® *</label>
+                        <label>Válido até *</label>
                         <input type="date" id="budgetValidUntil" required>
                     </div>
                 </div>
                 <button type="submit" class="btn btn-primary" style="width: 100%;">
-                    <i class="fas fa-save"></i> Gerar Or├ºamento
+                    <i class="fas fa-save"></i> Gerar Orçamento
                 </button>
             </form>
         </div>
@@ -1487,7 +1487,7 @@
     <!-- Order Modal -->
     <div class="modal" id="orderModal">
         <div class="modal-content">
-            <button class="modal-close" onclick="closeModal('orderModal')">Ô£ò</button>
+            <button class="modal-close" onclick="closeModal('orderModal')">×</button>
             <div class="modal-header"><i class="fas fa-shopping-cart"></i> Novo Pedido</div>
             <form onsubmit="saveOrder(event)">
                 <div class="form-group">
@@ -1498,8 +1498,8 @@
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Descri├º├úo *</label>
-                        <input type="text" id="orderDesc" placeholder="Produto/Servi├ºo" required>
+                        <label>Descrição *</label>
+                        <input type="text" id="orderDesc" placeholder="Produto/Serviço" required>
                     </div>
                     <div class="form-group">
                         <label>Valor *</label>
@@ -1613,7 +1613,7 @@
                 document.getElementById('stat-leads').textContent = data.data.qualifiedLeads;
                 document.getElementById('stat-revenue').textContent = 'R$ ' +
                     (data.data.totalRevenue || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-                document.getElementById('stat-orders').textContent = '0'; // Voc├¬ pode contar pedidos depois
+                document.getElementById('stat-orders').textContent = '0'; // Você pode contar pedidos depois
             } catch (error) {
                 console.error('Erro carregando dashboard:', error);
                 showAlert(`Erro ao carregar dashboard: ${error.message}`, 'error');
@@ -1675,7 +1675,7 @@
                 charts.performance = new Chart(perfCtx, {
                     type: 'bar',
                     data: {
-                        labels: ['Google', 'Facebook', 'LinkedIn', 'Email', 'Refer├¬ncia'],
+                        labels: ['Google', 'Facebook', 'LinkedIn', 'Email', 'Referência'],
                         datasets: [{
                             label: 'Clientes Adquiridos',
                             data: [12, 18, 8, 14, 10],
@@ -1963,7 +1963,7 @@
                     throw new Error(data.error || 'Erro ao excluir permanentemente');
                 }
 
-                showAlert(data.message || 'Item exclu├¡do permanentemente', 'success');
+                showAlert(data.message || 'Item excluído permanentemente', 'success');
                 await loadCmsTrash();
             } catch (error) {
                 showAlert(error.message || 'Falha ao excluir item da lixeira', 'error');
@@ -2363,7 +2363,7 @@
                             <div>Telefone</div>
                             <div>Empresa</div>
                             <div>Email</div>
-                            <div>A├º├Áes</div>
+                            <div>Ações</div>
                         </div>
                         ${data.data.map(c => `
                             <div class="list-item">
@@ -2412,7 +2412,7 @@
                             <div>Telefone</div>
                             <div>Valor Est.</div>
                             <div>Status</div>
-                            <div>A├º├Áes</div>
+                            <div>Ações</div>
                         </div>
                         ${data.data.map(l => `
                             <div class="list-item">
@@ -2451,7 +2451,7 @@
                 const data = await res.json();
 
                 if (!data.success) {
-                    throw new Error(data.error || 'Falha ao carregar or├ºamentos');
+                    throw new Error(data.error || 'Falha ao carregar orçamentos');
                 }
 
                 if (data.data.length > 0) {
@@ -2462,7 +2462,7 @@
                             <div>Cliente</div>
                             <div>Valor</div>
                             <div>Status</div>
-                            <div>A├º├Áes</div>
+                            <div>Ações</div>
                         </div>
                         ${data.data.map(b => `
                             <div class="list-item">
@@ -2485,10 +2485,10 @@
                     document.getElementById('budgets-container').innerHTML = html;
                 } else {
                     document.getElementById('budgets-container').innerHTML = 
-                        '<div class="empty-state"><div class="empty-state-icon"><i class="fas fa-file-invoice"></i></div><p>Nenhum or├ºamento cadastrado</p></div>';
+                        '<div class="empty-state"><div class="empty-state-icon"><i class="fas fa-file-invoice"></i></div><p>Nenhum orçamento cadastrado</p></div>';
                 }
             } catch (error) {
-                console.error('Erro carregando or├ºamentos:', error);
+                console.error('Erro carregando orçamentos:', error);
                 document.getElementById('budgets-container').innerHTML =
                     `<div class="empty-state"><div class="empty-state-icon"><i class="fas fa-triangle-exclamation"></i></div><p>${error.message}</p></div>`;
             }
@@ -2512,7 +2512,7 @@
                             <div>Cliente</div>
                             <div>Valor</div>
                             <div>Status</div>
-                            <div>A├º├Áes</div>
+                            <div>Ações</div>
                         </div>
                         ${data.data.map(o => `
                             <div class="list-item">
@@ -2650,12 +2650,12 @@
                 });
                 const data = await res.json();
                 if (data.success) {
-                    showAlert('Or├ºamento criado com sucesso!', 'success');
+                    showAlert('Orçamento criado com sucesso!', 'success');
                     closeModal('budgetModal');
                     loadBudgets();
                 }
             } catch (error) {
-                showAlert('Erro ao criar or├ºamento', 'error');
+                showAlert('Erro ao criar orçamento', 'error');
             }
         }
 
@@ -2711,7 +2711,7 @@
 
         // ===== DELETE FUNCTIONS =====
         async function deleteCustomer(id) {
-            if (!confirm('Tem certeza que deseja deletar este cliente? Esta a├º├úo n├úo pode ser desfeita.')) return;
+            if (!confirm('Tem certeza que deseja deletar este cliente? Esta ação não pode ser desfeita.')) return;
             try {
                 const res = await fetch(`${API_URL}/customers/${id}`, { method: 'DELETE' });
                 const data = await res.json();
@@ -2720,7 +2720,7 @@
                     loadCustomers();
                 } else {
                     const details = data?.data
-                        ? ` (leads: ${data.data.leads || 0}, or├ºamentos: ${data.data.budgets || 0}, pedidos: ${data.data.orders || 0}, follow-ups: ${data.data.followUps || 0})`
+                        ? ` (leads: ${data.data.leads || 0}, orçamentos: ${data.data.budgets || 0}, pedidos: ${data.data.orders || 0}, follow-ups: ${data.data.followUps || 0})`
                         : '';
                     showAlert((data.error || 'Erro ao deletar cliente') + details, 'error');
                 }
@@ -2735,7 +2735,7 @@
                 const res = await fetch(`${API_URL}/leads/${id}`, { method: 'DELETE' });
                 const data = await res.json();
                 if (data.success) {
-                    showAlert('Lead exclu├¡do com sucesso!', 'success');
+                    showAlert('Lead excluído com sucesso!', 'success');
                     loadLeads(document.getElementById('leadsSearch')?.value || '');
                 } else {
                     showAlert(data.error || 'Erro ao excluir lead', 'error');
@@ -2746,18 +2746,18 @@
         }
 
         async function deleteBudget(id) {
-            if (!confirm('Tem certeza que deseja excluir este or├ºamento?')) return;
+            if (!confirm('Tem certeza que deseja excluir este orçamento?')) return;
             try {
                 const res = await fetch(`${API_URL}/budgets/${id}`, { method: 'DELETE' });
                 const data = await res.json();
                 if (data.success) {
-                    showAlert('Or├ºamento exclu├¡do com sucesso!', 'success');
+                    showAlert('Orçamento excluído com sucesso!', 'success');
                     loadBudgets(document.getElementById('budgetsSearch')?.value || '');
                 } else {
-                    showAlert(data.error || 'Erro ao excluir or├ºamento', 'error');
+                    showAlert(data.error || 'Erro ao excluir orçamento', 'error');
                 }
             } catch (error) {
-                showAlert(error.message || 'Erro ao excluir or├ºamento', 'error');
+                showAlert(error.message || 'Erro ao excluir orçamento', 'error');
             }
         }
 
@@ -2767,7 +2767,7 @@
                 const res = await fetch(`${API_URL}/orders/${id}`, { method: 'DELETE' });
                 const data = await res.json();
                 if (data.success) {
-                    showAlert('Pedido exclu├¡do com sucesso!', 'success');
+                    showAlert('Pedido excluído com sucesso!', 'success');
                     loadOrders(document.getElementById('ordersSearch')?.value || '');
                 } else {
                     showAlert(data.error || 'Erro ao excluir pedido', 'error');
@@ -2826,7 +2826,7 @@
                 if (!data.success) throw new Error(data.error || 'Falha ao excluir leads');
 
                 bulkSelection.leads.clear();
-                showAlert(data.message || 'Leads exclu├¡dos com sucesso', 'success');
+                showAlert(data.message || 'Leads excluídos com sucesso', 'success');
                 loadLeads(document.getElementById('leadsSearch')?.value || '');
             } catch (error) {
                 showAlert(error.message || 'Erro ao excluir leads', 'error');
@@ -2836,11 +2836,11 @@
         async function deleteSelectedBudgets() {
             const ids = Array.from(bulkSelection.budgets);
             if (!ids.length) {
-                showAlert('Selecione pelo menos um or├ºamento', 'warning');
+                showAlert('Selecione pelo menos um orçamento', 'warning');
                 return;
             }
 
-            if (!confirm(`Excluir ${ids.length} or├ºamento(s) selecionado(s)?`)) return;
+            if (!confirm(`Excluir ${ids.length} orçamento(s) selecionado(s)?`)) return;
 
             try {
                 const res = await fetch(`${API_URL}/budgets/bulk-delete`, {
@@ -2849,13 +2849,13 @@
                     body: JSON.stringify({ ids })
                 });
                 const data = await res.json();
-                if (!data.success) throw new Error(data.error || 'Falha ao excluir or├ºamentos');
+                if (!data.success) throw new Error(data.error || 'Falha ao excluir orçamentos');
 
                 bulkSelection.budgets.clear();
-                showAlert(data.message || 'Or├ºamentos exclu├¡dos com sucesso', 'success');
+                showAlert(data.message || 'Orçamentos excluídos com sucesso', 'success');
                 loadBudgets(document.getElementById('budgetsSearch')?.value || '');
             } catch (error) {
-                showAlert(error.message || 'Erro ao excluir or├ºamentos', 'error');
+                showAlert(error.message || 'Erro ao excluir orçamentos', 'error');
             }
         }
 
@@ -2878,7 +2878,7 @@
                 if (!data.success) throw new Error(data.error || 'Falha ao excluir pedidos');
 
                 bulkSelection.orders.clear();
-                showAlert(data.message || 'Pedidos exclu├¡dos com sucesso', 'success');
+                showAlert(data.message || 'Pedidos excluídos com sucesso', 'success');
                 loadOrders(document.getElementById('ordersSearch')?.value || '');
             } catch (error) {
                 showAlert(error.message || 'Erro ao excluir pedidos', 'error');
@@ -2886,11 +2886,11 @@
         }
 
         function editCustomer(id) {
-            alert('Funcionalidade de edi├º├úo em desenvolvimento');
+            alert('Funcionalidade de edição em desenvolvimento');
         }
 
         function editLead(id) {
-            alert('Funcionalidade de edi├º├úo em desenvolvimento');
+            alert('Funcionalidade de edição em desenvolvimento');
         }
 
         // ===== FINANCIAL REPORTS =====
@@ -2916,7 +2916,7 @@
                     generateFinancialInsights(totalRevenue, totalOrders, averageTicket);
                 }
             } catch (error) {
-                console.error('Erro carregando relat├│rios:', error);
+                console.error('Erro carregando relatórios:', error);
             }
         }
 
@@ -2937,8 +2937,8 @@
                         <div class="list-header">
                             <div>Cliente</div>
                             <div>Receita Total</div>
-                            <div>N┬║ Pedidos</div>
-                            <div>Ticket M├®dio</div>
+                            <div>Nº Pedidos</div>
+                            <div>Ticket Médio</div>
                         </div>
                         ${clientsWithRevenue.map(c => `
                             <div class="list-item">
@@ -2960,33 +2960,33 @@
             const insights = `
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
                     <div style="padding: 15px; background: rgba(16, 185, 129, 0.05); border-radius: 8px; border-left: 4px solid #10b981;">
-                        <strong style="color: #10b981;">­ƒôê Faturamento</strong>
-                        <p style="margin: 8px 0 0 0; font-size: 0.9rem;">Faturamento total de R$ ${revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} com ${orders} pedidos confirmados neste per├¡odo.</p>
+                        <strong style="color: #10b981;">Faturamento</strong>
+                        <p style="margin: 8px 0 0 0; font-size: 0.9rem;">Faturamento total de R$ ${revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} com ${orders} pedidos confirmados neste período.</p>
                     </div>
 
                     <div style="padding: 15px; background: rgba(72, 128, 57, 0.06); border-radius: 8px; border-left: 4px solid #488039;">
-                        <strong style="color: #488039;">­ƒÆí Ticket M├®dio</strong>
-                        <p style="margin: 8px 0 0 0; font-size: 0.9rem;">Pre├ºo m├®dio por pedido ├® R$ ${parseFloat(average).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}. Oportunidade para upsell em clientes menores.</p>
+                        <strong style="color: #488039;">Ticket Médio</strong>
+                        <p style="margin: 8px 0 0 0; font-size: 0.9rem;">Preço médio por pedido é R$ ${parseFloat(average).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}. Oportunidade para upsell em clientes menores.</p>
                     </div>
 
                     <div style="padding: 15px; background: rgba(245, 158, 11, 0.05); border-radius: 8px; border-left: 4px solid #f59e0b;">
-                        <strong style="color: #f59e0b;">­ƒÄ» Recomenda├º├úo</strong>
-                        <p style="margin: 8px 0 0 0; font-size: 0.9rem;">Foco em manter relacionamento com top 10% de clientes. Eles geram 80% da receita (Princ├¡pio de Pareto).</p>
+                        <strong style="color: #f59e0b;">Recomendação</strong>
+                        <p style="margin: 8px 0 0 0; font-size: 0.9rem;">Foco em manter relacionamento com top 10% de clientes. Eles geram 80% da receita (Princípio de Pareto).</p>
                     </div>
 
                     <div style="padding: 15px; background: rgba(95, 150, 68, 0.08); border-radius: 8px; border-left: 4px solid #5f9644;">
-                        <strong style="color: #2f5f24;">­ƒôè Oportunidade</strong>
-                        <p style="margin: 8px 0 0 0; font-size: 0.9rem;">${orders} pedidos este m├¬s. Meta: aumentar para 10+ pedidos/m├¬s para crescimento de 100% anual.</p>
+                        <strong style="color: #2f5f24;">Oportunidade</strong>
+                        <p style="margin: 8px 0 0 0; font-size: 0.9rem;">${orders} pedidos este mês. Meta: aumentar para 10+ pedidos/mês para crescimento de 100% anual.</p>
                     </div>
 
                     <div style="padding: 15px; background: rgba(72, 128, 57, 0.08); border-radius: 8px; border-left: 4px solid #488039;">
-                        <strong style="color: #488039;">­ƒÆ░ Proje├º├úo</strong>
-                        <p style="margin: 8px 0 0 0; font-size: 0.9rem;">Se manter taxa de crescimento: pr├│ximas 3 meses devem gerar R$ ${(revenue * 1.5).toLocaleString('pt-BR', { minimumFractionDigits: 0 })} em faturamento.</p>
+                        <strong style="color: #488039;">Projeção</strong>
+                        <p style="margin: 8px 0 0 0; font-size: 0.9rem;">Se manter taxa de crescimento: próximas 3 meses devem gerar R$ ${(revenue * 1.5).toLocaleString('pt-BR', { minimumFractionDigits: 0 })} em faturamento.</p>
                     </div>
 
                     <div style="padding: 15px; background: rgba(10, 180, 180, 0.05); border-radius: 8px; border-left: 4px solid #0ab4b4;">
-                        <strong style="color: #0ab4b4;">ÔÜí A├º├úo</strong>
-                        <p style="margin: 8px 0 0 0; font-size: 0.9rem;">Aumentar leads qualificados em 30% para crescimento sustent├ível. Qualidade > Quantidade.</p>
+                        <strong style="color: #0ab4b4;">Ação</strong>
+                        <p style="margin: 8px 0 0 0; font-size: 0.9rem;">Aumentar leads qualificados em 30% para crescimento sustentável. Qualidade > Quantidade.</p>
                     </div>
                 </div>
             `;
@@ -3021,7 +3021,7 @@
                 });
             }
 
-            // Comparison Chart (M├¬s atual vs M├¬s anterior)
+            // Comparison Chart (Mês atual vs Mês anterior)
             const comparisonCtx = document.getElementById('comparisonChart');
             if (comparisonCtx && !charts.comparison) {
                 charts.comparison = new Chart(comparisonCtx, {
@@ -3030,13 +3030,13 @@
                         labels: ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'],
                         datasets: [
                             {
-                                label: 'M├¬s Atual',
+                                label: 'Mês Atual',
                                 data: [8000, 9000, 10000, 11000],
                                 backgroundColor: '#488039',
                                 borderRadius: 6
                             },
                             {
-                                label: 'M├¬s Anterior',
+                                label: 'Mês Anterior',
                                 data: [6500, 7500, 8500, 9500],
                                 backgroundColor: '#cbd5e1',
                                 borderRadius: 6
