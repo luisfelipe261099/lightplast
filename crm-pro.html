@@ -1307,6 +1307,21 @@
                                 <i class="fas fa-rotate"></i> Atualizar Lixeira
                             </button>
                         </div>
+                        
+                        <div style="margin-bottom: 16px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
+                            <input type="text" id="cmsTrashSearchInput" placeholder="Pesquisar por nome do arquivo..." 
+                                   style="flex: 1; min-width: 250px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.9rem;">
+                            <div style="display: flex; gap: 8px;">
+                                <button class="btn btn-small" type="button" id="cmsTrashFilterAll" data-filter="all" style="background: var(--primary); color: white;">Todos</button>
+                                <button class="btn btn-small" type="button" id="cmsTrashFilterProduto" data-filter="produto" style="background: var(--border); color: var(--text-dark);">Produtos</button>
+                                <button class="btn btn-small" type="button" id="cmsTrashFilterBlog" data-filter="blog-artigo" style="background: var(--border); color: var(--text-dark);">Artigos</button>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 12px; font-size: 0.9rem; color: var(--text-light);">
+                            Itens: <span id="cmsTrashItemCount">0</span> de <span id="cmsTrashTotalCount">0</span>
+                        </div>
+
                         <div id="cmsTrashList" class="list-container">
                             <div class="empty-state" style="padding: 25px 10px;">
                                 <p>Carregando itens removidos...</p>
@@ -1682,6 +1697,32 @@
         document.getElementById('cmsDeleteBlogBtn')?.addEventListener('click', deleteGuidedBlog);
         document.getElementById('cmsTrashReloadBtn')?.addEventListener('click', loadCmsTrash);
 
+        // Trash search and filter event listeners
+        document.getElementById('cmsTrashSearchInput')?.addEventListener('input', (e) => {
+            cmsTrashState.searchQuery = e.target.value;
+            const filtered = getFilteredTrashEntries();
+            renderCmsTrash(filtered);
+        });
+
+        document.querySelectorAll('[data-filter]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const filterValue = e.currentTarget.getAttribute('data-filter');
+                cmsTrashState.typeFilter = filterValue;
+
+                // Update button styles
+                document.querySelectorAll('[data-filter]').forEach(b => {
+                    b.style.background = 'var(--border)';
+                    b.style.color = 'var(--text-dark)';
+                });
+                e.currentTarget.style.background = 'var(--primary)';
+                e.currentTarget.style.color = 'white';
+
+                // Update list
+                const filtered = getFilteredTrashEntries();
+                renderCmsTrash(filtered);
+            });
+        });
+
         // ===== CMS CONTENT MANAGEMENT =====
         function getTypeLabel(type) {
             const labels = {
@@ -1715,6 +1756,40 @@
             }).join('');
         }
 
+        // Trash filter state
+        const cmsTrashState = {
+            allEntries: [],
+            searchQuery: '',
+            typeFilter: 'all'
+        };
+
+        function getFilteredTrashEntries() {
+            let filtered = cmsTrashState.allEntries;
+
+            // Apply type filter
+            if (cmsTrashState.typeFilter !== 'all') {
+                filtered = filtered.filter(item => item.type === cmsTrashState.typeFilter);
+            }
+
+            // Apply search filter
+            if (cmsTrashState.searchQuery.trim()) {
+                const query = cmsTrashState.searchQuery.toLowerCase();
+                filtered = filtered.filter(item =>
+                    (item.fileName || '').toLowerCase().includes(query)
+                );
+            }
+
+            return filtered;
+        }
+
+        function updateTrashItemCount() {
+            const filtered = getFilteredTrashEntries();
+            const itemCountEl = document.getElementById('cmsTrashItemCount');
+            const totalCountEl = document.getElementById('cmsTrashTotalCount');
+            if (itemCountEl) itemCountEl.textContent = filtered.length;
+            if (totalCountEl) totalCountEl.textContent = cmsTrashState.allEntries.length;
+        }
+
         function populateGuidedEditSelectors() {
             const productSelect = document.getElementById('cmsEditProductFile');
             const blogSelect = document.getElementById('cmsEditBlogFile');
@@ -1745,6 +1820,7 @@
 
             if (!entries.length) {
                 container.innerHTML = '<div class="empty-state" style="padding: 25px 10px;"><p>Nenhum item na lixeira.</p></div>';
+                updateTrashItemCount();
                 return;
             }
 
@@ -1780,6 +1856,8 @@
                 </div>
                 ${rows}
             `;
+            
+            updateTrashItemCount();
         }
 
         async function loadCmsTrash() {
@@ -1789,12 +1867,27 @@
                 if (!data.success) {
                     throw new Error(data.error || 'Erro ao carregar lixeira');
                 }
-                renderCmsTrash(data.data || []);
+                cmsTrashState.allEntries = data.data || [];
+                cmsTrashState.searchQuery = '';
+                cmsTrashState.typeFilter = 'all';
+                
+                // Reset filter UI
+                document.getElementById('cmsTrashSearchInput').value = '';
+                document.querySelectorAll('[data-filter]').forEach(btn => {
+                    btn.style.background = 'var(--border)';
+                    btn.style.color = 'var(--text-dark)';
+                });
+                document.getElementById('cmsTrashFilterAll').style.background = 'var(--primary)';
+                document.getElementById('cmsTrashFilterAll').style.color = 'white';
+                
+                const filtered = getFilteredTrashEntries();
+                renderCmsTrash(filtered);
             } catch (error) {
                 const container = document.getElementById('cmsTrashList');
                 if (container) {
                     container.innerHTML = '<div class="empty-state" style="padding: 25px 10px;"><p>Erro ao carregar lixeira.</p></div>';
                 }
+                console.error('Erro ao carregar lixeira:', error);
             }
         }
 
