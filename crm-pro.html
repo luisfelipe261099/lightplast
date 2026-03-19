@@ -42,11 +42,16 @@
             --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
         }
 
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+        }
+
         body {
             font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background: var(--bg-light);
             color: var(--text-dark);
-            min-height: 100vh;
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -93,7 +98,7 @@
             display: flex;
             flex: 1;
             overflow: hidden;
-            height: calc(100vh - 70px);
+            min-height: 0;
         }
 
         /* ===== SIDEBAR ===== */
@@ -172,6 +177,7 @@
             padding: 30px;
             overflow-y: auto;
             background: #f8fafc;
+            min-height: 0;
         }
 
         /* ===== DASHBOARD GRID ===== */
@@ -283,6 +289,7 @@
         .section.active {
             display: block;
             animation: fadeIn 0.3s ease-in;
+            padding-bottom: 60px;
         }
 
         @keyframes fadeIn {
@@ -849,7 +856,7 @@
                     <i class="fas fa-bullseye"></i> Leads
                 </button>
                 <button class="sidebar-btn" data-tab="followups">
-                    <i class="fas fa-calendar-check"></i> Follow-ups
+                    <i class="fas fa-calendar-check"></i> Acompanhamentos
                 </button>
                 <button class="sidebar-btn" data-tab="scheduling">
                     <i class="fas fa-clock"></i> Agendamentos
@@ -1185,16 +1192,16 @@
                     </div>
                 </section>
 
-                <!-- ===== FOLLOW-UPS ===== -->
+                <!-- ===== ACOMPANHAMENTOS ===== -->
                 <section id="followups" class="section">
                     <div class="section-header">
-                        <h1 class="section-title"><i class="fas fa-calendar-check"></i> Follow-ups</h1>
+                        <h1 class="section-title"><i class="fas fa-calendar-check"></i> Acompanhamentos</h1>
                         <div style="display: flex; gap: 10px;">
                             <div class="search-bar">
-                                <input type="text" id="followUpSearch" placeholder="Buscar follow-up...">
+                                <input type="text" id="followUpSearch" placeholder="Buscar acompanhamento...">
                             </div>
                             <button class="btn btn-primary" onclick="openFollowUpModal()">
-                                <i class="fas fa-plus"></i> Novo Follow-up
+                                <i class="fas fa-plus"></i> Novo Acompanhamento
                             </button>
                         </div>
                     </div>
@@ -1202,7 +1209,7 @@
                     <div class="list-container" id="followups-container">
                         <div class="empty-state">
                             <div class="empty-state-icon"><i class="fas fa-calendar-check"></i></div>
-                            <p>Carregando follow-ups...</p>
+                            <p>Carregando acompanhamentos...</p>
                         </div>
                     </div>
                 </section>
@@ -1342,7 +1349,7 @@
             <div class="modal" id="followUpModal">
                 <div class="modal-content">
                     <button class="modal-close" onclick="closeModal('followUpModal')">×</button>
-                    <div class="modal-header"><i class="fas fa-calendar-check"></i> Novo Follow-up</div>
+                    <div class="modal-header"><i class="fas fa-calendar-check"></i> Novo Acompanhamento</div>
                     <form onsubmit="saveFollowUp(event)">
                         <div class="form-group">
                             <label>Cliente *</label>
@@ -1371,7 +1378,7 @@
                                 placeholder="Ex: Cobrar retorno do orçamento enviado"></textarea>
                         </div>
                         <button type="submit" class="btn btn-primary" style="width: 100%;">
-                            <i class="fas fa-save"></i> Agendar Follow-up
+                            <i class="fas fa-save"></i> Agendar Acompanhamento
                         </button>
                     </form>
                 </div>
@@ -3157,7 +3164,7 @@
                             container.innerHTML = `
                                 <div class="empty-state">
                                     <div class="empty-state-icon"><i class="fas fa-calendar-check"></i></div>
-                                    <p>Nenhum follow-up encontrado.</p>
+                                    <p>Nenhum acompanhamento encontrado.</p>
                                 </div>`;
                             return;
                         }
@@ -3192,7 +3199,7 @@
                         container.innerHTML = html;
                     } catch (error) {
                         console.error(error);
-                        container.innerHTML = '<div class="empty-state"><p>Erro ao carregar follow-ups</p></div>';
+                        container.innerHTML = '<div class="empty-state"><p>Erro ao carregar acompanhamentos</p></div>';
                     }
                 }
 
@@ -3217,12 +3224,12 @@
                             body: JSON.stringify(payload)
                         });
                         if (res.ok) {
-                            showAlert('Follow-up agendado com sucesso!');
+                            showAlert('Acompanhamento agendado com sucesso!');
                             closeModal('followUpModal');
                             loadFollowUps();
                         }
                     } catch (error) {
-                        showAlert('Erro ao agendar follow-up', 'error');
+                        showAlert('Erro ao agendar acompanhamento', 'error');
                     }
                 }
 
@@ -3230,24 +3237,24 @@
                     try {
                         const res = await fetch(`${API_URL}/follow-ups/${id}/complete`, { method: 'POST' });
                         if (res.ok) {
-                            showAlert('Follow-up marcado como concluído!');
+                            showAlert('Acompanhamento marcado como concluído!');
                             loadFollowUps();
                         }
                     } catch (error) {
-                        showAlert('Erro ao atualizar follow-up', 'error');
+                        showAlert('Erro ao atualizar acompanhamento', 'error');
                     }
                 }
 
                 async function deleteFollowUp(id) {
-                    if (!confirm('Excluir este follow-up?')) return;
+                    if (!confirm('Excluir este acompanhamento?')) return;
                     try {
                         const res = await fetch(`${API_URL}/follow-ups/${id}`, { method: 'DELETE' });
                         if (res.ok) {
-                            showAlert('Follow-up excluído!');
+                            showAlert('Acompanhamento excluído!');
                             loadFollowUps();
                         }
                     } catch (error) {
-                        showAlert('Erro ao excluir follow-up', 'error');
+                        showAlert('Erro ao excluir acompanhamento', 'error');
                     }
                 }
 
