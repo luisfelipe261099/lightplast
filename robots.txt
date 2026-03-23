@@ -1,4 +1,4 @@
-User-agent: *
+﻿User-agent: *
 Allow: /
 Disallow: /crm
 Disallow: /crm-login.html
@@ -6,7 +6,7 @@ Disallow: /crm-pro.html
 Disallow: /.cms-trash/
 Disallow: /api/
 
-Sitemap: https://lightplast.vercel.app/sitemap.xml
+Sitemap: https://www.lightplast.com.br/sitemap.xml
 
 # Crawl delay for respectful crawling
 Crawl-delay: 1
